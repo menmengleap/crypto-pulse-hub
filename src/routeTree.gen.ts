@@ -26,6 +26,7 @@ import { Route as SentimentRouteImport } from './routes/sentiment'
 import { Route as SpotRouteImport } from './routes/spot'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
+import { Route as NewsNewsIdRouteImport } from './routes/news.$newsId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -112,6 +113,11 @@ const NewsIndexRoute = NewsIndexRouteImport.update({
   path: '/news/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NewsNewsIdRoute = NewsNewsIdRouteImport.update({
+  id: '/news/$newsId',
+  path: '/news/$newsId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/sentiment': typeof SentimentRoute
   '/spot': typeof SpotRoute
   '/watchlist': typeof WatchlistRoute
+  '/news/$newsId': typeof NewsNewsIdRoute
   '/news/': typeof NewsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/sentiment': typeof SentimentRoute
   '/spot': typeof SpotRoute
   '/watchlist': typeof WatchlistRoute
+  '/news/$newsId': typeof NewsNewsIdRoute
   '/news': typeof NewsIndexRoute
 }
 export interface FileRoutesById {
@@ -169,6 +177,7 @@ export interface FileRoutesById {
   '/sentiment': typeof SentimentRoute
   '/spot': typeof SpotRoute
   '/watchlist': typeof WatchlistRoute
+  '/news/$newsId': typeof NewsNewsIdRoute
   '/news/': typeof NewsIndexRoute
 }
 export interface FileRouteTypes {
@@ -190,6 +199,7 @@ export interface FileRouteTypes {
     | '/sentiment'
     | '/spot'
     | '/watchlist'
+    | '/news/$newsId'
     | '/news/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -209,6 +219,7 @@ export interface FileRouteTypes {
     | '/sentiment'
     | '/spot'
     | '/watchlist'
+    | '/news/$newsId'
     | '/news'
   id:
     | '__root__'
@@ -228,6 +239,7 @@ export interface FileRouteTypes {
     | '/sentiment'
     | '/spot'
     | '/watchlist'
+    | '/news/$newsId'
     | '/news/'
   fileRoutesById: FileRoutesById
 }
@@ -248,6 +260,7 @@ export interface RootRouteChildren {
   SentimentRoute: typeof SentimentRoute
   SpotRoute: typeof SpotRoute
   WatchlistRoute: typeof WatchlistRoute
+  NewsNewsIdRoute: typeof NewsNewsIdRoute
   NewsIndexRoute: typeof NewsIndexRoute
 }
 
@@ -372,6 +385,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/news/$newsId': {
+      id: '/news/$newsId'
+      path: '/news/$newsId'
+      fullPath: '/news/$newsId'
+      preLoaderRoute: typeof NewsNewsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -392,6 +412,7 @@ const rootRouteChildren: RootRouteChildren = {
   SentimentRoute: SentimentRoute,
   SpotRoute: SpotRoute,
   WatchlistRoute: WatchlistRoute,
+  NewsNewsIdRoute: NewsNewsIdRoute,
   NewsIndexRoute: NewsIndexRoute,
 }
 export const routeTree = rootRouteImport
