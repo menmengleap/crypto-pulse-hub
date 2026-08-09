@@ -10,33 +10,258 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AssetsRouteImport } from './routes/assets'
+import { Route as ChartRouteImport } from './routes/chart'
+import { Route as CompareRouteImport } from './routes/compare'
+import { Route as CycleRouteImport } from './routes/cycle'
+import { Route as DerivativesRouteImport } from './routes/derivatives'
+import { Route as DominanceRouteImport } from './routes/dominance'
+import { Route as FearGreedRouteImport } from './routes/fear-greed'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as HeatmapRouteImport } from './routes/heatmap'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as MarketRouteImport } from './routes/market'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as SentimentRouteImport } from './routes/sentiment'
+import { Route as SpotRouteImport } from './routes/spot'
+import { Route as WatchlistRouteImport } from './routes/watchlist'
+import { Route as NewsIndexRouteImport } from './routes/news.index'
+import { Route as NewsNewsIdRouteImport } from './routes/news.$newsId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AssetsRoute = AssetsRouteImport.update({
+  id: '/assets',
+  path: '/assets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChartRoute = ChartRouteImport.update({
+  id: '/chart',
+  path: '/chart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompareRoute = CompareRouteImport.update({
+  id: '/compare',
+  path: '/compare',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CycleRoute = CycleRouteImport.update({
+  id: '/cycle',
+  path: '/cycle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DerivativesRoute = DerivativesRouteImport.update({
+  id: '/derivatives',
+  path: '/derivatives',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DominanceRoute = DominanceRouteImport.update({
+  id: '/dominance',
+  path: '/dominance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FearGreedRoute = FearGreedRouteImport.update({
+  id: '/fear-greed',
+  path: '/fear-greed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HeatmapRoute = HeatmapRouteImport.update({
+  id: '/heatmap',
+  path: '/heatmap',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketRoute = MarketRouteImport.update({
+  id: '/market',
+  path: '/market',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SentimentRoute = SentimentRouteImport.update({
+  id: '/sentiment',
+  path: '/sentiment',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SpotRoute = SpotRouteImport.update({
+  id: '/spot',
+  path: '/spot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WatchlistRoute = WatchlistRouteImport.update({
+  id: '/watchlist',
+  path: '/watchlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsIndexRoute = NewsIndexRouteImport.update({
+  id: '/news/',
+  path: '/news/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsNewsIdRoute = NewsNewsIdRouteImport.update({
+  id: '/news/$newsId',
+  path: '/news/$newsId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/assets': typeof AssetsRoute
+  '/chart': typeof ChartRoute
+  '/compare': typeof CompareRoute
+  '/cycle': typeof CycleRoute
+  '/derivatives': typeof DerivativesRoute
+  '/dominance': typeof DominanceRoute
+  '/fear-greed': typeof FearGreedRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/heatmap': typeof HeatmapRoute
+  '/login': typeof LoginRoute
+  '/market': typeof MarketRoute
+  '/register': typeof RegisterRoute
+  '/sentiment': typeof SentimentRoute
+  '/spot': typeof SpotRoute
+  '/watchlist': typeof WatchlistRoute
+  '/news/$newsId': typeof NewsNewsIdRoute
+  '/news/': typeof NewsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/assets': typeof AssetsRoute
+  '/chart': typeof ChartRoute
+  '/compare': typeof CompareRoute
+  '/cycle': typeof CycleRoute
+  '/derivatives': typeof DerivativesRoute
+  '/dominance': typeof DominanceRoute
+  '/fear-greed': typeof FearGreedRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/heatmap': typeof HeatmapRoute
+  '/login': typeof LoginRoute
+  '/market': typeof MarketRoute
+  '/register': typeof RegisterRoute
+  '/sentiment': typeof SentimentRoute
+  '/spot': typeof SpotRoute
+  '/watchlist': typeof WatchlistRoute
+  '/news/$newsId': typeof NewsNewsIdRoute
+  '/news': typeof NewsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/assets': typeof AssetsRoute
+  '/chart': typeof ChartRoute
+  '/compare': typeof CompareRoute
+  '/cycle': typeof CycleRoute
+  '/derivatives': typeof DerivativesRoute
+  '/dominance': typeof DominanceRoute
+  '/fear-greed': typeof FearGreedRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/heatmap': typeof HeatmapRoute
+  '/login': typeof LoginRoute
+  '/market': typeof MarketRoute
+  '/register': typeof RegisterRoute
+  '/sentiment': typeof SentimentRoute
+  '/spot': typeof SpotRoute
+  '/watchlist': typeof WatchlistRoute
+  '/news/$newsId': typeof NewsNewsIdRoute
+  '/news/': typeof NewsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/assets'
+    | '/chart'
+    | '/compare'
+    | '/cycle'
+    | '/derivatives'
+    | '/dominance'
+    | '/fear-greed'
+    | '/forgot-password'
+    | '/heatmap'
+    | '/login'
+    | '/market'
+    | '/register'
+    | '/sentiment'
+    | '/spot'
+    | '/watchlist'
+    | '/news/$newsId'
+    | '/news/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/assets'
+    | '/chart'
+    | '/compare'
+    | '/cycle'
+    | '/derivatives'
+    | '/dominance'
+    | '/fear-greed'
+    | '/forgot-password'
+    | '/heatmap'
+    | '/login'
+    | '/market'
+    | '/register'
+    | '/sentiment'
+    | '/spot'
+    | '/watchlist'
+    | '/news/$newsId'
+    | '/news'
+  id:
+    | '__root__'
+    | '/'
+    | '/assets'
+    | '/chart'
+    | '/compare'
+    | '/cycle'
+    | '/derivatives'
+    | '/dominance'
+    | '/fear-greed'
+    | '/forgot-password'
+    | '/heatmap'
+    | '/login'
+    | '/market'
+    | '/register'
+    | '/sentiment'
+    | '/spot'
+    | '/watchlist'
+    | '/news/$newsId'
+    | '/news/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AssetsRoute: typeof AssetsRoute
+  ChartRoute: typeof ChartRoute
+  CompareRoute: typeof CompareRoute
+  CycleRoute: typeof CycleRoute
+  DerivativesRoute: typeof DerivativesRoute
+  DominanceRoute: typeof DominanceRoute
+  FearGreedRoute: typeof FearGreedRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
+  HeatmapRoute: typeof HeatmapRoute
+  LoginRoute: typeof LoginRoute
+  MarketRoute: typeof MarketRoute
+  RegisterRoute: typeof RegisterRoute
+  SentimentRoute: typeof SentimentRoute
+  SpotRoute: typeof SpotRoute
+  WatchlistRoute: typeof WatchlistRoute
+  NewsNewsIdRoute: typeof NewsNewsIdRoute
+  NewsIndexRoute: typeof NewsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,22 +273,148 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/assets': {
+      id: '/assets'
+      path: '/assets'
+      fullPath: '/assets'
+      preLoaderRoute: typeof AssetsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chart': {
+      id: '/chart'
+      path: '/chart'
+      fullPath: '/chart'
+      preLoaderRoute: typeof ChartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compare': {
+      id: '/compare'
+      path: '/compare'
+      fullPath: '/compare'
+      preLoaderRoute: typeof CompareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cycle': {
+      id: '/cycle'
+      path: '/cycle'
+      fullPath: '/cycle'
+      preLoaderRoute: typeof CycleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/derivatives': {
+      id: '/derivatives'
+      path: '/derivatives'
+      fullPath: '/derivatives'
+      preLoaderRoute: typeof DerivativesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dominance': {
+      id: '/dominance'
+      path: '/dominance'
+      fullPath: '/dominance'
+      preLoaderRoute: typeof DominanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fear-greed': {
+      id: '/fear-greed'
+      path: '/fear-greed'
+      fullPath: '/fear-greed'
+      preLoaderRoute: typeof FearGreedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/heatmap': {
+      id: '/heatmap'
+      path: '/heatmap'
+      fullPath: '/heatmap'
+      preLoaderRoute: typeof HeatmapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/market': {
+      id: '/market'
+      path: '/market'
+      fullPath: '/market'
+      preLoaderRoute: typeof MarketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sentiment': {
+      id: '/sentiment'
+      path: '/sentiment'
+      fullPath: '/sentiment'
+      preLoaderRoute: typeof SentimentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/spot': {
+      id: '/spot'
+      path: '/spot'
+      fullPath: '/spot'
+      preLoaderRoute: typeof SpotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/watchlist': {
+      id: '/watchlist'
+      path: '/watchlist'
+      fullPath: '/watchlist'
+      preLoaderRoute: typeof WatchlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news/': {
+      id: '/news/'
+      path: '/news'
+      fullPath: '/news/'
+      preLoaderRoute: typeof NewsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news/$newsId': {
+      id: '/news/$newsId'
+      path: '/news/$newsId'
+      fullPath: '/news/$newsId'
+      preLoaderRoute: typeof NewsNewsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AssetsRoute: AssetsRoute,
+  ChartRoute: ChartRoute,
+  CompareRoute: CompareRoute,
+  CycleRoute: CycleRoute,
+  DerivativesRoute: DerivativesRoute,
+  DominanceRoute: DominanceRoute,
+  FearGreedRoute: FearGreedRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
+  HeatmapRoute: HeatmapRoute,
+  LoginRoute: LoginRoute,
+  MarketRoute: MarketRoute,
+  RegisterRoute: RegisterRoute,
+  SentimentRoute: SentimentRoute,
+  SpotRoute: SpotRoute,
+  WatchlistRoute: WatchlistRoute,
+  NewsNewsIdRoute: NewsNewsIdRoute,
+  NewsIndexRoute: NewsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
