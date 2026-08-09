@@ -10,21 +10,35 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AiAnalysisRouteImport } from './routes/ai-analysis'
+import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as AssetsRouteImport } from './routes/assets'
+import { Route as BlogRouteImport } from './routes/blog'
 import { Route as ChartRouteImport } from './routes/chart'
+import { Route as ComingSoonRouteImport } from './routes/coming-soon'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as CycleRouteImport } from './routes/cycle'
 import { Route as DerivativesRouteImport } from './routes/derivatives'
+import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as DominanceRouteImport } from './routes/dominance'
 import { Route as FearGreedRouteImport } from './routes/fear-greed'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as HeatmapRouteImport } from './routes/heatmap'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MarketRouteImport } from './routes/market'
+import { Route as NewRouteImport } from './routes/new'
+import { Route as PolicyRouteImport } from './routes/policy'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as SavedRouteImport } from './routes/saved'
+import { Route as ScreenerRouteImport } from './routes/screener'
 import { Route as SentimentRouteImport } from './routes/sentiment'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SpotRouteImport } from './routes/spot'
+import { Route as SupportRouteImport } from './routes/support'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
 import { Route as NewsNewsIdRouteImport } from './routes/news.$newsId'
 
@@ -33,14 +47,34 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AiAnalysisRoute = AiAnalysisRouteImport.update({
+  id: '/ai-analysis',
+  path: '/ai-analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlertsRoute = AlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AssetsRoute = AssetsRouteImport.update({
   id: '/assets',
   path: '/assets',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChartRoute = ChartRouteImport.update({
   id: '/chart',
   path: '/chart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComingSoonRoute = ComingSoonRouteImport.update({
+  id: '/coming-soon',
+  path: '/coming-soon',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CompareRoute = CompareRouteImport.update({
@@ -56,6 +90,11 @@ const CycleRoute = CycleRouteImport.update({
 const DerivativesRoute = DerivativesRouteImport.update({
   id: '/derivatives',
   path: '/derivatives',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DisclaimerRoute = DisclaimerRouteImport.update({
+  id: '/disclaimer',
+  path: '/disclaimer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DominanceRoute = DominanceRouteImport.update({
@@ -88,9 +127,34 @@ const MarketRoute = MarketRouteImport.update({
   path: '/market',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NewRoute = NewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PolicyRoute = PolicyRouteImport.update({
+  id: '/policy',
+  path: '/policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SavedRoute = SavedRouteImport.update({
+  id: '/saved',
+  path: '/saved',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScreenerRoute = ScreenerRouteImport.update({
+  id: '/screener',
+  path: '/screener',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SentimentRoute = SentimentRouteImport.update({
@@ -98,14 +162,34 @@ const SentimentRoute = SentimentRouteImport.update({
   path: '/sentiment',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SpotRoute = SpotRouteImport.update({
   id: '/spot',
   path: '/spot',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WatchlistRoute = WatchlistRouteImport.update({
   id: '/watchlist',
   path: '/watchlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NewsIndexRoute = NewsIndexRouteImport.update({
@@ -121,62 +205,104 @@ const NewsNewsIdRoute = NewsNewsIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ai-analysis': typeof AiAnalysisRoute
+  '/alerts': typeof AlertsRoute
   '/assets': typeof AssetsRoute
+  '/blog': typeof BlogRoute
   '/chart': typeof ChartRoute
+  '/coming-soon': typeof ComingSoonRoute
   '/compare': typeof CompareRoute
   '/cycle': typeof CycleRoute
   '/derivatives': typeof DerivativesRoute
+  '/disclaimer': typeof DisclaimerRoute
   '/dominance': typeof DominanceRoute
   '/fear-greed': typeof FearGreedRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/heatmap': typeof HeatmapRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
+  '/new': typeof NewRoute
+  '/policy': typeof PolicyRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/saved': typeof SavedRoute
+  '/screener': typeof ScreenerRoute
   '/sentiment': typeof SentimentRoute
+  '/settings': typeof SettingsRoute
   '/spot': typeof SpotRoute
+  '/support': typeof SupportRoute
+  '/terms': typeof TermsRoute
   '/watchlist': typeof WatchlistRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/news/$newsId': typeof NewsNewsIdRoute
   '/news/': typeof NewsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ai-analysis': typeof AiAnalysisRoute
+  '/alerts': typeof AlertsRoute
   '/assets': typeof AssetsRoute
+  '/blog': typeof BlogRoute
   '/chart': typeof ChartRoute
+  '/coming-soon': typeof ComingSoonRoute
   '/compare': typeof CompareRoute
   '/cycle': typeof CycleRoute
   '/derivatives': typeof DerivativesRoute
+  '/disclaimer': typeof DisclaimerRoute
   '/dominance': typeof DominanceRoute
   '/fear-greed': typeof FearGreedRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/heatmap': typeof HeatmapRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
+  '/new': typeof NewRoute
+  '/policy': typeof PolicyRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/saved': typeof SavedRoute
+  '/screener': typeof ScreenerRoute
   '/sentiment': typeof SentimentRoute
+  '/settings': typeof SettingsRoute
   '/spot': typeof SpotRoute
+  '/support': typeof SupportRoute
+  '/terms': typeof TermsRoute
   '/watchlist': typeof WatchlistRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/news/$newsId': typeof NewsNewsIdRoute
   '/news': typeof NewsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ai-analysis': typeof AiAnalysisRoute
+  '/alerts': typeof AlertsRoute
   '/assets': typeof AssetsRoute
+  '/blog': typeof BlogRoute
   '/chart': typeof ChartRoute
+  '/coming-soon': typeof ComingSoonRoute
   '/compare': typeof CompareRoute
   '/cycle': typeof CycleRoute
   '/derivatives': typeof DerivativesRoute
+  '/disclaimer': typeof DisclaimerRoute
   '/dominance': typeof DominanceRoute
   '/fear-greed': typeof FearGreedRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/heatmap': typeof HeatmapRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
+  '/new': typeof NewRoute
+  '/policy': typeof PolicyRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/saved': typeof SavedRoute
+  '/screener': typeof ScreenerRoute
   '/sentiment': typeof SentimentRoute
+  '/settings': typeof SettingsRoute
   '/spot': typeof SpotRoute
+  '/support': typeof SupportRoute
+  '/terms': typeof TermsRoute
   '/watchlist': typeof WatchlistRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/news/$newsId': typeof NewsNewsIdRoute
   '/news/': typeof NewsIndexRoute
 }
@@ -184,82 +310,138 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ai-analysis'
+    | '/alerts'
     | '/assets'
+    | '/blog'
     | '/chart'
+    | '/coming-soon'
     | '/compare'
     | '/cycle'
     | '/derivatives'
+    | '/disclaimer'
     | '/dominance'
     | '/fear-greed'
     | '/forgot-password'
     | '/heatmap'
     | '/login'
     | '/market'
+    | '/new'
+    | '/policy'
+    | '/profile'
     | '/register'
+    | '/saved'
+    | '/screener'
     | '/sentiment'
+    | '/settings'
     | '/spot'
+    | '/support'
+    | '/terms'
     | '/watchlist'
+    | '/auth/callback'
     | '/news/$newsId'
     | '/news/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ai-analysis'
+    | '/alerts'
     | '/assets'
+    | '/blog'
     | '/chart'
+    | '/coming-soon'
     | '/compare'
     | '/cycle'
     | '/derivatives'
+    | '/disclaimer'
     | '/dominance'
     | '/fear-greed'
     | '/forgot-password'
     | '/heatmap'
     | '/login'
     | '/market'
+    | '/new'
+    | '/policy'
+    | '/profile'
     | '/register'
+    | '/saved'
+    | '/screener'
     | '/sentiment'
+    | '/settings'
     | '/spot'
+    | '/support'
+    | '/terms'
     | '/watchlist'
+    | '/auth/callback'
     | '/news/$newsId'
     | '/news'
   id:
     | '__root__'
     | '/'
+    | '/ai-analysis'
+    | '/alerts'
     | '/assets'
+    | '/blog'
     | '/chart'
+    | '/coming-soon'
     | '/compare'
     | '/cycle'
     | '/derivatives'
+    | '/disclaimer'
     | '/dominance'
     | '/fear-greed'
     | '/forgot-password'
     | '/heatmap'
     | '/login'
     | '/market'
+    | '/new'
+    | '/policy'
+    | '/profile'
     | '/register'
+    | '/saved'
+    | '/screener'
     | '/sentiment'
+    | '/settings'
     | '/spot'
+    | '/support'
+    | '/terms'
     | '/watchlist'
+    | '/auth/callback'
     | '/news/$newsId'
     | '/news/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AiAnalysisRoute: typeof AiAnalysisRoute
+  AlertsRoute: typeof AlertsRoute
   AssetsRoute: typeof AssetsRoute
+  BlogRoute: typeof BlogRoute
   ChartRoute: typeof ChartRoute
+  ComingSoonRoute: typeof ComingSoonRoute
   CompareRoute: typeof CompareRoute
   CycleRoute: typeof CycleRoute
   DerivativesRoute: typeof DerivativesRoute
+  DisclaimerRoute: typeof DisclaimerRoute
   DominanceRoute: typeof DominanceRoute
   FearGreedRoute: typeof FearGreedRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   HeatmapRoute: typeof HeatmapRoute
   LoginRoute: typeof LoginRoute
   MarketRoute: typeof MarketRoute
+  NewRoute: typeof NewRoute
+  PolicyRoute: typeof PolicyRoute
+  ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
+  SavedRoute: typeof SavedRoute
+  ScreenerRoute: typeof ScreenerRoute
   SentimentRoute: typeof SentimentRoute
+  SettingsRoute: typeof SettingsRoute
   SpotRoute: typeof SpotRoute
+  SupportRoute: typeof SupportRoute
+  TermsRoute: typeof TermsRoute
   WatchlistRoute: typeof WatchlistRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   NewsNewsIdRoute: typeof NewsNewsIdRoute
   NewsIndexRoute: typeof NewsIndexRoute
 }
@@ -273,6 +455,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ai-analysis': {
+      id: '/ai-analysis'
+      path: '/ai-analysis'
+      fullPath: '/ai-analysis'
+      preLoaderRoute: typeof AiAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/alerts': {
+      id: '/alerts'
+      path: '/alerts'
+      fullPath: '/alerts'
+      preLoaderRoute: typeof AlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/assets': {
       id: '/assets'
       path: '/assets'
@@ -280,11 +476,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AssetsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/chart': {
       id: '/chart'
       path: '/chart'
       fullPath: '/chart'
       preLoaderRoute: typeof ChartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coming-soon': {
+      id: '/coming-soon'
+      path: '/coming-soon'
+      fullPath: '/coming-soon'
+      preLoaderRoute: typeof ComingSoonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/compare': {
@@ -306,6 +516,13 @@ declare module '@tanstack/react-router' {
       path: '/derivatives'
       fullPath: '/derivatives'
       preLoaderRoute: typeof DerivativesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/disclaimer': {
+      id: '/disclaimer'
+      path: '/disclaimer'
+      fullPath: '/disclaimer'
+      preLoaderRoute: typeof DisclaimerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dominance': {
@@ -350,11 +567,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/new': {
+      id: '/new'
+      path: '/new'
+      fullPath: '/new'
+      preLoaderRoute: typeof NewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/policy': {
+      id: '/policy'
+      path: '/policy'
+      fullPath: '/policy'
+      preLoaderRoute: typeof PolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/saved': {
+      id: '/saved'
+      path: '/saved'
+      fullPath: '/saved'
+      preLoaderRoute: typeof SavedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/screener': {
+      id: '/screener'
+      path: '/screener'
+      fullPath: '/screener'
+      preLoaderRoute: typeof ScreenerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sentiment': {
@@ -364,6 +616,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SentimentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/spot': {
       id: '/spot'
       path: '/spot'
@@ -371,11 +630,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SpotRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/watchlist': {
       id: '/watchlist'
       path: '/watchlist'
       fullPath: '/watchlist'
       preLoaderRoute: typeof WatchlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/news/': {
@@ -397,24 +677,48 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AiAnalysisRoute: AiAnalysisRoute,
+  AlertsRoute: AlertsRoute,
   AssetsRoute: AssetsRoute,
+  BlogRoute: BlogRoute,
   ChartRoute: ChartRoute,
+  ComingSoonRoute: ComingSoonRoute,
   CompareRoute: CompareRoute,
   CycleRoute: CycleRoute,
   DerivativesRoute: DerivativesRoute,
+  DisclaimerRoute: DisclaimerRoute,
   DominanceRoute: DominanceRoute,
   FearGreedRoute: FearGreedRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   HeatmapRoute: HeatmapRoute,
   LoginRoute: LoginRoute,
   MarketRoute: MarketRoute,
+  NewRoute: NewRoute,
+  PolicyRoute: PolicyRoute,
+  ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
+  SavedRoute: SavedRoute,
+  ScreenerRoute: ScreenerRoute,
   SentimentRoute: SentimentRoute,
+  SettingsRoute: SettingsRoute,
   SpotRoute: SpotRoute,
+  SupportRoute: SupportRoute,
+  TermsRoute: TermsRoute,
   WatchlistRoute: WatchlistRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   NewsNewsIdRoute: NewsNewsIdRoute,
   NewsIndexRoute: NewsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

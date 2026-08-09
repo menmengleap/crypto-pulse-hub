@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/app-shell";
 import { Panel, StatCard, SentimentGauge } from "@/components/market/ui";
 import { Sparkline } from "@/components/market/sparkline";
-import { assets, fearGreedHistory30 } from "@/lib/market-data";
+import { fearGreedHistory30 } from "@/lib/market-data";
+import { useLiveAssets } from "@/lib/realtime";
 
 export const Route = createFileRoute("/sentiment")({
   head: () => ({
@@ -26,6 +27,7 @@ const drivers = [
 ];
 
 function SentimentPage() {
+  const assets = useLiveAssets();
   return (
     <AppShell title="Market Sentiment" subtitle="Composite positioning signal">
       <div className="space-y-5">

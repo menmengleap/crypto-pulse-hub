@@ -12,4 +12,15 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    server: {
+      // Dev only: forward /api/* to the Go backend (runs on :8787; :8080 is this dev server).
+      proxy: {
+        "/api": {
+          target: "http://localhost:8787",
+          changeOrigin: true,
+        },
+      },
+    },
+  },
 });

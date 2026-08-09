@@ -7,11 +7,14 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { assets, news, fmtPct, fmtPrice } from "@/lib/market-data";
+import { news, fmtPct, fmtPrice } from "@/lib/market-data";
+import { useLiveAssets } from "@/lib/realtime";
+import { AssetLogo } from "@/components/market/asset-logo";
 import { cn } from "@/lib/utils";
 
 export function GlobalSearch({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const navigate = useNavigate();
+  const assets = useLiveAssets();
 
   const go = (to: string) => {
     onOpenChange(false);
@@ -26,9 +29,7 @@ export function GlobalSearch({ open, onOpenChange }: { open: boolean; onOpenChan
         <CommandGroup heading="Assets">
           {assets.slice(0, 8).map((a) => (
             <CommandItem key={a.id} value={`${a.symbol} ${a.name}`} onSelect={() => go("/chart")}>
-              <span className="grid size-6 place-items-center rounded-md text-[10px] font-bold" style={{ background: `${a.color}22`, color: a.color }}>
-                {a.symbol.slice(0, 2)}
-              </span>
+              <AssetLogo asset={a} className="size-6 rounded-md" />
               <span className="font-medium">{a.symbol}</span>
               <span className="text-muted-foreground">{a.name}</span>
               <span className="ml-auto num text-xs text-muted-foreground">{fmtPrice(a.price)}</span>

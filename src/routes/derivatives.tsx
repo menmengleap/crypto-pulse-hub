@@ -3,7 +3,8 @@ import { Activity, Layers, Percent, TrendingUp } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Panel, StatCard, ChangeBadge, AssetRowCell } from "@/components/market/ui";
 import { Sparkline } from "@/components/market/sparkline";
-import { assets, fmtCompact, fmtPrice, globalStats } from "@/lib/market-data";
+import { fmtCompact, fmtPrice } from "@/lib/market-data";
+import { useLiveAssets, useLiveGlobal } from "@/lib/realtime";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/derivatives")({
@@ -18,15 +19,17 @@ export const Route = createFileRoute("/derivatives")({
   component: DerivativesPage,
 });
 
-const perps = assets.slice(0, 8).map((a, i) => ({
-  asset: a,
-  oi: a.marketCap * 0.028 * (1 + i * 0.05),
-  funding: ((i % 5) - 2) * 0.0037 + 0.0042,
-  ls: 1.12 - i * 0.06,
-  liq24h: 40000000 + i * 18000000,
-}));
-
 function DerivativesPage() {
+  const assets = useLiveAssets();
+  const globalStats = useLiveGlobal();
+  const perps = assets.slice(0, 8).map((a, i) => ({
+    asset: a,
+    oi: a.marketCap * 0.028 * (1 + i * 0.05),
+    funding: ((i % 5) - 2) * 0.0037 + 0.0042,
+    ls: 1.12 - i * 0.06,
+    liq24h: 40000000 + i * 18000000,
+  }));
+
   return (
     <AppShell title="Derivatives Market" subtitle="Perpetual futures positioning and flow">
       <div className="space-y-5">

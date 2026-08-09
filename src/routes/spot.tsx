@@ -4,7 +4,8 @@ import { Search } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Panel, ChangeBadge, AssetRowCell, TrendBadge } from "@/components/market/ui";
 import { Sparkline } from "@/components/market/sparkline";
-import { assets, fmtCompact, fmtPrice } from "@/lib/market-data";
+import { fmtCompact, fmtPrice } from "@/lib/market-data";
+import { useLiveAssets } from "@/lib/realtime";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/spot")({
 function SpotPage() {
   const [q, setQ] = useState("");
   const [tab, setTab] = useState("all");
+  const assets = useLiveAssets();
 
   const rows = assets.filter((a) => {
     const match = `${a.symbol} ${a.name}`.toLowerCase().includes(q.toLowerCase());

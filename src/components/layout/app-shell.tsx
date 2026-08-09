@@ -1,5 +1,5 @@
-import { useState, type ReactNode } from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { useEffect, useState, type ReactNode } from "react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Activity,
   BarChart3,
@@ -8,7 +8,6 @@ import {
   Brain,
   ChevronLeft,
   Filter,
-  Flame,
   Gauge,
   Grid2x2,
   LayoutDashboard,
@@ -38,6 +37,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GlobalSearch } from "./global-search";
+import { useAuth } from "@/lib/auth";
+import myioLogo from "@/Img/myio.png";
 
 type NavItem = { label: string; to: string; icon: LucideIcon };
 type NavGroup = { label: string; items: NavItem[] };
@@ -95,13 +96,17 @@ const mobileNav: NavItem[] = [
 export function Brand({ collapsed }: { collapsed?: boolean }) {
   return (
     <Link to="/" className="flex items-center gap-2.5 px-1">
-      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary ring-1 ring-primary/30">
-        <Flame className="size-4.5" />
-      </span>
+      <img
+        src={myioLogo}
+        alt=""
+        className="h-9 w-auto shrink-0 rounded-lg object-contain ring-1 ring-primary/30"
+      />
       {!collapsed && (
         <span className="min-w-0">
           <span className="block truncate text-sm font-semibold tracking-tight">Cryptolytic</span>
-          <span className="block truncate text-[11px] text-muted-foreground">Market Intelligence</span>
+          <span className="block truncate text-[11px] text-muted-foreground">
+            Market Intelligence
+          </span>
         </span>
       )}
     </Link>
@@ -178,6 +183,38 @@ export function AppShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
+  // Console access requires a signed-in session. Unauthenticated visitors are
+  // sent to /login (client-side only — no SSR redirects).
+  const accessToken = useAuth((s) => s.accessToken);
+  const user = useAuth((s) => s.user);
+  const clearSession = useAuth((s) => s.clearSession);
+  const navigate = useNavigate();
+
+  // Gate the render behind mount so the server and first client paint agree
+  // (both show the loader) — the guard then runs client-side without an SSR
+  // hydration mismatch.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+    if (!accessToken) {
+      void navigate({ to: "/login", search: { redirect: window.location.pathname } });
+    }
+  }, [accessToken, navigate]);
+
+  if (!mounted || !accessToken) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <span className="size-5 animate-spin rounded-full border-2 border-border border-t-primary" />
+      </div>
+    );
+  }
+
+  const displayName = user?.name?.trim() || "Analyst";
+  const email = user?.email ?? "";
+  const initials =
+    ((user?.name || user?.email || "??").match(/\b\w/g) ?? []).slice(0, 2).join("").toUpperCase() ||
+    "?";
+
   return (
     <TooltipProvider delayDuration={120}>
       <div className="min-h-screen w-full bg-background">
@@ -187,7 +224,12 @@ export function AppShell({
             collapsed ? "w-[76px]" : "w-[248px]",
           )}
         >
-          <div className={cn("flex h-16 items-center border-b border-sidebar-border px-4", collapsed && "justify-center px-0")}>
+          <div
+            className={cn(
+              "flex h-16 items-center border-b border-sidebar-border px-4",
+              collapsed && "justify-center px-0",
+            )}
+          >
             <Brand collapsed={collapsed} />
           </div>
           <div className="flex-1 overflow-y-auto px-3 py-5">
@@ -202,13 +244,20 @@ export function AppShell({
               )}
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
-              <ChevronLeft className={cn("size-4 transition-transform", collapsed && "rotate-180")} />
+              <ChevronLeft
+                className={cn("size-4 transition-transform", collapsed && "rotate-180")}
+              />
               {!collapsed && <span>Collapse</span>}
             </button>
           </div>
         </aside>
 
-        <div className={cn("transition-[padding] duration-300", collapsed ? "lg:pl-[76px]" : "lg:pl-[248px]")}>
+        <div
+          className={cn(
+            "transition-[padding] duration-300",
+            collapsed ? "lg:pl-[76px]" : "lg:pl-[248px]",
+          )}
+        >
           <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-xl">
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-6">
               <div className="flex min-w-0 items-center gap-3">
@@ -219,7 +268,10 @@ export function AppShell({
                   >
                     <Menu className="size-4" />
                   </SheetTrigger>
-                  <SheetContent side="left" className="w-[272px] border-sidebar-border bg-sidebar p-0">
+                  <SheetContent
+                    side="left"
+                    className="w-[272px] border-sidebar-border bg-sidebar p-0"
+                  >
                     <SheetTitle className="sr-only">Navigation</SheetTitle>
                     <div className="flex h-16 items-center border-b border-sidebar-border px-4">
                       <Brand />
@@ -230,7 +282,9 @@ export function AppShell({
                   </SheetContent>
                 </Sheet>
                 <div className="min-w-0">
-                  <h1 className="truncate text-base font-semibold tracking-tight sm:text-lg">{title}</h1>
+                  <h1 className="truncate text-base font-semibold tracking-tight sm:text-lg">
+                    {title}
+                  </h1>
                   {subtitle && <p className="truncate text-xs text-muted-foreground">{subtitle}</p>}
                 </div>
               </div>
@@ -253,8 +307,8 @@ export function AppShell({
                 </button>
                 {actions}
                 <Link
-                  to="/alerts"
-                  aria-label="Notifications"
+                  to="/blog"
+                  aria-label="Updates & blog"
                   className="relative grid size-9 place-items-center rounded-lg border border-border text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <Bell className="size-4" />
@@ -270,14 +324,16 @@ export function AppShell({
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex items-center gap-2 rounded-lg border border-border p-1 pr-2 transition-colors hover:border-primary/40">
                     <span className="grid size-7 place-items-center rounded-md bg-primary/15 text-[11px] font-semibold text-primary">
-                      AK
+                      {initials}
                     </span>
-                    <span className="hidden text-xs font-medium sm:block">Alex K.</span>
+                    <span className="hidden text-xs font-medium sm:block">{displayName}</span>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-52">
                     <DropdownMenuLabel className="font-normal">
-                      <p className="text-sm font-medium">Alex Kim</p>
-                      <p className="text-xs text-muted-foreground">alex@cryptolytic.io</p>
+                      <p className="text-sm font-medium">{displayName}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {email || "Signed in via OAuth"}
+                      </p>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
@@ -290,8 +346,13 @@ export function AppShell({
                       <Link to="/settings">Settings</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to="/login">Sign out</Link>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        clearSession();
+                        void navigate({ to: "/login" });
+                      }}
+                    >
+                      Sign out
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

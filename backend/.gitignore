@@ -1,0 +1,12 @@
+# Environment
+.env
+.env.*
+
+# Build artifacts
+/bin/
+*.exe
+*.test
+
+# Local tooling
+.idea/
+.vscode/

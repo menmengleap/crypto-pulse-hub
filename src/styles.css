@@ -106,7 +106,8 @@
     color-mix(in oklab, var(--surface-2) 92%, transparent),
     var(--surface)
   );
-  --shadow-glow: 0 0 0 1px color-mix(in oklab, var(--primary) 22%, transparent),
+  --shadow-glow:
+    0 0 0 1px color-mix(in oklab, var(--primary) 22%, transparent),
     0 18px 50px -24px color-mix(in oklab, var(--primary) 45%, transparent);
 }
 
@@ -148,4 +149,82 @@
 @utility num {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
+}
+
+/* Infinite team marquee — the track is duplicated in JSX so a -50% loop is seamless. */
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: marquee-scroll 36s linear infinite;
+  will-change: transform;
+}
+
+/* Product showcase — gently floating terminal screenshot. */
+@keyframes showcase-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.showcase-float {
+  animation: showcase-float 9s ease-in-out infinite;
+}
+
+@keyframes showcase-glow {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+.showcase-glow {
+  animation: showcase-glow 7s ease-in-out infinite;
+}
+
+@keyframes showcase-shine {
+  0% {
+    transform: translateX(-130%) skewX(-18deg);
+  }
+  55%,
+  100% {
+    transform: translateX(320%) skewX(-18deg);
+  }
+}
+.showcase-shine {
+  background: linear-gradient(
+    105deg,
+    transparent 42%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 58%
+  );
+  animation: showcase-shine 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+  /* Static view: hide the duplicated second half so members aren't shown twice. */
+  .marquee-track > :nth-child(n + 4) {
+    display: none;
+  }
+  .showcase-float,
+  .showcase-glow,
+  .showcase-shine {
+    animation: none;
+  }
 }

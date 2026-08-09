@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowDownRight, ArrowUpRight, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sparkline } from "./sparkline";
+import { AssetLogo } from "./asset-logo";
 import { type Asset, fmtCompact, fmtPct, fmtPrice } from "@/lib/market-data";
 import {
   DropdownMenu,
@@ -106,12 +107,7 @@ export function MarketCard({ asset }: { asset: Asset }) {
     <article className="panel group relative min-w-[230px] p-4 transition-all hover:border-primary/35 hover:shadow-[0_18px_40px_-28px_var(--primary)]">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
         <div className="flex min-w-0 items-center gap-2.5">
-          <span
-            className="grid size-9 shrink-0 place-items-center rounded-xl text-[11px] font-bold"
-            style={{ background: `${asset.color}1f`, color: asset.color }}
-          >
-            {asset.symbol.slice(0, 3)}
-          </span>
+          <AssetLogo asset={asset} className="size-9 rounded-xl" />
           <span className="min-w-0">
             <span className="block truncate text-sm font-semibold">{asset.symbol}</span>
             <span className="block truncate text-[11px] text-muted-foreground">{asset.name}</span>
@@ -236,12 +232,7 @@ export function EmptyState({ title, description, action }: { title: string; desc
 export function AssetRowCell({ asset }: { asset: Asset }) {
   return (
     <div className="flex min-w-0 items-center gap-2.5">
-      <span
-        className="grid size-8 shrink-0 place-items-center rounded-lg text-[10px] font-bold"
-        style={{ background: `${asset.color}1f`, color: asset.color }}
-      >
-        {asset.symbol.slice(0, 3)}
-      </span>
+      <AssetLogo asset={asset} className="size-8" />
       <span className="min-w-0">
         <span className="block truncate text-sm font-medium">{asset.symbol}</span>
         <span className="block truncate text-[11px] text-muted-foreground">{asset.name}</span>

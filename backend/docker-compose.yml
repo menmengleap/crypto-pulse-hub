@@ -1,0 +1,49 @@
+version: "3.9"
+
+# Cryptolytic analytics backend — market analysis only. No trading.
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cryptolytic
+      POSTGRES_PASSWORD: cryptolytic_dev
+      POSTGRES_DB: cryptolytic
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cryptolytic -d cryptolytic"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: "8080"
+      APP_ENV: development
+      DATABASE_URL: postgresql://cryptolytic:cryptolytic_dev@postgres:5432/cryptolytic
+      JWT_SECRET: change-me-in-production-at-least-32-chars
+      CORS_ORIGINS: http://localhost:3001,http://localhost:5173
+      SEED_ON_STARTUP: "true"
+      WS_ENABLED: "true"
+    ports:
+      - "8080:8080"
+
+  # Optional: prepared for future realtime fan-out. Uncomment to enable.
+  # redis:
+  #   image: redis:7-alpine
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6379:6379"
+
+volumes:
+  pgdata:

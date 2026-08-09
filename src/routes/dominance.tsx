@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/app-shell";
 import { Panel, StatCard } from "@/components/market/ui";
 import { Sparkline } from "@/components/market/sparkline";
-import { dominanceHistory, globalStats } from "@/lib/market-data";
+import { dominanceHistory } from "@/lib/market-data";
+import { useLiveGlobal } from "@/lib/realtime";
 
 export const Route = createFileRoute("/dominance")({
   head: () => ({
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/dominance")({
 });
 
 function DominancePage() {
+  const globalStats = useLiveGlobal();
   return (
     <AppShell title="Bitcoin Dominance" subtitle="Capital distribution across the market">
       <div className="space-y-5">

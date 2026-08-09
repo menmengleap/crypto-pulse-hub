@@ -3,7 +3,8 @@ import { useState } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Panel, ChangeBadge } from "@/components/market/ui";
 import { Sparkline } from "@/components/market/sparkline";
-import { assets, fmtCompact, fmtPrice } from "@/lib/market-data";
+import { fmtCompact, fmtPrice } from "@/lib/market-data";
+import { useLiveAssets } from "@/lib/realtime";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/compare")({
 function ComparePage() {
   const [a, setA] = useState("BTC");
   const [b, setB] = useState("ETH");
+  const assets = useLiveAssets();
   const left = assets.find((x) => x.symbol === a) ?? assets[0]!;
   const right = assets.find((x) => x.symbol === b) ?? assets[1]!;
 

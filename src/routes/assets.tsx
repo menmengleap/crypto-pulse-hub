@@ -4,7 +4,8 @@ import { Search } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Panel, ChangeBadge, AssetRowCell, TrendBadge } from "@/components/market/ui";
 import { Sparkline } from "@/components/market/sparkline";
-import { assets, fmtCompact, fmtPrice } from "@/lib/market-data";
+import { fmtCompact, fmtPrice } from "@/lib/market-data";
+import { useLiveAssets } from "@/lib/realtime";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +26,7 @@ const sectors = ["All", "Bitcoin", "Ethereum", "Layer 1", "Layer 2", "DeFi", "AI
 function AssetsPage() {
   const [q, setQ] = useState("");
   const [sector, setSector] = useState("All");
+  const assets = useLiveAssets();
 
   const rows = assets.filter(
     (a) => (sector === "All" || a.sector === sector) && `${a.symbol} ${a.name}`.toLowerCase().includes(q.toLowerCase()),

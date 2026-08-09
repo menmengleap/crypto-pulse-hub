@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/app-shell";
 import { Panel } from "@/components/market/ui";
-import { assets, fmtCompact, fmtPct, fmtPrice } from "@/lib/market-data";
+import { fmtCompact, fmtPct, fmtPrice } from "@/lib/market-data";
+import { useLiveAssets } from "@/lib/realtime";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/heatmap")({
 const groups = ["Bitcoin", "Ethereum", "Layer 1", "Layer 2", "DeFi", "AI", "Meme", "Gaming"];
 
 function HeatmapPage() {
+  const assets = useLiveAssets();
   return (
     <AppShell title="Market Heatmap" subtitle="24h performance by sector">
       <div className="space-y-4">

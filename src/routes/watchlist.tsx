@@ -4,7 +4,8 @@ import { Plus, Star, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Panel, ChangeBadge, AssetRowCell, TrendBadge, EmptyState } from "@/components/market/ui";
 import { Sparkline } from "@/components/market/sparkline";
-import { assets, fmtCompact, fmtPrice } from "@/lib/market-data";
+import { fmtCompact, fmtPrice } from "@/lib/market-data";
+import { useLiveAssets } from "@/lib/realtime";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,7 @@ function WatchlistPage() {
   const [activeId, setActiveId] = useState("core");
   const [newName, setNewName] = useState("");
   const active = lists.find((l) => l.id === activeId) ?? lists[0];
+  const assets = useLiveAssets();
   const rows = assets.filter((a) => active?.symbols.includes(a.symbol));
 
   const remove = (symbol: string) => {

@@ -1,11 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { z } from "zod";
 import { AuthLayout } from "@/components/layout/auth-layout";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { SocialAuthButtons } from "@/components/layout/social-auth";
+import { useAuth } from "@/lib/auth";
+
+const loginSearch = z.object({
+  /** Where to return after signing in (console pages pass their path). */
+  redirect: z.string().optional(),
+  /** OAuth failure message (from the backend callback). */
+  error: z.string().optional(),
+});
 
 export const Route = createFileRoute("/login")({
+  validateSearch: loginSearch,
   head: () => ({
     meta: [
       { title: "Sign in — Cryptolytic" },
@@ -18,6 +26,16 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
+  const { redirect, error } = Route.useSearch();
+  const isAuthed = useAuth((s) => s.accessToken !== null);
+
+  // Already signed in? Go straight to the console (or the original target).
+  useEffect(() => {
+    if (!isAuthed) return;
+    const dest = redirect && redirect.startsWith("/") ? redirect : "/market";
+    window.location.assign(dest);
+  }, [isAuthed, redirect]);
+
   return (
     <AuthLayout
       title="Welcome back"
@@ -31,35 +49,17 @@ function LoginPage() {
         </>
       }
     >
-      <form
-        className="space-y-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-        }}
-      >
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="you@company.com" autoComplete="email" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" placeholder="••••••••" autoComplete="current-password" />
-        </div>
-        <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Checkbox id="remember" /> Remember me
-          </label>
-          <Link to="/forgot-password" className="text-xs text-primary hover:underline">
-            Forgot password?
-          </Link>
-        </div>
-        <Button asChild className="w-full">
-          <Link to="/market">Sign in</Link>
-        </Button>
+      <div className="space-y-4">
+        {error && (
+          <p className="rounded-lg border border-down/25 bg-down/10 px-3 py-2 text-xs text-down">
+            {error}
+          </p>
+        )}
+        <SocialAuthButtons mode="login" redirect={redirect} />
         <p className="text-center text-[11px] text-muted-foreground">
           Cryptolytic is an analytics platform. We never execute trades or hold funds.
         </p>
-      </form>
+      </div>
     </AuthLayout>
   );
 }

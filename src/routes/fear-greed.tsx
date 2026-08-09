@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/app-shell";
 import { Panel, SentimentGauge, StatCard } from "@/components/market/ui";
 import { Sparkline } from "@/components/market/sparkline";
-import { fearGreedHistory7, fearGreedHistory30, globalStats } from "@/lib/market-data";
+import { fearGreedHistory7, fearGreedHistory30 } from "@/lib/market-data";
+import { useLiveGlobal } from "@/lib/realtime";
 
 export const Route = createFileRoute("/fear-greed")({
   head: () => ({
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/fear-greed")({
 });
 
 function FearGreedPage() {
+  const globalStats = useLiveGlobal();
   return (
     <AppShell title="Fear & Greed" subtitle="Market emotion index">
       <div className="space-y-5">

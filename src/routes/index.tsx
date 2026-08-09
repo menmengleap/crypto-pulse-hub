@@ -1,8 +1,28 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, BarChart3, Bell, Brain, Flame, Gauge, LineChart, Newspaper, ShieldCheck } from "lucide-react";
-import { assets, fmtCompact, globalStats } from "@/lib/market-data";
+import {
+  ArrowRight,
+  BarChart3,
+  Bell,
+  Brain,
+  Gauge,
+  LineChart,
+  Newspaper,
+  ShieldCheck,
+} from "lucide-react";
+import { fmtCompact, fmtDominance, fmtPrice } from "@/lib/market-data";
+import { useLiveAssets, useLiveGlobal } from "@/lib/realtime";
 import { ChangeBadge } from "@/components/market/ui";
+import { AssetLogo } from "@/components/market/asset-logo";
 import { Sparkline } from "@/components/market/sparkline";
+import { LoopingVideo } from "@/components/layout/looping-video";
+import { MarketingNav } from "@/components/layout/marketing-nav";
+import { AudienceSection } from "@/components/layout/audience-map";
+import { ProductShowcase } from "@/components/layout/product-showcase";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { TestimonialSection } from "@/components/layout/testimonials";
+import { TeamSection } from "@/components/layout/team-section";
+import { cn } from "@/lib/utils";
+import bannerVideo from "@/video/Banner.mp4";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,7 +36,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Cryptolytic — Crypto Market Analytics & Intelligence" },
       {
         property: "og:description",
-        content: "Charts, indicators, sentiment and AI research for serious crypto market analysts.",
+        content:
+          "Charts, indicators, sentiment and AI research for serious crypto market analysts.",
       },
     ],
   }),
@@ -24,84 +45,162 @@ export const Route = createFileRoute("/")({
 });
 
 const features = [
-  { icon: LineChart, title: "Advanced charting", text: "Candlesticks, volume and crosshair analysis with a workspace built for reading structure, not clicking buttons." },
-  { icon: Gauge, title: "Sentiment engine", text: "Fear & Greed, market cycle phase and dominance trends condensed into signals you can act on." },
-  { icon: Brain, title: "AI market analyst", text: "Structured multi-timeframe reads on trend, momentum and key levels — written like a desk note." },
-  { icon: BarChart3, title: "Screener", text: "Filter thousands of pairs by RSI, trend, breakout state, volume and market cap in one table." },
-  { icon: Newspaper, title: "News with context", text: "Every headline tagged with sentiment, related assets and expected market impact." },
-  { icon: Bell, title: "Alerts & saved work", text: "Track levels, indicators and research notes across watchlists that stay in sync." },
+  {
+    icon: LineChart,
+    title: "Advanced charting",
+    text: "Candlesticks, volume and crosshair analysis with a workspace built for reading structure, not clicking buttons.",
+  },
+  {
+    icon: Gauge,
+    title: "Sentiment engine",
+    text: "Fear & Greed, market cycle phase and dominance trends condensed into signals you can act on.",
+  },
+  {
+    icon: Brain,
+    title: "AI market analyst",
+    text: "Structured multi-timeframe reads on trend, momentum and key levels — written like a desk note.",
+  },
+  {
+    icon: BarChart3,
+    title: "Screener",
+    text: "Filter thousands of pairs by RSI, trend, breakout state, volume and market cap in one table.",
+  },
+  {
+    icon: Newspaper,
+    title: "News with context",
+    text: "Every headline tagged with sentiment, related assets and expected market impact.",
+  },
+  {
+    icon: Bell,
+    title: "Alerts & saved work",
+    text: "Track levels, indicators and research notes across watchlists that stay in sync.",
+  },
 ];
 
+function BtcSpotlightBox() {
+  const assets = useLiveAssets();
+  const globalStats = useLiveGlobal();
+  const btc = assets.find((a) => a.symbol === "BTC");
+  const hasPrice = !!btc && Number.isFinite(btc.price) && btc.price > 0;
+  return (
+    <div className="rounded-xl border border-border bg-background/60 p-5 backdrop-blur-xl">
+      <div className="flex items-center gap-2.5">
+        {btc ? (
+          <AssetLogo asset={btc} className="size-9 rounded-xl" />
+        ) : (
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-muted text-[10px] font-bold text-muted-foreground">
+            BTC
+          </span>
+        )}
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold">Bitcoin</p>
+          <p className="truncate text-[11px] text-muted-foreground">BTC/USDT · live</p>
+        </div>
+      </div>
+      <p className="num mt-4 text-3xl font-semibold tracking-tight">
+        {hasPrice ? fmtPrice(btc.price) : "—"}
+      </p>
+      <div className="mt-2">
+        {hasPrice && btc ? (
+          <ChangeBadge value={btc.change24h} />
+        ) : (
+          <span className="text-xs text-muted-foreground">Waiting for live data…</span>
+        )}
+      </div>
+      <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-border pt-4 text-xs">
+        <div>
+          <dt className="text-muted-foreground">Market cap</dt>
+          <dd className="num mt-0.5 text-sm font-semibold">
+            {btc && btc.marketCap > 0 ? fmtCompact(btc.marketCap) : "—"}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground">BTC dominance</dt>
+          <dd className="num mt-0.5 text-sm font-semibold">
+            {fmtDominance(globalStats.btcDominance)}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground">24h volume</dt>
+          <dd className="num mt-0.5 text-sm font-semibold">
+            {btc && btc.volume24h > 0 ? fmtCompact(btc.volume24h) : "—"}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground">7d change</dt>
+          <dd
+            className={cn(
+              "num mt-0.5 text-sm font-semibold",
+              btc && btc.change7d >= 0 ? "text-up" : "text-down",
+            )}
+          >
+            {btc ? `${btc.change7d >= 0 ? "+" : ""}${btc.change7d.toFixed(2)}%` : "—"}
+          </dd>
+        </div>
+      </dl>
+    </div>
+  );
+}
+
 function Landing() {
+  const assets = useLiveAssets();
+  const globalStats = useLiveGlobal();
   const top = assets.slice(0, 6);
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 py-3.5 sm:px-6">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary ring-1 ring-primary/30">
-              <Flame className="size-4.5" />
-            </span>
-            <span className="truncate text-sm font-semibold tracking-tight">Cryptolytic</span>
-          </div>
-          <nav className="flex items-center gap-2">
-            <Link to="/login" className="hidden rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground sm:block">
-              Sign in
-            </Link>
-            <Link
-              to="/market"
-              className="rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-            >
-              Open terminal
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <MarketingNav />
 
       <section className="relative overflow-hidden border-b border-border">
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[560px]" style={{ background: "var(--gradient-glow)" }} />
+        {/* Homepage banner video — loops continuously behind the hero content */}
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <LoopingVideo src={bannerVideo} preload="auto" overlayClassName="bg-black/45" />
+        </div>
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
-          <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted-foreground">
-              <ShieldCheck className="size-3.5 text-primary" />
-              Analysis-only platform · no trading execution
-            </span>
-            <h1 className="mt-6 text-4xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
-              Read the market
-              <span className="block text-muted-foreground">before it moves.</span>
-            </h1>
-            <p className="mt-5 max-w-xl text-base text-muted-foreground">
-              A market intelligence terminal for crypto research: technical structure, sentiment, dominance, news impact
-              and AI-assisted analysis in one dense, quiet interface.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                to="/market"
-                className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-              >
-                Launch market overview <ArrowRight className="size-4" />
-              </Link>
-              <Link
-                to="/chart"
-                className="inline-flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-medium transition-colors hover:border-primary/40"
-              >
-                Explore charts
-              </Link>
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
+            <div className="max-w-3xl">
+              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted-foreground">
+                <ShieldCheck className="size-3.5 text-primary" />
+                Analysis-only platform · no trading execution
+              </span>
+              <h1 className="mt-6 text-4xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
+                Read the market
+                <span className="block text-muted-foreground">before it moves.</span>
+              </h1>
+              <p className="mt-5 max-w-xl text-base text-muted-foreground">
+                A market intelligence terminal for crypto research: technical structure, sentiment,
+                dominance, news impact and AI-assisted analysis in one dense, quiet interface.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  to="/market"
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                >
+                  Launch market overview <ArrowRight className="size-4" />
+                </Link>
+                <Link
+                  to="/chart"
+                  className="inline-flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-medium transition-colors hover:border-primary/40"
+                >
+                  Explore charts
+                </Link>
+              </div>
+
+              <dl className="mt-12 grid max-w-2xl grid-cols-2 gap-6 sm:grid-cols-4">
+                {[
+                  ["Market cap", fmtCompact(globalStats.marketCap)],
+                  ["24h volume", fmtCompact(globalStats.volume24h)],
+                  ["BTC dominance", fmtDominance(globalStats.btcDominance)],
+                  ["Fear & Greed", `${globalStats.fearGreed} · ${globalStats.fearGreedLabel}`],
+                ].map(([k, v]) => (
+                  <div key={k}>
+                    <dt className="text-xs text-muted-foreground">{k}</dt>
+                    <dd className="num mt-1 text-lg font-semibold tracking-tight">{v}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
 
-            <dl className="mt-12 grid max-w-2xl grid-cols-2 gap-6 sm:grid-cols-4">
-              {[
-                ["Market cap", fmtCompact(globalStats.marketCap)],
-                ["24h volume", fmtCompact(globalStats.volume24h)],
-                ["BTC dominance", `${globalStats.btcDominance}%`],
-                ["Fear & Greed", `${globalStats.fearGreed} · ${globalStats.fearGreedLabel}`],
-              ].map(([k, v]) => (
-                <div key={k}>
-                  <dt className="text-xs text-muted-foreground">{k}</dt>
-                  <dd className="num mt-1 text-lg font-semibold tracking-tight">{v}</dd>
-                </div>
-              ))}
-            </dl>
+            <BtcSpotlightBox />
           </div>
         </div>
       </section>
@@ -116,7 +215,9 @@ function Landing() {
                   <ChangeBadge value={a.change24h} />
                 </div>
                 <p className="num mt-2 text-sm font-semibold">
-                  {a.price >= 1 ? `$${a.price.toLocaleString("en-US", { maximumFractionDigits: 2 })}` : `$${a.price}`}
+                  {a.price >= 1
+                    ? `$${a.price.toLocaleString("en-US", { maximumFractionDigits: 2 })}`
+                    : `$${a.price}`}
                 </p>
                 <Sparkline data={a.spark} positive={a.change24h >= 0} className="mt-2 h-7" />
               </div>
@@ -126,10 +227,12 @@ function Landing() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Everything an analyst needs. Nothing they don't.</h2>
+        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          Everything an analyst needs. Nothing they don't.
+        </h2>
         <p className="mt-3 max-w-xl text-sm text-muted-foreground">
-          No order tickets, no wallets, no noise. Cryptolytic is built for the part of the job that actually decides
-          outcomes — understanding the market.
+          No order tickets, no wallets, no noise. Cryptolytic is built for the part of the job that
+          actually decides outcomes — understanding the market.
         </p>
         <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {features.map((f) => (
@@ -144,18 +247,15 @@ function Landing() {
         </div>
       </section>
 
-      <footer className="border-t border-border">
-        <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 py-8 sm:px-6">
-          <p className="min-w-0 truncate text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Cryptolytic. Market data shown is illustrative.
-          </p>
-          <div className="flex gap-4 text-xs text-muted-foreground">
-            <Link to="/news" className="hover:text-foreground">News</Link>
-            <Link to="/screener" className="hover:text-foreground">Screener</Link>
-            <Link to="/login" className="hover:text-foreground">Sign in</Link>
-          </div>
-        </div>
-      </footer>
+      <ProductShowcase />
+
+      <TestimonialSection />
+
+      <TeamSection id="team" />
+
+      <AudienceSection />
+
+      <SiteFooter />
     </div>
   );
 }
