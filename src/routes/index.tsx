@@ -22,7 +22,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { TestimonialSection } from "@/components/layout/testimonials";
 import { TeamSection } from "@/components/layout/team-section";
 import { cn } from "@/lib/utils";
-import bannerVideo from "@/video/Banner.mp4";
+import bannerVideo from "@/Video/Banner.mp4";
 
 export const Route = createFileRoute("/")({
   head: () => ({

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { LoopingVideo } from "@/components/layout/looping-video";
-import loreVideo from "@/video/lore.mp4";
+import loreVideo from "@/Video/lore.mp4";
 import myioLogo from "@/Img/myio.png";
 
 export function AuthLayout({
