@@ -19,6 +19,7 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MarketRouteImport } from './routes/market'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as SentimentRouteImport } from './routes/sentiment'
 import { Route as SpotRouteImport } from './routes/spot'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
 
@@ -72,6 +73,11 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SentimentRoute = SentimentRouteImport.update({
+  id: '/sentiment',
+  path: '/sentiment',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SpotRoute = SpotRouteImport.update({
   id: '/spot',
   path: '/spot',
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
   '/register': typeof RegisterRoute
+  '/sentiment': typeof SentimentRoute
   '/spot': typeof SpotRoute
   '/watchlist': typeof WatchlistRoute
 }
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
   '/register': typeof RegisterRoute
+  '/sentiment': typeof SentimentRoute
   '/spot': typeof SpotRoute
   '/watchlist': typeof WatchlistRoute
 }
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
   '/register': typeof RegisterRoute
+  '/sentiment': typeof SentimentRoute
   '/spot': typeof SpotRoute
   '/watchlist': typeof WatchlistRoute
 }
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/market'
     | '/register'
+    | '/sentiment'
     | '/spot'
     | '/watchlist'
   fileRoutesByTo: FileRoutesByTo
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/market'
     | '/register'
+    | '/sentiment'
     | '/spot'
     | '/watchlist'
   id:
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/market'
     | '/register'
+    | '/sentiment'
     | '/spot'
     | '/watchlist'
   fileRoutesById: FileRoutesById
@@ -182,6 +194,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MarketRoute: typeof MarketRoute
   RegisterRoute: typeof RegisterRoute
+  SentimentRoute: typeof SentimentRoute
   SpotRoute: typeof SpotRoute
   WatchlistRoute: typeof WatchlistRoute
 }
@@ -258,6 +271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sentiment': {
+      id: '/sentiment'
+      path: '/sentiment'
+      fullPath: '/sentiment'
+      preLoaderRoute: typeof SentimentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/spot': {
       id: '/spot'
       path: '/spot'
@@ -286,6 +306,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MarketRoute: MarketRoute,
   RegisterRoute: RegisterRoute,
+  SentimentRoute: SentimentRoute,
   SpotRoute: SpotRoute,
   WatchlistRoute: WatchlistRoute,
 }
