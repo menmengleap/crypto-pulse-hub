@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AssetsRouteImport } from './routes/assets'
 import { Route as ChartRouteImport } from './routes/chart'
 import { Route as CompareRouteImport } from './routes/compare'
+import { Route as CycleRouteImport } from './routes/cycle'
 import { Route as DerivativesRouteImport } from './routes/derivatives'
 import { Route as FearGreedRouteImport } from './routes/fear-greed'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
@@ -41,6 +42,11 @@ const ChartRoute = ChartRouteImport.update({
 const CompareRoute = CompareRouteImport.update({
   id: '/compare',
   path: '/compare',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CycleRoute = CycleRouteImport.update({
+  id: '/cycle',
+  path: '/cycle',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DerivativesRoute = DerivativesRouteImport.update({
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/assets': typeof AssetsRoute
   '/chart': typeof ChartRoute
   '/compare': typeof CompareRoute
+  '/cycle': typeof CycleRoute
   '/derivatives': typeof DerivativesRoute
   '/fear-greed': typeof FearGreedRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/assets': typeof AssetsRoute
   '/chart': typeof ChartRoute
   '/compare': typeof CompareRoute
+  '/cycle': typeof CycleRoute
   '/derivatives': typeof DerivativesRoute
   '/fear-greed': typeof FearGreedRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/assets': typeof AssetsRoute
   '/chart': typeof ChartRoute
   '/compare': typeof CompareRoute
+  '/cycle': typeof CycleRoute
   '/derivatives': typeof DerivativesRoute
   '/fear-greed': typeof FearGreedRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -142,6 +151,7 @@ export interface FileRouteTypes {
     | '/assets'
     | '/chart'
     | '/compare'
+    | '/cycle'
     | '/derivatives'
     | '/fear-greed'
     | '/forgot-password'
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
     | '/assets'
     | '/chart'
     | '/compare'
+    | '/cycle'
     | '/derivatives'
     | '/fear-greed'
     | '/forgot-password'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/assets'
     | '/chart'
     | '/compare'
+    | '/cycle'
     | '/derivatives'
     | '/fear-greed'
     | '/forgot-password'
@@ -188,6 +200,7 @@ export interface RootRouteChildren {
   AssetsRoute: typeof AssetsRoute
   ChartRoute: typeof ChartRoute
   CompareRoute: typeof CompareRoute
+  CycleRoute: typeof CycleRoute
   DerivativesRoute: typeof DerivativesRoute
   FearGreedRoute: typeof FearGreedRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
@@ -227,6 +240,13 @@ declare module '@tanstack/react-router' {
       path: '/compare'
       fullPath: '/compare'
       preLoaderRoute: typeof CompareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cycle': {
+      id: '/cycle'
+      path: '/cycle'
+      fullPath: '/cycle'
+      preLoaderRoute: typeof CycleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/derivatives': {
@@ -300,6 +320,7 @@ const rootRouteChildren: RootRouteChildren = {
   AssetsRoute: AssetsRoute,
   ChartRoute: ChartRoute,
   CompareRoute: CompareRoute,
+  CycleRoute: CycleRoute,
   DerivativesRoute: DerivativesRoute,
   FearGreedRoute: FearGreedRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
