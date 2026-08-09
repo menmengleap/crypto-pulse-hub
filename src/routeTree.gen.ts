@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AssetsRouteImport } from './routes/assets'
 import { Route as ChartRouteImport } from './routes/chart'
+import { Route as CompareRouteImport } from './routes/compare'
 import { Route as DerivativesRouteImport } from './routes/derivatives'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
@@ -32,6 +33,11 @@ const AssetsRoute = AssetsRouteImport.update({
 const ChartRoute = ChartRouteImport.update({
   id: '/chart',
   path: '/chart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompareRoute = CompareRouteImport.update({
+  id: '/compare',
+  path: '/compare',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DerivativesRoute = DerivativesRouteImport.update({
@@ -69,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/assets': typeof AssetsRoute
   '/chart': typeof ChartRoute
+  '/compare': typeof CompareRoute
   '/derivatives': typeof DerivativesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/assets': typeof AssetsRoute
   '/chart': typeof ChartRoute
+  '/compare': typeof CompareRoute
   '/derivatives': typeof DerivativesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/assets': typeof AssetsRoute
   '/chart': typeof ChartRoute
+  '/compare': typeof CompareRoute
   '/derivatives': typeof DerivativesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/'
     | '/assets'
     | '/chart'
+    | '/compare'
     | '/derivatives'
     | '/forgot-password'
     | '/login'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/'
     | '/assets'
     | '/chart'
+    | '/compare'
     | '/derivatives'
     | '/forgot-password'
     | '/login'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/assets'
     | '/chart'
+    | '/compare'
     | '/derivatives'
     | '/forgot-password'
     | '/login'
@@ -139,6 +151,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AssetsRoute: typeof AssetsRoute
   ChartRoute: typeof ChartRoute
+  CompareRoute: typeof CompareRoute
   DerivativesRoute: typeof DerivativesRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
@@ -168,6 +181,13 @@ declare module '@tanstack/react-router' {
       path: '/chart'
       fullPath: '/chart'
       preLoaderRoute: typeof ChartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compare': {
+      id: '/compare'
+      path: '/compare'
+      fullPath: '/compare'
+      preLoaderRoute: typeof CompareRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/derivatives': {
@@ -219,6 +239,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AssetsRoute: AssetsRoute,
   ChartRoute: ChartRoute,
+  CompareRoute: CompareRoute,
   DerivativesRoute: DerivativesRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
