@@ -18,6 +18,7 @@ import { Route as DerivativesRouteImport } from './routes/derivatives'
 import { Route as DominanceRouteImport } from './routes/dominance'
 import { Route as FearGreedRouteImport } from './routes/fear-greed'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as HeatmapRouteImport } from './routes/heatmap'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MarketRouteImport } from './routes/market'
 import { Route as RegisterRouteImport } from './routes/register'
@@ -70,6 +71,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HeatmapRoute = HeatmapRouteImport.update({
+  id: '/heatmap',
+  path: '/heatmap',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/dominance': typeof DominanceRoute
   '/fear-greed': typeof FearGreedRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/heatmap': typeof HeatmapRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
   '/register': typeof RegisterRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByTo {
   '/dominance': typeof DominanceRoute
   '/fear-greed': typeof FearGreedRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/heatmap': typeof HeatmapRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
   '/register': typeof RegisterRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   '/dominance': typeof DominanceRoute
   '/fear-greed': typeof FearGreedRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/heatmap': typeof HeatmapRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
   '/register': typeof RegisterRoute
@@ -165,6 +174,7 @@ export interface FileRouteTypes {
     | '/dominance'
     | '/fear-greed'
     | '/forgot-password'
+    | '/heatmap'
     | '/login'
     | '/market'
     | '/register'
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
     | '/dominance'
     | '/fear-greed'
     | '/forgot-password'
+    | '/heatmap'
     | '/login'
     | '/market'
     | '/register'
@@ -199,6 +210,7 @@ export interface FileRouteTypes {
     | '/dominance'
     | '/fear-greed'
     | '/forgot-password'
+    | '/heatmap'
     | '/login'
     | '/market'
     | '/register'
@@ -217,6 +229,7 @@ export interface RootRouteChildren {
   DominanceRoute: typeof DominanceRoute
   FearGreedRoute: typeof FearGreedRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  HeatmapRoute: typeof HeatmapRoute
   LoginRoute: typeof LoginRoute
   MarketRoute: typeof MarketRoute
   RegisterRoute: typeof RegisterRoute
@@ -290,6 +303,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/heatmap': {
+      id: '/heatmap'
+      path: '/heatmap'
+      fullPath: '/heatmap'
+      preLoaderRoute: typeof HeatmapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -345,6 +365,7 @@ const rootRouteChildren: RootRouteChildren = {
   DominanceRoute: DominanceRoute,
   FearGreedRoute: FearGreedRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  HeatmapRoute: HeatmapRoute,
   LoginRoute: LoginRoute,
   MarketRoute: MarketRoute,
   RegisterRoute: RegisterRoute,
