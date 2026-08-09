@@ -15,6 +15,7 @@ import { Route as ChartRouteImport } from './routes/chart'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as CycleRouteImport } from './routes/cycle'
 import { Route as DerivativesRouteImport } from './routes/derivatives'
+import { Route as DominanceRouteImport } from './routes/dominance'
 import { Route as FearGreedRouteImport } from './routes/fear-greed'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
@@ -52,6 +53,11 @@ const CycleRoute = CycleRouteImport.update({
 const DerivativesRoute = DerivativesRouteImport.update({
   id: '/derivatives',
   path: '/derivatives',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DominanceRoute = DominanceRouteImport.update({
+  id: '/dominance',
+  path: '/dominance',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FearGreedRoute = FearGreedRouteImport.update({
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/compare': typeof CompareRoute
   '/cycle': typeof CycleRoute
   '/derivatives': typeof DerivativesRoute
+  '/dominance': typeof DominanceRoute
   '/fear-greed': typeof FearGreedRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/compare': typeof CompareRoute
   '/cycle': typeof CycleRoute
   '/derivatives': typeof DerivativesRoute
+  '/dominance': typeof DominanceRoute
   '/fear-greed': typeof FearGreedRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
@@ -135,6 +143,7 @@ export interface FileRoutesById {
   '/compare': typeof CompareRoute
   '/cycle': typeof CycleRoute
   '/derivatives': typeof DerivativesRoute
+  '/dominance': typeof DominanceRoute
   '/fear-greed': typeof FearGreedRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
     | '/compare'
     | '/cycle'
     | '/derivatives'
+    | '/dominance'
     | '/fear-greed'
     | '/forgot-password'
     | '/login'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/compare'
     | '/cycle'
     | '/derivatives'
+    | '/dominance'
     | '/fear-greed'
     | '/forgot-password'
     | '/login'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/compare'
     | '/cycle'
     | '/derivatives'
+    | '/dominance'
     | '/fear-greed'
     | '/forgot-password'
     | '/login'
@@ -202,6 +214,7 @@ export interface RootRouteChildren {
   CompareRoute: typeof CompareRoute
   CycleRoute: typeof CycleRoute
   DerivativesRoute: typeof DerivativesRoute
+  DominanceRoute: typeof DominanceRoute
   FearGreedRoute: typeof FearGreedRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
@@ -254,6 +267,13 @@ declare module '@tanstack/react-router' {
       path: '/derivatives'
       fullPath: '/derivatives'
       preLoaderRoute: typeof DerivativesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dominance': {
+      id: '/dominance'
+      path: '/dominance'
+      fullPath: '/dominance'
+      preLoaderRoute: typeof DominanceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fear-greed': {
@@ -322,6 +342,7 @@ const rootRouteChildren: RootRouteChildren = {
   CompareRoute: CompareRoute,
   CycleRoute: CycleRoute,
   DerivativesRoute: DerivativesRoute,
+  DominanceRoute: DominanceRoute,
   FearGreedRoute: FearGreedRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
