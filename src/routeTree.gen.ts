@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DerivativesRouteImport } from './routes/derivatives'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MarketRouteImport } from './routes/market'
@@ -19,6 +20,11 @@ import { Route as SpotRouteImport } from './routes/spot'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DerivativesRoute = DerivativesRouteImport.update({
+  id: '/derivatives',
+  path: '/derivatives',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -49,6 +55,7 @@ const SpotRoute = SpotRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/derivatives': typeof DerivativesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
@@ -57,6 +64,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/derivatives': typeof DerivativesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
@@ -66,6 +74,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/derivatives': typeof DerivativesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
@@ -75,12 +84,26 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/forgot-password' | '/login' | '/market' | '/register' | '/spot'
+    | '/'
+    | '/derivatives'
+    | '/forgot-password'
+    | '/login'
+    | '/market'
+    | '/register'
+    | '/spot'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/forgot-password' | '/login' | '/market' | '/register' | '/spot'
+  to:
+    | '/'
+    | '/derivatives'
+    | '/forgot-password'
+    | '/login'
+    | '/market'
+    | '/register'
+    | '/spot'
   id:
     | '__root__'
     | '/'
+    | '/derivatives'
     | '/forgot-password'
     | '/login'
     | '/market'
@@ -90,6 +113,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DerivativesRoute: typeof DerivativesRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   MarketRoute: typeof MarketRoute
@@ -104,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/derivatives': {
+      id: '/derivatives'
+      path: '/derivatives'
+      fullPath: '/derivatives'
+      preLoaderRoute: typeof DerivativesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -146,6 +177,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DerivativesRoute: DerivativesRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   MarketRoute: MarketRoute,
