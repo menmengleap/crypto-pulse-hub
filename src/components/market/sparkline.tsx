@@ -15,7 +15,7 @@ export function Sparkline({
   fill?: boolean;
 }) {
   const id = useId();
-  const up = positive ?? data[data.length - 1] >= data[0];
+  const up = positive ?? (data.at(-1) ?? 0) >= (data[0] ?? 0);
   const min = Math.min(...data);
   const max = Math.max(...data);
   const span = max - min || 1;
