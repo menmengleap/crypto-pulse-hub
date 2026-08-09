@@ -14,6 +14,7 @@ import { Route as AssetsRouteImport } from './routes/assets'
 import { Route as ChartRouteImport } from './routes/chart'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as DerivativesRouteImport } from './routes/derivatives'
+import { Route as FearGreedRouteImport } from './routes/fear-greed'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MarketRouteImport } from './routes/market'
@@ -44,6 +45,11 @@ const CompareRoute = CompareRouteImport.update({
 const DerivativesRoute = DerivativesRouteImport.update({
   id: '/derivatives',
   path: '/derivatives',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FearGreedRoute = FearGreedRouteImport.update({
+  id: '/fear-greed',
+  path: '/fear-greed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/chart': typeof ChartRoute
   '/compare': typeof CompareRoute
   '/derivatives': typeof DerivativesRoute
+  '/fear-greed': typeof FearGreedRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/chart': typeof ChartRoute
   '/compare': typeof CompareRoute
   '/derivatives': typeof DerivativesRoute
+  '/fear-greed': typeof FearGreedRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/chart': typeof ChartRoute
   '/compare': typeof CompareRoute
   '/derivatives': typeof DerivativesRoute
+  '/fear-greed': typeof FearGreedRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/chart'
     | '/compare'
     | '/derivatives'
+    | '/fear-greed'
     | '/forgot-password'
     | '/login'
     | '/market'
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/chart'
     | '/compare'
     | '/derivatives'
+    | '/fear-greed'
     | '/forgot-password'
     | '/login'
     | '/market'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/chart'
     | '/compare'
     | '/derivatives'
+    | '/fear-greed'
     | '/forgot-password'
     | '/login'
     | '/market'
@@ -165,6 +177,7 @@ export interface RootRouteChildren {
   ChartRoute: typeof ChartRoute
   CompareRoute: typeof CompareRoute
   DerivativesRoute: typeof DerivativesRoute
+  FearGreedRoute: typeof FearGreedRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   MarketRoute: typeof MarketRoute
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/derivatives'
       fullPath: '/derivatives'
       preLoaderRoute: typeof DerivativesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fear-greed': {
+      id: '/fear-greed'
+      path: '/fear-greed'
+      fullPath: '/fear-greed'
+      preLoaderRoute: typeof FearGreedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -261,6 +281,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChartRoute: ChartRoute,
   CompareRoute: CompareRoute,
   DerivativesRoute: DerivativesRoute,
+  FearGreedRoute: FearGreedRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   MarketRoute: MarketRoute,
