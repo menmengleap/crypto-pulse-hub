@@ -14,6 +14,7 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MarketRouteImport } from './routes/market'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as SpotRouteImport } from './routes/spot'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +41,11 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SpotRoute = SpotRouteImport.update({
+  id: '/spot',
+  path: '/spot',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
   '/register': typeof RegisterRoute
+  '/spot': typeof SpotRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
   '/register': typeof RegisterRoute
+  '/spot': typeof SpotRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,22 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/market': typeof MarketRoute
   '/register': typeof RegisterRoute
+  '/spot': typeof SpotRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/forgot-password' | '/login' | '/market' | '/register'
+  fullPaths:
+    '/' | '/forgot-password' | '/login' | '/market' | '/register' | '/spot'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/forgot-password' | '/login' | '/market' | '/register'
-  id: '__root__' | '/' | '/forgot-password' | '/login' | '/market' | '/register'
+  to: '/' | '/forgot-password' | '/login' | '/market' | '/register' | '/spot'
+  id:
+    | '__root__'
+    | '/'
+    | '/forgot-password'
+    | '/login'
+    | '/market'
+    | '/register'
+    | '/spot'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +94,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MarketRoute: typeof MarketRoute
   RegisterRoute: typeof RegisterRoute
+  SpotRoute: typeof SpotRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -116,6 +134,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/spot': {
+      id: '/spot'
+      path: '/spot'
+      fullPath: '/spot'
+      preLoaderRoute: typeof SpotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -125,6 +150,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MarketRoute: MarketRoute,
   RegisterRoute: RegisterRoute,
+  SpotRoute: SpotRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
