@@ -50,7 +50,7 @@ function ArticlePage() {
             </div>
             <h1 className="mt-3 text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">{article.title}</h1>
             <div className="mt-5 space-y-4 text-sm leading-relaxed text-muted-foreground">
-              {article.body.map((p, i) => (
+              {article.body.map((p: string, i: number) => (
                 <p key={i}>{p}</p>
               ))}
             </div>
@@ -69,7 +69,7 @@ function ArticlePage() {
 
           <Panel title="Related assets">
             <div className="flex flex-wrap gap-2">
-              {article.assets.map((s) => (
+              {article.assets.map((s: string) => (
                 <Link key={s} to="/chart" className="rounded-lg border border-border px-3 py-1.5 text-xs transition-colors hover:border-primary/40">
                   {s} · View chart
                 </Link>
