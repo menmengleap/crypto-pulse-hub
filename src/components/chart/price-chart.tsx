@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { IChartApi, ISeriesApi } from "lightweight-charts";
 import { fetchKlines, normalizeInterval, subscribeKline, type Candle } from "@/lib/realtime";
 import {
+  INDICATOR_PRESETS,
   presetByKey,
   resolvePresets,
   useIndicatorSeries,
@@ -19,8 +20,11 @@ export type AnySeries = ISeriesApi<"Candlestick"> | ISeriesApi<"Line"> | ISeries
 
 type IndicatorSeries = ISeriesApi<"Line"> | ISeriesApi<"Histogram">;
 
-/** Width of every sub-pane band (volume / RSI / MACD) as a fraction of height. */
+/** Width of every sub-pane band (volume / RSI / MACD / …) as a fraction of height. */
 const SUB_PANE_HEIGHT = 0.18;
+
+/** The sub-pane stack may occupy at most this much of the chart height. */
+const MAX_PANE_STACK = 0.8;
 
 const withAlpha = (hex: string, alpha: number) => {
   const h = hex.replace("#", "");
@@ -33,9 +37,18 @@ const withAlpha = (hex: string, alpha: number) => {
 /**
  * Lay out the price pane + sub-panes using per-scale margins.
  *
- * Sub-panes stack below the price pane (top → bottom: volume, RSI, MACD) and
- * each gets an equal band. The price scale's bottom margin grows with the
+ * Sub-panes stack below the price pane (top → bottom: volume, RSI, MACD, …)
+ * and each gets an equal band. The price scale's bottom margin grows with the
  * number of active sub-panes so price always occupies the top.
+ *
+ * Each pane's band is `[1 - stack + i*band, 1 - (n - i - 1)*band]` in chart
+ * fraction terms — the last pane ends exactly at the bottom edge (bottom = 0),
+ * so the top + bottom margin of every pane sums to less than 1. (The previous
+ * formula computed a bottom margin of 1.0 for the last pane, which made the
+ * margins sum to > 1 and lightweight-charts threw "Invalid margins".)
+ *
+ * When many panes are active the bands shrink (min of the fixed height and a
+ * capped stack) so the margins stay valid with up to six panes.
  *
  * `existingPaneIds` guards against touching scales that don't exist yet —
  * custom scales only come into being when a series is attached to them, so on
@@ -48,23 +61,26 @@ function applyPaneMargins(
   showVolume: boolean,
   existingPaneIds: Set<string>,
 ) {
+  // Canonical order (volume first, then the preset catalog order) so the pane
+  // stack stays stable regardless of the order the user toggled indicators in.
   const paneIds: string[] = [];
   if (showVolume && existingPaneIds.has("volume")) paneIds.push("volume");
-  for (const key of activeKeys) {
-    const paneId = presetByKey(key)?.paneId;
+  for (const preset of INDICATOR_PRESETS) {
+    if (!activeKeys.includes(preset.key)) continue;
+    const paneId = preset.paneId;
     if (paneId && !paneIds.includes(paneId) && existingPaneIds.has(paneId)) {
       paneIds.push(paneId);
     }
   }
   const n = paneIds.length;
-  chart
-    .priceScale("right")
-    .applyOptions({ scaleMargins: { top: 0.05, bottom: n * SUB_PANE_HEIGHT } });
+  const band = n > 0 ? Math.min(SUB_PANE_HEIGHT, MAX_PANE_STACK / n) : 0;
+  const stack = band * n;
+  chart.priceScale("right").applyOptions({ scaleMargins: { top: 0.05, bottom: stack } });
   paneIds.forEach((id, i) => {
     chart.priceScale(id).applyOptions({
       scaleMargins: {
-        top: 1 - n * SUB_PANE_HEIGHT + i * SUB_PANE_HEIGHT,
-        bottom: 1 - n * SUB_PANE_HEIGHT + (i + 1) * SUB_PANE_HEIGHT,
+        top: 1 - stack + i * band,
+        bottom: (n - i - 1) * band,
       },
     });
   });

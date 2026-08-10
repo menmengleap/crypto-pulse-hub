@@ -65,21 +65,23 @@ export const useAuth = create<AuthStore>()(
  * straight back: the infinite /login ⇄ /market loop.
  */
 export function useAuthHydrated(): boolean {
-  const [hydrated, setHydrated] = useState(() => useAuth.persist.hasHydrated());
+  // `useAuth.persist` can be undefined in edge/SSR contexts — optional chaining
+  // keeps the initial state from throwing on the very first render.
+  const [hydrated, setHydrated] = useState(() => useAuth.persist?.hasHydrated() ?? false);
 
   useEffect(() => {
     // Sync storage (localStorage) hydrates synchronously once the store is
     // created; still subscribe in case hydration is still pending.
-    if (useAuth.persist.hasHydrated()) {
+    if (useAuth.persist?.hasHydrated()) {
       setHydrated(true);
       return;
     }
-    const unsub = useAuth.persist.onFinishHydration(() => setHydrated(true));
+    const unsub = useAuth.persist?.onFinishHydration?.(() => setHydrated(true));
     // Safety net: if storage is unavailable (blocked/private mode) zustand
     // never hydrates — resolve anyway so the app doesn't hang on a spinner.
     const fallback = window.setTimeout(() => setHydrated(true), 1500);
     return () => {
-      unsub();
+      unsub?.();
       window.clearTimeout(fallback);
     };
   }, []);

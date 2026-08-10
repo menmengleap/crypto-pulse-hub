@@ -102,6 +102,34 @@ export const INDICATOR_PRESETS: IndicatorPreset[] = [
     spec: { type: "macd", params: { fast: 12, slow: 26, signal: 9 } },
     colors: { macd: "#4C8DF6", signal: "#F7931A", histogram: "" },
   },
+  {
+    key: "atr14",
+    label: "ATR 14",
+    kind: "pane",
+    paneId: "atr",
+    spec: { type: "atr", params: { period: 14 } },
+    colors: { atr: "#F0B90B" },
+  },
+  {
+    key: "stoch14",
+    label: "Stochastic 14, 3, 3",
+    kind: "pane",
+    paneId: "stoch",
+    spec: { type: "stochastic", params: { period: 14, smoothK: 3, smoothD: 3 } },
+    colors: { k: "#4C8DF6", d: "#F7931A" },
+    levels: [
+      { price: 80, color: "rgba(240,97,109,0.4)", title: "80" },
+      { price: 20, color: "rgba(46,211,160,0.4)", title: "20" },
+    ],
+  },
+  {
+    key: "obv",
+    label: "On-Balance Volume",
+    kind: "pane",
+    paneId: "obv",
+    spec: { type: "obv", params: {} },
+    colors: { obv: "#4C8DF6" },
+  },
 ];
 
 export function presetByKey(key: string): IndicatorPreset | undefined {

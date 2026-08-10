@@ -280,33 +280,38 @@ function ChartPage() {
                     </span>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  {INDICATOR_PRESETS.map((p) => {
-                    const on = activeIndicators.includes(p.key);
+                  {(["overlay", "pane"] as const).map((kind) => {
+                    const group = INDICATOR_PRESETS.filter((p) => p.kind === kind);
+                    if (group.length === 0) return null;
                     return (
-                      <DropdownMenuItem
-                        key={p.key}
-                        onClick={() => toggleIndicator(p.key)}
-                        className={cn("justify-between", on && "bg-primary/12 text-primary")}
-                      >
-                        <span className="flex min-w-0 items-center gap-2">
-                          {on ? (
-                            <Check className="size-3.5 shrink-0" />
-                          ) : (
-                            <span className="size-3.5 shrink-0" />
-                          )}
-                          <span className="truncate">{p.label}</span>
-                        </span>
-                        <span
-                          className={cn(
-                            "shrink-0 rounded-full border px-1.5 py-0.5 text-[10px] uppercase tracking-wider",
-                            p.kind === "overlay"
-                              ? "border-primary/25 bg-primary/10 text-primary"
-                              : "border-[#B18CFF]/25 bg-[#B18CFF]/10 text-[#B18CFF]",
-                          )}
-                        >
-                          {p.kind === "overlay" ? "Overlay" : "Pane"}
-                        </span>
-                      </DropdownMenuItem>
+                      <div key={kind}>
+                        <DropdownMenuLabel className="px-2 pb-1 pt-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                          {kind === "overlay" ? "Overlays" : "Panes"}
+                        </DropdownMenuLabel>
+                        {group.map((p) => {
+                          const on = activeIndicators.includes(p.key);
+                          const dot = Object.values(p.colors).find((c) => c) ?? "#9AA1AA";
+                          return (
+                            <DropdownMenuItem
+                              key={p.key}
+                              onClick={() => toggleIndicator(p.key)}
+                              className={cn("justify-between", on && "bg-primary/12 text-primary")}
+                            >
+                              <span className="flex min-w-0 items-center gap-2">
+                                {on ? (
+                                  <Check className="size-3.5 shrink-0" />
+                                ) : (
+                                  <span
+                                    className="size-1.5 shrink-0 rounded-full"
+                                    style={{ background: dot }}
+                                  />
+                                )}
+                                <span className="truncate">{p.label}</span>
+                              </span>
+                            </DropdownMenuItem>
+                          );
+                        })}
+                      </div>
                     );
                   })}
                   {activeIndicators.length > 0 && (

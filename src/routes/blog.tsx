@@ -1,18 +1,29 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarDays, Rocket } from "lucide-react";
+import { useState } from "react";
+import {
+  Activity,
+  CalendarDays,
+  CheckCircle2,
+  Cpu,
+  GitBranch,
+  Rocket,
+  Sparkles,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
 import { MarketingLayout } from "@/components/layout/marketing-layout";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/blog")({
   head: () => ({
     meta: [
-      { title: "Blog — Cryptolytic" },
+      { title: "Changelog & Blog — Cryptolytic" },
       {
         name: "description",
         content:
-          "Verified system updates, changelog and product announcements from the Cryptolytic team.",
+          "Verified system updates, changelog, bug fixes and product announcements from the Cryptolytic team.",
       },
-      { property: "og:title", content: "Blog — Cryptolytic" },
+      { property: "og:title", content: "Changelog & Blog — Cryptolytic" },
     ],
   }),
   component: BlogPage,
@@ -29,84 +40,97 @@ type Post = {
 
 const posts: Post[] = [
   {
-    id: "global-markets",
-    tag: "Feature",
-    date: "Aug 9, 2026",
-    title: "Global markets: stocks & forex now live on the Market page",
-    excerpt:
-      "The Market page now covers crypto, US equities and major forex pairs — with real-time prices, 24h volume and sparklines on every ticker.",
-    body: [
-      "Market Overview now has three tabs: Crypto, Stocks and Forex. Crypto streams live spot prices from Binance; stocks and forex tickers update every few seconds so you always see current money amounts.",
-      "Every ticker row carries price, change, 24h volume and a sparkline, and the same data powers the console — one source of truth for the whole platform.",
-    ],
-  },
-  {
-    id: "live-charts",
+    id: "indicators-live",
     tag: "Release",
-    date: "Jul 28, 2026",
-    title: "Realtime klines & live chart updates",
+    date: "Aug 10, 2026",
+    title: "Technical indicators now compute live — 8 indicators from scratch",
     excerpt:
-      "Charts now stream live candles from Binance instead of generated demo data, with a Live indicator on the chart frame.",
+      "SMA, EMA, RSI, MACD, Bollinger, ATR, Stochastic and OBV are now calculated server-side by a dedicated Python service and rendered straight onto the Advanced Chart.",
     body: [
-      "Advanced Chart now subscribes to the exchange stream directly: open a symbol, pick a timeframe, and watch the last candle update in real time.",
-      "If the connection drops, the chart falls back gracefully to the last snapshot instead of going blank.",
+      "Every indicator is computed from first principles (pure pandas/numpy — no third-party indicator libraries) by a new microservice behind the Go API gateway, so the browser never talks to it directly. Warm-up values are trimmed automatically, so every line you see is meaningful.",
+      "Indicators render where they belong: moving averages and Bollinger Bands overlay price, while RSI, MACD, ATR, Stochastic and OBV each get their own pane below the candles with reference guides (RSI 30/70, Stochastic 20/80).",
+      "If the indicator service is ever unreachable, the chart stays fully usable with candles and volume instead of erroring out — we never show fabricated data.",
     ],
   },
   {
-    id: "pricing-open",
+    id: "provider-failover",
     tag: "Feature",
-    date: "Jul 15, 2026",
-    title: "Pricing is open — Free, Starter and Advance",
+    date: "Aug 8, 2026",
+    title: "Markets that never go quiet: automatic provider failover",
     excerpt:
-      "Three honest plans: a free tier for exploring the terminal, a Starter plan for active analysts, and Advance for desks that need it all.",
+      "Crypto, forex and stocks now stream from primary providers with automatic fallbacks, so a single upstream outage can't blank your market data.",
     body: [
-      "The terminal stays read-only on every plan — we analyze, we never trade for you. Yearly billing saves 20%.",
-      "Free accounts keep full access to live charts, sentiment and news; alerts and AI analysis scale with your plan.",
+      "Crypto quotes stream from Binance public market data. Forex comes from exchangerate-api with automatic failover to Frankfurter (and back); stocks come from Yahoo Finance with failover to Finnhub (and back).",
+      "Each asset class refreshes on its own cadence — crypto every 5–10 s, forex every 15–30 s, stocks every 30–60 s — tuned so the terminal stays fresh without hammering upstream APIs.",
     ],
   },
   {
-    id: "faster-snapshots",
+    id: "rate-limit-fix",
     tag: "Fix",
-    date: "Jul 2, 2026",
-    title: "Faster snapshots, fewer stale prices",
+    date: "Aug 5, 2026",
+    title: "No more 429s: bulk data feeds and background market workers",
     excerpt:
-      "Market-cap and global-stats snapshots now refresh on a tighter cadence with graceful fallback when CoinGecko is slow.",
+      "The terminal used to fire one request per symbol on load, which tripped rate limits and caused fetch loops. Now the backend prefetches into a cache and the frontend pulls everything in one bulk call.",
     body: [
-      "Market cap, dominance and Fear & Greed used to refresh on a fixed five-minute timer; they now update opportunistically whenever new data arrives.",
-      "If a snapshot fails, the terminal keeps the last known values instead of zeroing out cards.",
+      "Background workers refresh market data on fixed intervals and serve every request from cache, so per-symbol round-trips to upstream providers are gone entirely.",
+      "On the frontend, individual symbol requests were combined into a single bulk endpoint and effect dependency arrays were fixed, killing the infinite fetch loops that made the UI stutter.",
     ],
   },
   {
-    id: "ai-engine",
-    tag: "Release",
-    date: "Jun 20, 2026",
-    title: "AI analysis engine v2",
+    id: "health-checks",
+    tag: "Fix",
+    date: "Aug 3, 2026",
+    title: "Health checks & warm wake-ups: no more 404s on /health",
     excerpt:
-      "Structured multi-timeframe reads on trend, momentum and key levels — written like a desk note, not a generic chatbot answer.",
+      "The backend now exposes a real /health endpoint and the gateway keeps its services warm, so cold starts stop interrupting the first request after idle.",
     body: [
-      "The AI analyst now reasons over the actual chart state (trend, RSI, structure) and returns a compact, dated note you can save to your watchlist.",
-      "Token budgets and rate limits are enforced per plan so the terminal stays fast for everyone.",
+      "A dedicated /health route returns a clean 200 with service status, and the frontend polls it on a sane 30–60 s interval instead of spamming it.",
+      "The indicator gateway pings the Python service every minute to keep the free instance awake, and API clients tolerate a cold-start window instead of timing out instantly.",
     ],
   },
   {
-    id: "meet-the-team",
+    id: "auth-loop",
+    tag: "Fix",
+    date: "Jul 30, 2026",
+    title: "Sign-in redirect loop fixed",
+    excerpt:
+      "Protected routes now wait for the session to finish loading before deciding where to send you — no more ping-pong between /login and the console.",
+    body: [
+      "The guard previously checked auth before the token finished loading from storage, bouncing signed-in users to /login while /login bounced them straight back. Both sides now coordinate on a hydration flag, and redirects use history-safe replacement.",
+    ],
+  },
+  {
+    id: "real-profile",
     tag: "Update",
-    date: "Jun 5, 2026",
-    title: "Meet the team behind the terminal",
+    date: "Jul 26, 2026",
+    title: "Profile now pulls your real account data",
     excerpt:
-      "Cryptolytic is three people with one idea: market intelligence should be precise, fast and honest.",
+      "Your name, avatar and member-since date in the console sidebar and navbar now come from the database — not placeholders.",
     body: [
-      "Hover a face on the homepage to meet the founders — the builder, the trader, and the storyteller who keeps the signal loud and the noise out.",
+      "The console sidebar reads your live profile (name, avatar, registration date) from the backend on every visit, and the Settings page lets you change your display picture — it updates everywhere instantly.",
     ],
   },
 ];
 
+const filters = [
+  { id: "all", label: "All" },
+  { id: "Release", label: "Releases" },
+  { id: "Feature", label: "Features" },
+  { id: "Fix", label: "Fixes" },
+  { id: "Update", label: "Updates" },
+] as const;
+
 function tagClass(tag: Post["tag"]) {
-  return tag === "Feature"
-    ? "bg-up/10 text-up"
-    : tag === "Fix"
-      ? "bg-down/10 text-down"
-      : "bg-primary/10 text-primary";
+  switch (tag) {
+    case "Release":
+      return "bg-up/10 text-up";
+    case "Fix":
+      return "bg-down/10 text-down";
+    case "Update":
+      return "bg-btc/10 text-btc";
+    default:
+      return "bg-primary/10 text-primary";
+  }
 }
 
 function PostCard({ post, featured = false }: { post: Post; featured?: boolean }) {
@@ -130,9 +154,9 @@ function PostCard({ post, featured = false }: { post: Post; featured?: boolean }
         >
           {post.title}
         </h2>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{post.excerpt}</p>{" "}
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{post.excerpt}</p>
         {featured && (
-          <div className="mt-4 space-y-3">
+          <div className="mt-4 space-y-3 border-t border-border pt-4">
             {post.body.map((p, i) => (
               <p key={i} className="text-sm leading-relaxed text-muted-foreground">
                 {p}
@@ -145,30 +169,149 @@ function PostCard({ post, featured = false }: { post: Post; featured?: boolean }
   );
 }
 
+const changes: {
+  heading: string;
+  icon: LucideIcon;
+  tone: string;
+  items: string[];
+}[] = [
+  {
+    heading: "New features",
+    icon: Sparkles,
+    tone: "text-up",
+    items: [
+      "8 technical indicators computed live by a Python microservice",
+      "Crypto, forex & stock coverage with automatic provider failover",
+      "Overlay & sub-pane indicator rendering on the Advanced Chart",
+      "Real profile data (name, avatar, member since) from the database",
+    ],
+  },
+  {
+    heading: "Bug fixes",
+    icon: Wrench,
+    tone: "text-down",
+    items: [
+      "429 rate limits — bulk feeds & background market workers",
+      "Infinite /login ⇄ console redirect loop",
+      "Missing /health endpoint returning 404",
+      "Chart crash when toggling indicator panes",
+    ],
+  },
+  {
+    heading: "Under the hood",
+    icon: Cpu,
+    tone: "text-primary",
+    items: [
+      "Go gateway → Python service architecture (never direct to providers)",
+      "Server-side caching with background refresh tickers",
+      "Static JWT secret config + automatic token refresh on 401",
+      "Graceful fallbacks everywhere — no fabricated data",
+    ],
+  },
+];
+
 function BlogPage() {
-  const featured = posts[0];
-  const rest = posts.slice(1);
+  const [filter, setFilter] = useState<(typeof filters)[number]["id"]>("all");
+  const visible = filter === "all" ? posts : posts.filter((p) => p.tag === filter);
+  const featured = visible[0];
+  const rest = visible.slice(1);
+
   return (
-    <MarketingLayout className="max-w-4xl space-y-8">
+    <MarketingLayout className="max-w-5xl space-y-8">
       <div className="text-center">
         <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted-foreground">
           <Rocket className="size-3.5 text-primary" />
-          Blog
+          Changelog & Blog
         </span>
         <h1 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
-          System updates & changelog
+          What changed at Cryptolytic
         </h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          Verified releases, fixes and product announcements — straight from the team.
+          Releases, bug fixes and product announcements — straight from the team, in order.
         </p>
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+          {[
+            ["posts", posts.length],
+            ["releases", posts.filter((p) => p.tag === "Release").length],
+            ["fixes", posts.filter((p) => p.tag === "Fix").length],
+          ].map(([label, n]) => (
+            <span
+              key={label as string}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted-foreground"
+            >
+              <Activity className="size-3.5" />
+              <span className="num font-semibold text-foreground">{n}</span> {label}
+            </span>
+          ))}
+        </div>
       </div>
 
-      {featured && <PostCard post={featured} featured />}
-
-      <div className="grid gap-4 md:grid-cols-2">
-        {rest.map((p) => (
-          <PostCard key={p.id} post={p} />
+      {/* Filter chips */}
+      <div className="flex flex-wrap items-center justify-center gap-1.5">
+        {filters.map((f) => (
+          <button
+            key={f.id}
+            type="button"
+            onClick={() => setFilter(f.id)}
+            className={cn(
+              "rounded-full border px-3 py-1 text-xs transition-colors",
+              filter === f.id
+                ? "border-primary/40 bg-primary/10 text-primary"
+                : "border-border text-muted-foreground hover:bg-accent hover:text-foreground",
+            )}
+          >
+            {f.label}
+          </button>
         ))}
+      </div>
+
+      {featured ? (
+        <>
+          <PostCard post={featured} featured />
+          {rest.length > 0 && (
+            <div className="grid gap-4 md:grid-cols-2">
+              {rest.map((p) => (
+                <PostCard key={p.id} post={p} />
+              ))}
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="panel p-8 text-center text-sm text-muted-foreground">
+          No posts in this category yet.
+        </div>
+      )}
+
+      {/* What changed recently — features vs fixes vs plumbing */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <GitBranch className="size-4 text-primary" />
+          <h2 className="text-lg font-semibold tracking-tight">What changed recently</h2>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          {changes.map((c) => (
+            <div
+              key={c.heading}
+              className="panel p-5 transition-all duration-300 hover:border-primary/35"
+            >
+              <div className="flex items-center gap-2">
+                <c.icon className={cn("size-4", c.tone)} />
+                <p className="text-sm font-semibold">{c.heading}</p>
+              </div>
+              <ul className="mt-3 space-y-2.5">
+                {c.items.map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-start gap-2 text-xs leading-relaxed text-muted-foreground"
+                  >
+                    <CheckCircle2 className={cn("mt-0.5 size-3.5 shrink-0", c.tone)} />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="panel flex items-start gap-3 p-5">
@@ -178,8 +321,9 @@ function BlogPage() {
         <div>
           <p className="text-sm font-semibold">What's next</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Derivatives analytics, portfolio-sync watchlists and a proper mobile layout are on the
-            roadmap. Follow the releases here — or{" "}
+            The indicator service is ready to deploy (see the release notes above). Derivatives
+            analytics, portfolio-sync watchlists and a proper mobile layout are on the roadmap.
+            Follow the releases here — or{" "}
             <Link to="/register" className="text-primary hover:underline">
               create an account
             </Link>{" "}
