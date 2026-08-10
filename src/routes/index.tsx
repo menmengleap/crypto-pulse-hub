@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import {
   ArrowRight,
   BarChart3,
@@ -16,6 +16,7 @@ import { AssetLogo } from "@/components/market/asset-logo";
 import { Sparkline } from "@/components/market/sparkline";
 import { LoopingVideo } from "@/components/layout/looping-video";
 import { MarketingNav } from "@/components/layout/marketing-nav";
+import { TerminalLink } from "@/components/layout/terminal-link";
 import { AudienceSection } from "@/components/layout/audience-map";
 import { ProductShowcase } from "@/components/layout/product-showcase";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -171,18 +172,18 @@ function Landing() {
                 dominance, news impact and AI-assisted analysis in one dense, quiet interface.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link
+                <TerminalLink
                   to="/market"
                   className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
                 >
                   Launch market overview <ArrowRight className="size-4" />
-                </Link>
-                <Link
+                </TerminalLink>
+                <TerminalLink
                   to="/chart"
                   className="inline-flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-medium transition-colors hover:border-primary/40"
                 >
                   Explore charts
-                </Link>
+                </TerminalLink>
               </div>
 
               <dl className="mt-12 grid max-w-2xl grid-cols-2 gap-6 sm:grid-cols-4">

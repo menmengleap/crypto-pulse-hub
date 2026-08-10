@@ -4,6 +4,7 @@ import { ShieldCheck } from "lucide-react";
 import myioLogo from "@/Img/myio.png";
 import { useBackendHealth } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { TerminalLink } from "./terminal-link";
 
 const linkCls =
   "text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground";
@@ -83,9 +84,9 @@ export function SiteFooter() {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/login" className={linkCls}>
-                    Sign in
-                  </Link>
+                  <TerminalLink to="/market" className={linkCls}>
+                    Open terminal
+                  </TerminalLink>
                 </li>
               </LinkColumn>
             </div>

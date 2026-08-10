@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { type MarketingTab } from "@/components/layout/marketing-nav";
 import { MarketingLayout } from "@/components/layout/marketing-layout";
 import { LoopingVideo } from "@/components/layout/looping-video";
+import { TerminalLink } from "@/components/layout/terminal-link";
 import { AssetLogo } from "@/components/market/asset-logo";
 import { ChangeBadge, Panel } from "@/components/market/ui";
 import { AdNetworkPanel } from "@/components/market/ad-network";
@@ -1278,9 +1279,9 @@ function MarketTabContent() {
       <p className="text-xs text-muted-foreground">
         Crypto prices stream live from Binance. Stocks & forex update from live providers with
         automatic failover (Yahoo Finance ⇄ Finnhub, exchangerate-api ⇄ Frankfurter).{" "}
-        <Link to="/market" className="text-primary hover:underline">
+        <TerminalLink to="/market" className="text-primary hover:underline">
           Open the terminal's market page
-        </Link>{" "}
+        </TerminalLink>{" "}
         for the full analyst dashboard.
       </p>
     </div>
