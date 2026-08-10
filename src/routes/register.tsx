@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { z } from "zod";
 import { AuthLayout } from "@/components/layout/auth-layout";
 import { SocialAuthButtons } from "@/components/layout/social-auth";
-import { useAuth } from "@/lib/auth";
+import { useSessionGate } from "@/lib/api";
 
 const registerSearch = z.object({
   /** Where to return after signing up. */
@@ -31,16 +31,19 @@ export const Route = createFileRoute("/register")({
 
 function RegisterPage() {
   const { redirect } = Route.useSearch();
-  const isAuthed = useAuth((s) => s.accessToken !== null);
+  const { loading, authed } = useSessionGate();
 
-  // Already signed in? Go straight to the console (or the original target).
-  // replace() keeps /register out of the back stack so the back button can't
-  // bounce the user into a redirect loop.
+  // Already signed in with a *validated* session? Go straight to the console
+  // (or the original target). The gate waits for hydration + /api/me before
+  // deciding, so a stale token in localStorage is purged here instead of
+  // bouncing /register → /market → /login forever. replace() keeps /register
+  // out of the back stack so the back button can't re-enter the loop.
   useEffect(() => {
-    if (!isAuthed) return;
+    if (loading) return;
+    if (!authed) return;
     const dest = redirect && redirect.startsWith("/") ? redirect : "/market";
     window.location.replace(dest);
-  }, [isAuthed, redirect]);
+  }, [loading, authed, redirect]);
 
   return (
     <AuthLayout

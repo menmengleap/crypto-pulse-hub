@@ -65,6 +65,16 @@ type ForexTicker struct {
 	live bool
 }
 
+// StockSymbols returns the supported equity symbols (used by the Finnhub
+// fundamentals endpoint to validate requests).
+func StockSymbols() []string {
+	out := make([]string, len(stockCatalog))
+	for i, s := range stockCatalog {
+		out[i] = s.symbol
+	}
+	return out
+}
+
 // ProviderState describes which provider is active and whether it is healthy.
 type ProviderState struct {
 	Active      string    `json:"active"`
@@ -76,13 +86,13 @@ type ProviderState struct {
 // GlobalSnapshot is a point-in-time copy of every global ticker plus provider
 // health, so handlers never expose a live view to callers.
 type GlobalSnapshot struct {
-	Stocks    []StockTicker             `json:"stocks"`
-	Forex     []ForexTicker             `json:"forex"`
-	Providers map[string]ProviderState  `json:"providers"`
+	Stocks    []StockTicker            `json:"stocks"`
+	Forex     []ForexTicker            `json:"forex"`
+	Providers map[string]ProviderState `json:"providers"`
 }
 
 type stockSeed struct {
-	id, symbol, name string
+	id, symbol, name         string
 	price, volume, marketCap float64
 }
 
@@ -106,10 +116,10 @@ var stockCatalog = []stockSeed{
 type forexMode int
 
 const (
-	forexDirect forexMode = iota // rate[code] IS the pair price (USD/JPY, USD/CHF, …)
-	forexInverse                 // 1 / rate[code] (EUR/USD, GBP/USD, …)
-	forexCross                   // rates["GBP"] / rates["EUR"] → EUR/GBP
-	forexStatic                  // no live source (e.g. XAU/USD) — hold last price
+	forexDirect  forexMode = iota // rate[code] IS the pair price (USD/JPY, USD/CHF, …)
+	forexInverse                  // 1 / rate[code] (EUR/USD, GBP/USD, …)
+	forexCross                    // rates["GBP"] / rates["EUR"] → EUR/GBP
+	forexStatic                   // no live source (e.g. XAU/USD) — hold last price
 )
 
 type forexSeed struct {
@@ -134,14 +144,14 @@ var forexCatalog = []forexSeed{
 
 type stockQuote struct {
 	price, prevClose, volume, marketCap float64
-	spark                                []float64
-	ok                                   bool
+	spark                               []float64
+	ok                                  bool
 }
 
 // GlobalProvider holds the cached global tickers and provider-failover state.
 type GlobalProvider struct {
-	client         *http.Client
-	finnhubKey     string
+	client          *http.Client
+	finnhubKey      string
 	exchangeRateKey string
 
 	mu          sync.RWMutex
@@ -363,7 +373,7 @@ func (p *GlobalProvider) fetchYahoo() (map[string]stockQuote, string, error) {
 							PreviousClose       *float64 `json:"previousClose"`
 							RegularMarketVolume *float64 `json:"regularMarketVolume"`
 						} `json:"meta"`
-						Timestamp []int64 `json:"timestamp"`
+						Timestamp  []int64 `json:"timestamp"`
 						Indicators struct {
 							Quote []struct {
 								Close []*float64 `json:"close"`
@@ -575,7 +585,7 @@ func (p *GlobalProvider) fetchExchangeRateAPI() (map[string]float64, string, err
 		return nil, "exchangerate-api", fmt.Errorf("exchangerate-api status %d", res.StatusCode)
 	}
 	var body struct {
-		Result         string             `json:"result"`
+		Result          string             `json:"result"`
 		ConversionRates map[string]float64 `json:"conversion_rates"`
 	}
 	if err := json.NewDecoder(res.Body).Decode(&body); err != nil {

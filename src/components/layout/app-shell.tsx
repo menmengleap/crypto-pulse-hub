@@ -37,14 +37,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GlobalSearch } from "./global-search";
-import { refreshMe } from "@/lib/api";
-import { useAuth, useAuthHydrated } from "@/lib/auth";
-
-// AppShell remounts on every console route navigation, but the profile only
-// changes through /api/me/profile — refetch at most once per minute so page
-// navigation doesn't spam the API.
-const PROFILE_REFRESH_MS = 60_000;
-let lastProfileRefresh = 0;
+import { useSessionGate } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import myioLogo from "@/Img/myio.png";
 
 type NavItem = { label: string; to: string; icon: LucideIcon };
@@ -192,44 +186,43 @@ export function AppShell({
 
   // Console access requires a signed-in session. Unauthenticated visitors are
   // sent to /login (client-side only — no SSR redirects).
-  const accessToken = useAuth((s) => s.accessToken);
   const user = useAuth((s) => s.user);
   const profile = useAuth((s) => s.profile);
   const clearSession = useAuth((s) => s.clearSession);
-  const hydrated = useAuthHydrated();
   const navigate = useNavigate();
+
+  // Session gate: `authLoading` stays true until (a) the persisted session has
+  // been read from localStorage AND (b) it has been validated against /api/me.
+  // Only then is a redirect decision safe — redirecting earlier sees a false
+  // "signed out" on first paint and bounces to /login, which then sees the
+  // hydrated token and bounces straight back: the /login ⇄ /market loop. The
+  // validation also hydrates the real user + profile, so the sidebar shows
+  // fresh database data on every boot.
+  const { loading: authLoading, authed } = useSessionGate();
 
   // Gate the render behind mount so the server and first client paint agree
   // (both show the loader) — the guard then runs client-side without an SSR
-  // hydration mismatch. The auth check is additionally deferred until zustand
-  // has finished reading the persisted session from localStorage: checking
-  // before hydration sees a false "signed out" and bounces to /login, which
-  // then sees the hydrated token and bounces back — the redirect loop.
+  // hydration mismatch.
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
-    if (!hydrated) return;
-    if (!accessToken) {
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || authLoading) return;
+    if (!authed) {
       // replace: true so the guarded route is not left in the back stack.
       void navigate({
         to: "/login",
         search: { redirect: window.location.pathname },
         replace: true,
       });
-      return;
     }
-    // Signed in — pull the real user + profile from the database so the
-    // sidebar/navbar show fresh name, avatar and member-since date (covers
-    // existing localStorage sessions; OAuth flow hydrates too). Throttled so
-    // route navigation doesn't fire a request every page change.
-    const now = Date.now();
-    if (now - lastProfileRefresh > PROFILE_REFRESH_MS) {
-      lastProfileRefresh = now;
-      void refreshMe().catch(() => {});
-    }
-  }, [accessToken, hydrated, navigate]);
+    // Signed in — no extra fetch needed: the gate's /api/me validation already
+    // hydrated the real user + profile (re-validated at most once per minute).
+  }, [mounted, authLoading, authed, navigate]);
 
-  if (!mounted || !hydrated || !accessToken) {
+  if (!mounted || authLoading || !authed) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <span className="size-5 animate-spin rounded-full border-2 border-border border-t-primary" />

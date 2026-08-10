@@ -55,6 +55,11 @@ func main() {
 
 	provider := marketdata.MarketDataProvider(liveProvider)
 
+	// Finnhub-powered research data (events calendar, company fundamentals,
+	// market news). The API key is used server-side only and cached with TTLs
+	// so the frontend never talks to Finnhub directly.
+	finnhubData := marketdata.NewFinnhubData(cfg.FinnhubAPIKey)
+
 	if cfg.SeedOnStartup {
 		// Seed from the deterministic mock so first boot is fast, offline-safe
 		// and reproducible; the live provider feeds the /api/live/* routes.
@@ -73,7 +78,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,
-		Handler:           routes.NewRouter(cfg, pool, provider, liveProvider, globalProvider, hub),
+		Handler:           routes.NewRouter(cfg, pool, provider, liveProvider, globalProvider, finnhubData, hub),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      30 * time.Second,

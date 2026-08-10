@@ -16,8 +16,9 @@ import (
 )
 
 // NewRouter assembles the full HTTP API. `provider` backs the WebSocket stream
-// and AI analysis; `live` and `global` back the /api/live/* market-data routes.
-func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.MarketDataProvider, live *marketdata.LiveProvider, global *marketdata.GlobalProvider, hub *ws.Hub) http.Handler {
+// and AI analysis; `live` and `global` back the /api/live/* market-data routes;
+// `finnhub` backs the /api/finnhub/* research routes.
+func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.MarketDataProvider, live *marketdata.LiveProvider, global *marketdata.GlobalProvider, finnhub *marketdata.FinnhubData, hub *ws.Hub) http.Handler {
 	// Repositories
 	userRepo := repositories.NewUserRepo(pool)
 	sessionRepo := repositories.NewSessionRepo(pool)
@@ -43,6 +44,7 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.Marke
 	healthH := handlers.NewHealthHandler(pool)
 	liveH := handlers.NewLiveHandler(live, global)
 	indicatorH := handlers.NewIndicatorHandler(services.NewIndicatorService(cfg.IndicatorServiceURL))
+	finnhubH := handlers.NewFinnhubHandler(finnhub)
 
 	rateLimit := middleware.NewRateLimit(cfg.RateLimitRPS, cfg.RateLimitBurst)
 
@@ -83,6 +85,11 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.Marke
 	r.Get("/api/sentiment", marketH.Sentiment)
 	r.Get("/api/fear-greed", marketH.FearGreed)
 	r.Get("/api/heatmap", marketH.Heatmap)
+
+	// --- Finnhub research (server-side key, cached) ---
+	r.Get("/api/finnhub/events", finnhubH.Events)
+	r.Get("/api/finnhub/fundamentals", finnhubH.Fundamentals)
+	r.Get("/api/finnhub/news", finnhubH.News)
 
 	// --- News (public) ---
 	r.Get("/api/news", newsH.List)
