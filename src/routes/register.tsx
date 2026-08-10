@@ -34,10 +34,12 @@ function RegisterPage() {
   const isAuthed = useAuth((s) => s.accessToken !== null);
 
   // Already signed in? Go straight to the console (or the original target).
+  // replace() keeps /register out of the back stack so the back button can't
+  // bounce the user into a redirect loop.
   useEffect(() => {
     if (!isAuthed) return;
     const dest = redirect && redirect.startsWith("/") ? redirect : "/market";
-    window.location.assign(dest);
+    window.location.replace(dest);
   }, [isAuthed, redirect]);
 
   return (

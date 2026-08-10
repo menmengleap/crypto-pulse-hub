@@ -34,12 +34,13 @@ function AuthCallbackPage() {
 
       const dest = sessionStorage.getItem("auth_redirect");
       sessionStorage.removeItem("auth_redirect");
-      window.location.assign(dest && dest.startsWith("/") ? dest : "/market");
+      // replace() so the /auth/callback entry doesn't stay in the back stack.
+      window.location.replace(dest && dest.startsWith("/") ? dest : "/market");
       return;
     }
 
     // No tokens — the OAuth flow failed or was interrupted.
-    window.location.assign(
+    window.location.replace(
       "/login?error=" + encodeURIComponent(error ?? "Sign-in failed. Please try again."),
     );
   }, [accessToken, refreshToken, error, setSession]);

@@ -37,7 +37,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GlobalSearch } from "./global-search";
-import { useAuth } from "@/lib/auth";
+import { useAuth, useAuthHydrated } from "@/lib/auth";
 import myioLogo from "@/Img/myio.png";
 
 type NavItem = { label: string; to: string; icon: LucideIcon };
@@ -188,20 +188,30 @@ export function AppShell({
   const accessToken = useAuth((s) => s.accessToken);
   const user = useAuth((s) => s.user);
   const clearSession = useAuth((s) => s.clearSession);
+  const hydrated = useAuthHydrated();
   const navigate = useNavigate();
 
   // Gate the render behind mount so the server and first client paint agree
   // (both show the loader) — the guard then runs client-side without an SSR
-  // hydration mismatch.
+  // hydration mismatch. The auth check is additionally deferred until zustand
+  // has finished reading the persisted session from localStorage: checking
+  // before hydration sees a false "signed out" and bounces to /login, which
+  // then sees the hydrated token and bounces back — the redirect loop.
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
+    if (!hydrated) return;
     if (!accessToken) {
-      void navigate({ to: "/login", search: { redirect: window.location.pathname } });
+      // replace: true so the guarded route is not left in the back stack.
+      void navigate({
+        to: "/login",
+        search: { redirect: window.location.pathname },
+        replace: true,
+      });
     }
-  }, [accessToken, navigate]);
+  }, [accessToken, hydrated, navigate]);
 
-  if (!mounted || !accessToken) {
+  if (!mounted || !hydrated || !accessToken) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <span className="size-5 animate-spin rounded-full border-2 border-border border-t-primary" />
@@ -349,7 +359,7 @@ export function AppShell({
                     <DropdownMenuItem
                       onClick={() => {
                         clearSession();
-                        void navigate({ to: "/login" });
+                        void navigate({ to: "/login", replace: true });
                       }}
                     >
                       Sign out

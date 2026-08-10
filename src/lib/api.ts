@@ -52,6 +52,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = useAuth.getState().accessToken;
   const res = await fetch(apiUrl(path), {
     ...init,
+    // Cross-origin Render frontend ⇄ backend: send cookies if the backend ever
+    // sets them (CORS_ORIGINS is the explicit origin, so credentials are
+    // allowed). Harmless for the current Bearer-token flow.
+    credentials: "include",
     headers: {
       "content-type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -117,7 +121,7 @@ export function useBackendHealth(intervalMs = 45_000): BackendStatus {
     const check = async () => {
       let next: BackendStatus;
       try {
-        const res = await fetch(HEALTH_URL, { cache: "no-store" });
+        const res = await fetch(HEALTH_URL, { cache: "no-store", credentials: "include" });
         next = res.ok ? "online" : "offline";
       } catch {
         next = "offline";
