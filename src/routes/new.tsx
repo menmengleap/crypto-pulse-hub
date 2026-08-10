@@ -1,19 +1,25 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { z } from "zod";
-import { ArrowRight, BarChart3, Check, Newspaper, Sparkles, Zap } from "lucide-react";
+import {
+  ArrowRight,
+  BarChart3,
+  CalendarDays,
+  Check,
+  FlaskConical,
+  Newspaper,
+  Rocket,
+  Sparkles,
+  Zap,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type MarketingTab } from "@/components/layout/marketing-nav";
 import { MarketingLayout } from "@/components/layout/marketing-layout";
 import { LoopingVideo } from "@/components/layout/looping-video";
 import { AssetLogo } from "@/components/market/asset-logo";
-import { ChangeBadge, Panel } from "@/components/market/ui";
-import {
-  FeaturedNewsCard,
-  LatestNewsList,
-  NewsCard,
-  TrendingTopics,
-} from "@/components/market/news-cards";
+import { ChangeBadge } from "@/components/market/ui";
+import { AdNetworkPanel } from "@/components/market/ad-network";
+import { FeaturedNewsCard, NewsCard } from "@/components/market/news-cards";
 import { NewsArticleDialog } from "@/components/market/news-article-dialog";
 import { LiveBadge } from "@/components/market/live-badge";
 import { Sparkline } from "@/components/market/sparkline";
@@ -24,13 +30,12 @@ import {
   fmtPrice,
   news,
   newsCategories,
-  trendingTopics,
   type Asset,
   type GlobalStats,
   type NewsItem,
 } from "@/lib/market-data";
 import { useLiveAssets, useLiveGlobal } from "@/lib/realtime";
-import { useSimulatedTickers, type GlobalTicker } from "@/lib/global-market";
+import { useLiveTickers, type GlobalTicker } from "@/lib/global-market";
 import newVideo from "@/Video/new.mp4";
 
 const tabSchema = z.enum(["new", "pricing", "market"]);
@@ -113,9 +118,19 @@ function VideoShowcase() {
           label="Cryptolytic product showcase video"
         />
         <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/90 via-black/45 to-transparent p-6 pt-24 sm:p-10 sm:pt-32">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-black/40 px-3 py-1 text-xs text-muted-foreground backdrop-blur-md">
-            <Sparkles className="size-3.5 text-primary" />
-            What's new
+          <span className="inline-flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-black/40 px-3 py-1 text-xs text-muted-foreground backdrop-blur-md">
+              <Sparkles className="size-3.5 text-primary" />
+              What's new
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-xs font-medium text-primary backdrop-blur-md">
+              <Rocket className="size-3.5" />
+              v3.2 · Live providers
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-black/40 px-3 py-1 text-xs text-muted-foreground backdrop-blur-md">
+              <CalendarDays className="size-3.5" />
+              Aug 10, 2026
+            </span>
           </span>
           <h1 className="mt-4 max-w-2xl text-3xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
             Fresh from the terminal.
@@ -144,9 +159,9 @@ function VideoShowcase() {
       </div>
       <div className="grid gap-4 border-t border-border p-5 sm:grid-cols-3">
         {[
-          ["Analysis only", "No orders, no wallets, no exit liquidity"],
-          ["Live by default", "Binance WebSocket feed, updated every 2s"],
-          ["Three people", "One dense terminal, built in public"],
+          ["Live by default", "Binance prices refreshed every 5–10s"],
+          ["Provider failover", "Yahoo ⇄ Finnhub · exchangerate-api ⇄ Frankfurter"],
+          ["Server-side data", "The terminal never calls an exchange directly"],
         ].map(([label, value]) => (
           <div key={label}>
             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -300,16 +315,131 @@ function NewsFeedSection() {
         </div>
 
         <div className="space-y-4">
-          <Panel title="Trending topics">
-            <TrendingTopics topics={trendingTopics} />
-          </Panel>
-          <Panel title="Latest" bodyClassName="p-0">
-            <LatestNewsList items={news.slice(0, 6)} onSelect={setOpenArticle} />
-          </Panel>
+          {/* Ad Network — A-Ads, Adsterra & PropellerAds (crypto / forex / international stocks). */}
+          <AdNetworkPanel />
         </div>
       </div>
 
       <NewsArticleDialog item={openArticle} onClose={() => setOpenArticle(null)} />
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// What's new — release timeline
+// ---------------------------------------------------------------------------
+
+type Release = {
+  version: string;
+  tag: "Release" | "Feature" | "Fix";
+  date: string;
+  title: string;
+  points: string[];
+};
+
+const releases: Release[] = [
+  {
+    version: "v3.2",
+    tag: "Release",
+    date: "Aug 10, 2026",
+    title: "Live market data providers",
+    points: [
+      "Crypto now streams from Binance's public market data, refreshed every 5–10 seconds.",
+      "Forex (exchangerate-api ⇄ Frankfurter) and stocks (Yahoo Finance ⇄ Finnhub) update with automatic provider failover.",
+      "All provider traffic stays server-side — the terminal never calls an exchange directly.",
+    ],
+  },
+  {
+    version: "v3.1",
+    tag: "Feature",
+    date: "Aug 9, 2026",
+    title: "Global markets: stocks & forex",
+    points: [
+      "Market Overview now has three tabs — Crypto, Stocks and Forex — with live prices, volume and sparklines.",
+      "The same data powers the console: one source of truth for the whole platform.",
+    ],
+  },
+  {
+    version: "v3.0",
+    tag: "Release",
+    date: "Jul 28, 2026",
+    title: "Realtime klines & live chart updates",
+    points: [
+      "Charts now stream live candles instead of generated demo data, with a Live indicator on the frame.",
+      "Graceful fallback keeps the last snapshot when the feed drops.",
+    ],
+  },
+  {
+    version: "v2.9",
+    tag: "Fix",
+    date: "Jul 2, 2026",
+    title: "Faster snapshots, fewer stale prices",
+    points: [
+      "Market cap, dominance and Fear & Greed refresh on a tighter cadence.",
+      "Failed snapshots keep the last known values instead of zeroing out cards.",
+    ],
+  },
+];
+
+function releaseTag(tag: Release["tag"]) {
+  return tag === "Feature"
+    ? "bg-up/10 text-up"
+    : tag === "Fix"
+      ? "bg-down/10 text-down"
+      : "bg-primary/10 text-primary";
+}
+
+function releaseIcon(tag: Release["tag"]) {
+  if (tag === "Feature") return <Sparkles className="size-3" />;
+  if (tag === "Fix") return <FlaskConical className="size-3" />;
+  return <Rocket className="size-3" />;
+}
+
+function WhatNewSection() {
+  return (
+    <section className="space-y-5">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">What's new</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Release notes from the terminal — shipped and verified.
+          </p>
+        </div>
+        <Link to="/blog" className="text-xs text-primary hover:underline">
+          Full changelog →
+        </Link>
+      </div>
+
+      <ol className="space-y-4">
+        {releases.map((r) => (
+          <li key={r.version} className="grid gap-2 sm:grid-cols-[150px_minmax(0,1fr)]">
+            <div className="sm:pt-4 sm:text-right">
+              <p className="num text-xs font-semibold text-primary">{r.version}</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">{r.date}</p>
+              <span
+                className={cn(
+                  "mt-2 inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium",
+                  releaseTag(r.tag),
+                )}
+              >
+                {releaseIcon(r.tag)}
+                {r.tag}
+              </span>
+            </div>
+            <article className="panel p-4 transition-all duration-300 hover:border-primary/35 sm:p-5">
+              <h3 className="text-base font-semibold tracking-tight">{r.title}</h3>
+              <ul className="mt-3 space-y-2">
+                {r.points.map((p, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                    <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary/60" />
+                    <span>{p}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          </li>
+        ))}
+      </ol>
     </section>
   );
 }
@@ -323,6 +453,9 @@ function NewTabContent() {
     <div className="space-y-12">
       {/* Video showcase */}
       <VideoShowcase />
+
+      {/* Release notes — changelog-style timeline */}
+      <WhatNewSection />
 
       {/* Realtime information */}
       <LiveMarketsStrip top={top} stats={globalStats} movers={movers} />
@@ -663,8 +796,8 @@ function SectionTitle({ title, note }: { title: string; note: string }) {
 
 function MarketTabContent() {
   const assets = useLiveAssets();
-  const stocks = useSimulatedTickers("stocks", true);
-  const forex = useSimulatedTickers("forex", true);
+  const stocks = useLiveTickers("stocks", true);
+  const forex = useLiveTickers("forex", true);
   const crypto = assets.slice(0, 12);
 
   return (
@@ -688,18 +821,18 @@ function MarketTabContent() {
       </section>
 
       <section className="space-y-4">
-        <SectionTitle title="Stocks" note="US equities · simulated feed" />
+        <SectionTitle title="Stocks" note="US equities · Yahoo Finance ⇄ Finnhub" />
         <Mosaic tiles={stocks.map(toTile)} />
       </section>
 
       <section className="space-y-4">
-        <SectionTitle title="Forex" note="FX & metals · simulated feed" />
+        <SectionTitle title="Forex" note="FX & metals · exchangerate-api ⇄ Frankfurter" />
         <Mosaic tiles={forex.map(toTile)} />
       </section>
 
       <p className="text-xs text-muted-foreground">
-        Crypto prices stream live from Binance. Stocks & forex run on a simulated feed while a
-        bundled live source is offline.{" "}
+        Crypto prices stream live from Binance. Stocks & forex update from live providers with
+        automatic failover (Yahoo Finance ⇄ Finnhub, exchangerate-api ⇄ Frankfurter).{" "}
         <Link to="/market" className="text-primary hover:underline">
           Open the terminal's market page
         </Link>{" "}

@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
+import { api } from "./api";
 
 /**
  * Global markets (stocks & forex).
  *
- * Crypto already streams real prices over Binance; stocks and forex have no
- * bundled live feed, so they run on a lightweight simulated ticker that jitters
- * prices every 2 seconds (a random walk around the previous close) — matching
- * the app's mock-first data philosophy. Swap in a real market-data API later by
- * replacing the interval with a WebSocket or polling feed.
+ * Prices come from the backend's /api/live/stocks and /api/live/forex
+ * endpoints, which fetch from Yahoo Finance ⇄ Finnhub (stocks) and
+ * exchangerate-api ⇄ Frankfurter (forex) with automatic failover — all
+ * server-side. The browser never talks to a provider directly. The static
+ * catalogs below are only the initial/fallback data while the backend loads.
  */
 
 export type TickerKind = "stocks" | "forex";
@@ -25,6 +26,20 @@ export type GlobalTicker = {
   spark: number[];
 };
 
+/** Backend ticker shape (mirrors marketdata.StockTicker / ForexTicker). */
+type BackendTicker = {
+  id: string;
+  symbol: string;
+  name: string;
+  price: number;
+  prevClose: number;
+  change: number;
+  volume: number;
+  marketCap?: number;
+  spark: number[];
+  source?: string;
+};
+
 /** Deterministic little sparkline so SSR and first paint are stable. */
 function sparkFrom(seed: number, price: number, len = 28): number[] {
   let x = seed;
@@ -39,6 +54,11 @@ function sparkFrom(seed: number, price: number, len = 28): number[] {
     v *= 1 + (rand() - 0.48) * 0.006;
   }
   return out;
+}
+
+function pushPrice(spark: number[], price: number): number[] {
+  const next = [...spark, price];
+  return next.length > 28 ? next.slice(next.length - 28) : next;
 }
 
 export const stockTickers: GlobalTicker[] = [
@@ -278,31 +298,53 @@ export const forexTickers: GlobalTicker[] = [
 ];
 
 /**
- * Simulated realtime tickers — prices jitter every 2s around the prev close.
- * Pass `enabled = false` to freeze updates (e.g. when the tab is hidden).
+ * Live tickers polled from the backend (/api/live/stocks and /api/live/forex),
+ * which fetches from real providers with automatic failover. Cadences: stocks
+ * 30–60s, forex 15–30s. Pass `enabled = false` to pause polling (e.g. when the
+ * tab isn't visible). Falls back to the static catalog while the backend loads.
  */
-export function useSimulatedTickers(kind: TickerKind, enabled = true): GlobalTicker[] {
+export function useLiveTickers(kind: TickerKind, enabled = true): GlobalTicker[] {
   const seed = kind === "stocks" ? stockTickers : forexTickers;
   const [rows, setRows] = useState<GlobalTicker[]>(seed);
 
   useEffect(() => {
     if (!enabled) return;
-    const id = setInterval(() => {
-      setRows((prev) =>
-        prev.map((t) => {
-          const drift = (Math.random() - 0.5) * 0.0022;
-          const price = Math.max(t.price * (1 + drift), 0.0001);
-          const change = ((price - t.prevClose) / t.prevClose) * 100;
-          return {
-            ...t,
-            price,
-            change,
-            spark: t.spark.length > 0 ? [...t.spark.slice(1), price] : t.spark,
-          };
-        }),
-      );
-    }, 2000);
-    return () => clearInterval(id);
+    let disposed = false;
+    const path = kind === "stocks" ? "/live/stocks" : "/live/forex";
+    const intervalMs = kind === "stocks" ? 45_000 : 20_000;
+
+    const tick = async () => {
+      try {
+        const tickers = await api.get<BackendTicker[]>(path);
+        if (disposed) return;
+        const byId = new Map(tickers.map((t) => [t.id, t]));
+        setRows((prev) =>
+          prev.map((t) => {
+            const n = byId.get(t.id);
+            if (!n || !Number.isFinite(n.price) || n.price <= 0) return t;
+            const next: GlobalTicker = {
+              ...t,
+              price: n.price,
+              prevClose: n.prevClose > 0 ? n.prevClose : t.prevClose,
+              change: Number.isFinite(n.change) ? n.change : t.change,
+              volume: n.volume > 0 ? n.volume : t.volume,
+              spark: n.spark && n.spark.length >= 5 ? n.spark : pushPrice(t.spark, n.price),
+            };
+            if (n.marketCap !== undefined && n.marketCap > 0) next.marketCap = n.marketCap;
+            return next;
+          }),
+        );
+      } catch {
+        /* keep last known tickers */
+      }
+    };
+
+    void tick();
+    const id = window.setInterval(() => void tick(), intervalMs);
+    return () => {
+      disposed = true;
+      window.clearInterval(id);
+    };
   }, [kind, enabled]);
 
   return rows;

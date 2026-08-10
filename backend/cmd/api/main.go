@@ -36,12 +36,29 @@ func main() {
 		log.Fatalf("migrate: %v", err)
 	}
 
-	// The mock provider is the default data source. Swap this one line for a
-	// real exchange provider later — nothing else in the app needs to change.
-	provider := marketdata.NewMockProvider(mocks.Assets)
+	// Live market data: crypto streams from Binance's public API, forex from
+	// exchangerate-api ⇄ Frankfurter and stocks from Yahoo Finance ⇄ Finnhub,
+	// all fetched server-side on their own cadences. When a provider is
+	// unreachable the providers degrade gracefully to the deterministic mock,
+	// so the API stays up even without external connectivity.
+	liveProvider := marketdata.NewLiveProvider(mocks.Assets, time.Duration(cfg.CryptoRefreshSeconds)*time.Second)
+	globalProvider := marketdata.NewGlobalProvider(
+		cfg.FinnhubAPIKey,
+		cfg.ExchangeRateAPIKey,
+		time.Duration(cfg.StockRefreshSeconds)*time.Second,
+		time.Duration(cfg.ForexRefreshSeconds)*time.Second,
+	)
+	if cfg.LiveEnabled {
+		go liveProvider.Run(ctx)
+		go globalProvider.Run(ctx)
+	}
+
+	provider := marketdata.MarketDataProvider(liveProvider)
 
 	if cfg.SeedOnStartup {
-		seedSvc := services.NewSeedService(pool, provider)
+		// Seed from the deterministic mock so first boot is fast, offline-safe
+		// and reproducible; the live provider feeds the /api/live/* routes.
+		seedSvc := services.NewSeedService(pool, marketdata.NewMockProvider(mocks.Assets))
 		if err := seedSvc.SeedIfEmpty(ctx); err != nil {
 			log.Fatalf("seed: %v", err)
 		}
@@ -56,7 +73,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,
-		Handler:           routes.NewRouter(cfg, pool, provider, hub),
+		Handler:           routes.NewRouter(cfg, pool, provider, liveProvider, globalProvider, hub),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      30 * time.Second,

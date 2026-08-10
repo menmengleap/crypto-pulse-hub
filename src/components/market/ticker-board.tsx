@@ -6,7 +6,7 @@ import { LiveBadge } from "@/components/market/live-badge";
 import { Sparkline } from "@/components/market/sparkline";
 import { fmtCompact, fmtPrice } from "@/lib/market-data";
 import { useLiveAssets } from "@/lib/realtime";
-import { useSimulatedTickers, type GlobalTicker } from "@/lib/global-market";
+import { useLiveTickers, type GlobalTicker } from "@/lib/global-market";
 
 type Tab = "crypto" | "stocks" | "forex";
 
@@ -18,8 +18,8 @@ const tabs: { key: Tab; label: string }[] = [
 
 const descriptions: Record<Tab, string> = {
   crypto: "Live spot prices · Binance",
-  stocks: "US equities · simulated feed",
-  forex: "FX & metals · simulated feed",
+  stocks: "US equities · Yahoo Finance ⇄ Finnhub",
+  forex: "FX & metals · exchangerate-api ⇄ Frankfurter",
 };
 
 function TickerRow({ t }: { t: GlobalTicker }) {
@@ -59,8 +59,8 @@ function TickerRow({ t }: { t: GlobalTicker }) {
 export function TickerBoard() {
   const [tab, setTab] = useState<Tab>("crypto");
   const assets = useLiveAssets();
-  const stocks = useSimulatedTickers("stocks", tab === "stocks");
-  const forex = useSimulatedTickers("forex", tab === "forex");
+  const stocks = useLiveTickers("stocks", tab === "stocks");
+  const forex = useLiveTickers("forex", tab === "forex");
   const top = assets.slice(0, 6);
 
   return (
@@ -121,10 +121,10 @@ export function TickerBoard() {
       )}
 
       <p className="mt-4 text-[11px] text-muted-foreground">
-        Crypto prices stream live from Binance. Stocks & forex run on a simulated feed while the
-        bundled data source is offline —{" "}
+        All prices stream live from the Cryptolytic API — Binance (crypto), Yahoo Finance ⇄ Finnhub
+        (stocks) and exchangerate-api ⇄ Frankfurter (forex), with automatic provider failover.{" "}
         <Link to="/chart" className="text-primary hover:underline">
-          open a chart
+          Open a chart
         </Link>{" "}
         for any asset.
       </p>

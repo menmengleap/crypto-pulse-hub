@@ -1,8 +1,10 @@
 # Cryptolytic Analytics Backend
 
-A production-ready **read-only market analytics** API in Go. It provides realtime-grade
-market data (via a deterministic mock provider), technical indicators, news, saved
-analyses, watchlists, analysis-only alerts and a prepared WebSocket stream.
+A production-ready **read-only market analytics** API in Go. It provides live market
+data (crypto via Binance, forex via exchangerate-api/Frankfurter, stocks via Yahoo
+Finance/Finnhub — all fetched server-side with automatic provider failover),
+technical indicators, news, saved analyses, watchlists, analysis-only alerts and a
+prepared WebSocket stream.
 
 > **Market analysis only.** There is no trading, order execution, wallet management,
 > deposits or withdrawals anywhere in this codebase — by design.
@@ -57,25 +59,35 @@ mocks/                    deterministic seed catalog (assets, news)
 Dockerfile / docker-compose.yml
 ```
 
-## Architecture: the MarketDataProvider
+## Architecture: live market data providers
 
-The backend never hardcodes where market data comes from. Everything reads through one
-interface:
+The backend never hardcodes where market data comes from. Everything reads through the
+`MarketDataProvider` interface, and providers are chosen in `cmd/api/main.go`:
 
 ```
 MarketDataProvider
-   ├── MockMarketDataProvider   (default — deterministic, no external services)
-   └── FutureRealMarketDataProvider  (plug in a real exchange API later)
+   ├── LiveProvider      (default — crypto via Binance public REST, cached)
+   └── MockMarketDataProvider  (deterministic fallback when the network is down)
+
+GlobalProvider (stocks & forex, with automatic failover)
+   ├── forex  → exchangerate-api ⇄ Frankfurter (ECB)
+   └── stocks → Yahoo Finance   ⇄ Finnhub
 ```
 
-Swap the implementation in `cmd/api/main.go` and nothing else changes — the HTTP API,
-the database seed and the WebSocket hub all keep working. The frontend can never tell
-whether data came from the mock, the database or a live exchange.
+- **Clients never talk to providers.** All provider traffic originates from the backend;
+  the frontend only calls the API (see `/api/live/*` below).
+- **Failover is automatic.** If the active provider fails on consecutive refresh cycles
+  it flips to the backup; a successful refresh resets the counter, so the two providers
+  keep switching back and forth as required.
+- **Cadences** match the data's volatility: crypto ~8s (5–10s), forex ~20s (15–30s),
+  stocks ~45s (30–60s). All tunable via env vars.
+- The live providers cache in memory and **degrade gracefully** to the deterministic
+  mock when a provider is unreachable, so the API never goes down with a third party.
 
 The mock provider is **deterministic** (seeded RNG): the same symbol always produces the
 same candles, indicators and snapshots, which keeps tests and development reproducible.
-Candles are generated with a trend-based price walk so they look realistic rather than
-random.
+It is used to seed the database on first boot (fast, offline-safe) and as a last-resort
+fallback for live endpoints.
 
 ## API
 
@@ -85,7 +97,8 @@ Full reference: **[API.md](./API.md)**. Quick overview:
 | --- | --- |
 | Auth | `POST /api/auth/register`, `login`, `refresh`, `logout`, `forgot-password`, `reset-password` |
 | Me | `GET/PATCH /api/me`, `PATCH /api/me/preferences` |
-| Markets | `GET /api/markets`, `/api/markets/:symbol`, `/:symbol/history`, `/:symbol/indicators` |
+| Live markets | `GET /api/live/markets`, `/api/live/global`, `/api/live/klines?symbol=&timeframe=&limit=`, `/api/live/stocks`, `/api/live/forex`, `/api/live/providers` |
+| Markets (seeded) | `GET /api/markets`, `/api/markets/:symbol`, `/:symbol/history`, `/:symbol/indicators` |
 | Market structure | `/api/market-overview`, `/api/market-cap`, `/api/market-volume`, `/api/open-interest`, `/api/bitcoin-dominance` |
 | Sentiment | `/api/sentiment`, `/api/fear-greed`, `/api/heatmap` |
 | Watchlists | `GET/POST /api/watchlists`, `PATCH/DELETE /api/watchlists/:id`, `POST /api/watchlists/:id/assets`, `DELETE .../assets/:symbol` |
@@ -94,7 +107,7 @@ Full reference: **[API.md](./API.md)**. Quick overview:
 | News | `GET /api/news`, `/api/news/:id`, `/api/news/categories`, `/api/news/trending` |
 | AI analysis | `POST /api/ai/analyze`, `GET /api/ai/analyses`, `GET /api/ai/analyses/:id` |
 | Realtime | `GET /api/ws/markets` (WebSocket) |
-| Health | `GET /api/health` |
+| Health | `GET /api/health` and `GET /health` (alias for uptime monitors) |
 
 Every response uses the envelope:
 
@@ -139,6 +152,15 @@ provider, not the client contract.
 
 See [`.env.example`](./.env.example). Required: `DATABASE_URL`, `JWT_SECRET`. Optional:
 `PORT`, `APP_ENV`, `JWT_*_TTL`, `CORS_ORIGINS`, `RATE_LIMIT_*`, `SEED_ON_STARTUP`, `WS_ENABLED`.
+
+Live providers: `LIVE_DATA_ENABLED`, `FINNHUB_API_KEY`, `EXCHANGERATE_API_KEY`,
+`CRYPTO_REFRESH_SECONDS` (5–10s), `FOREX_REFRESH_SECONDS` (15–30s),
+`STOCK_REFRESH_SECONDS` (30–60s). Keys are never sent to the client.
+
+> Note: the free exchangerate-api tier is limited to ~1,500 requests/month. The default
+> 20s forex cadence can exhaust that quota quickly; when it does, the failover
+> automatically switches to Frankfurter (free/unlimited). Lower the cadence or upgrade
+> the plan if you need sustained exchangerate-api coverage.
 
 ## Development
 

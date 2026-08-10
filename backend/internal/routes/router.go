@@ -15,8 +15,9 @@ import (
 	"cryptolytic/backend/internal/ws"
 )
 
-// NewRouter assembles the full HTTP API.
-func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.MarketDataProvider, hub *ws.Hub) http.Handler {
+// NewRouter assembles the full HTTP API. `provider` backs the WebSocket stream
+// and AI analysis; `live` and `global` back the /api/live/* market-data routes.
+func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.MarketDataProvider, live *marketdata.LiveProvider, global *marketdata.GlobalProvider, hub *ws.Hub) http.Handler {
 	// Repositories
 	userRepo := repositories.NewUserRepo(pool)
 	sessionRepo := repositories.NewSessionRepo(pool)
@@ -40,6 +41,7 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.Marke
 	newsH := handlers.NewNewsHandler(newsRepo)
 	aiH := handlers.NewAIHandler(aiSvc)
 	healthH := handlers.NewHealthHandler(pool)
+	liveH := handlers.NewLiveHandler(live, global)
 
 	rateLimit := middleware.NewRateLimit(cfg.RateLimitRPS, cfg.RateLimitBurst)
 
@@ -50,6 +52,9 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.Marke
 	r.Use(rateLimit.Middleware())
 
 	r.Get("/api/health", healthH.Check)
+	// Bare /health alias — uptime monitors and older clients hit the backend
+	// origin directly (e.g. https://cryptolytic-api.onrender.com/health).
+	r.Get("/health", healthH.Check)
 
 	// --- Public market data (read-only) ---
 	r.Get("/api/markets", marketH.ListMarkets)
@@ -57,6 +62,14 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.Marke
 	r.Get("/api/markets/{symbol}/history", marketH.GetHistory)
 	r.Get("/api/markets/{symbol}/indicators", marketH.GetIndicators)
 	r.Get("/api/market-overview", marketH.Overview)
+
+	// --- Live market data (server-side provider fetching, cached) ---
+	r.Get("/api/live/markets", liveH.Markets)
+	r.Get("/api/live/global", liveH.Global)
+	r.Get("/api/live/klines", liveH.Klines)
+	r.Get("/api/live/stocks", liveH.Stocks)
+	r.Get("/api/live/forex", liveH.Forex)
+	r.Get("/api/live/providers", liveH.Providers)
 	r.Get("/api/market-cap", marketH.MarketCap)
 	r.Get("/api/market-volume", marketH.MarketVolume)
 	r.Get("/api/open-interest", marketH.OpenInterest)

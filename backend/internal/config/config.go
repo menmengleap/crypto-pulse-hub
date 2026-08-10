@@ -32,6 +32,17 @@ type Config struct {
 	GitHubClientID     string
 	GitHubClientSecret string
 	FrontendURL        string
+
+	// Live market-data providers. When LIVE_DATA_ENABLED is true the backend
+	// fetches crypto from Binance's public API, forex from exchangerate-api /
+	// Frankfurter, and stocks from Yahoo Finance / Finnhub — always server-side,
+	// so clients never talk to a provider directly.
+	LiveEnabled          bool
+	CryptoRefreshSeconds int // cadence for crypto snapshots (5–10s recommended)
+	ForexRefreshSeconds  int // cadence for forex tickers (15–30s recommended)
+	StockRefreshSeconds  int // cadence for stock tickers (30–60s recommended)
+	FinnhubAPIKey        string
+	ExchangeRateAPIKey   string
 }
 
 // Load reads configuration from the environment. A local .env file is loaded
@@ -57,6 +68,16 @@ func Load() (*Config, error) {
 		GitHubClientID:     getEnv("GITHUB_CLIENT_ID", ""),
 		GitHubClientSecret: getEnv("GITHUB_CLIENT_SECRET", ""),
 		FrontendURL:        getEnv("FRONTEND_URL", "http://localhost:8080"),
+
+		// Live provider settings. The API keys below are the project's free-tier
+		// keys; override them with FINNHUB_API_KEY / EXCHANGERATE_API_KEY in the
+		// environment (they are only used server-side, never sent to the client).
+		LiveEnabled:          getBoolEnv("LIVE_DATA_ENABLED", true),
+		CryptoRefreshSeconds: getIntEnv("CRYPTO_REFRESH_SECONDS", 8),
+		ForexRefreshSeconds:  getIntEnv("FOREX_REFRESH_SECONDS", 20),
+		StockRefreshSeconds:  getIntEnv("STOCK_REFRESH_SECONDS", 45),
+		FinnhubAPIKey:        getEnv("FINNHUB_API_KEY", "d9sjmqhr01qopv47qtdgd9sjmqhr01qopv47qte0"),
+		ExchangeRateAPIKey:   getEnv("EXCHANGERATE_API_KEY", "d7a369cd5aa48c44fd198e05"),
 	}
 
 	if cfg.DatabaseURL == "" {

@@ -11,9 +11,19 @@ import { useAuth, type AuthUser } from "./auth";
  * In development the Vite dev server proxies `/api/*` to the Go API, so the
  * browser talks to the same origin and never hits CORS. In production
  * (separate frontend/backend services) point VITE_API_BASE at the backend
- * origin, e.g. https://cryptolytic-api.onrender.com.
+ * origin without a path prefix, e.g. https://cryptolytic-api.onrender.com
+ * (the same convention social-auth.tsx uses) — every request is then built as
+ * {origin}/api{path}, e.g. …/api/live/markets.
  */
-const BASE = (import.meta.env["VITE_API_BASE"] as string | undefined) ?? "/api";
+const RAW_BASE = (import.meta.env["VITE_API_BASE"] as string | undefined) ?? "";
+
+/** Backend origin without a trailing "/api" (normalized). */
+const API_ORIGIN = RAW_BASE.replace(/\/+$/, "").replace(/\/api$/i, "");
+
+/** Build an API URL: "/api<path>" on the origin (or the dev proxy). */
+function apiUrl(path: string): string {
+  return API_ORIGIN ? `${API_ORIGIN}/api${path}` : `/api${path}`;
+}
 
 type ApiSuccess<T> = { success: true; data: T; meta?: Record<string, unknown> };
 type ApiFailure = {
@@ -40,7 +50,7 @@ export class ApiError extends Error {
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   // Attach the session access token when present.
   const token = useAuth.getState().accessToken;
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(apiUrl(path), {
     ...init,
     headers: {
       "content-type": "application/json",
@@ -87,9 +97,14 @@ export type MeResponse = {
   preferences: Record<string, unknown>;
 };
 
+const HEALTH_URL = apiUrl("/health");
+
 /**
- * Polls GET /api/health so the UI can reflect whether the backend API is
- * reachable. Returns "connecting" until the first check resolves.
+ * Polls the backend health endpoint so the UI can reflect whether the API is
+ * reachable. Works whether BASE is the Vite proxy ("/api") or an absolute
+ * backend origin (VITE_API_BASE=https://cryptolytic-api.onrender.com →
+ * https://cryptolytic-api.onrender.com/api/health). Returns "connecting" until
+ * the first check resolves.
  */
 export function useBackendHealth(intervalMs = 15_000): BackendStatus {
   const [status, setStatus] = useState<BackendStatus>("connecting");
@@ -100,7 +115,7 @@ export function useBackendHealth(intervalMs = 15_000): BackendStatus {
     const check = async () => {
       let next: BackendStatus;
       try {
-        const res = await fetch(`${BASE}/health`, { cache: "no-store" });
+        const res = await fetch(HEALTH_URL, { cache: "no-store" });
         next = res.ok ? "online" : "offline";
       } catch {
         next = "offline";

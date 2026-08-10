@@ -192,7 +192,12 @@ func (m *MockMarketDataProvider) Indicators(symbol, timeframe string) (Indicator
 	if err != nil {
 		return IndicatorSet{}, err
 	}
+	return indicatorsFromCandles(closes, highs, lows, volumes), nil
+}
 
+// indicatorsFromCandles computes the full IndicatorSet from OHLCV series. It is
+// shared by the mock and live providers so both produce identical math.
+func indicatorsFromCandles(closes, highs, lows, volumes []float64) IndicatorSet {
 	ind := IndicatorSet{}
 	ind.RSI = rsi(closes, 14)
 	ind.EMA20 = emaLast(closes, 20)
@@ -211,7 +216,7 @@ func (m *MockMarketDataProvider) Indicators(symbol, timeframe string) (Indicator
 
 	ind.Trend = trendLabel(lastOr(closes, 0), ind.EMA20, ind.EMA50, ind.RSI)
 	ind.Momentum = momentumLabel(ind.RSI)
-	return ind, nil
+	return ind
 }
 
 func (m *MockMarketDataProvider) series(meta AssetMeta, timeframe string, count int) ([]float64, []float64, []float64, []float64, error) {
