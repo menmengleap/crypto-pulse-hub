@@ -15,13 +15,21 @@ import { api } from "./api";
  * The backend fetches from Binance (crypto), exchangerate-api/Frankfurter
  * (forex) and Yahoo/Finnhub (stocks), caches the results and serves them over
  * /api/live/*. The frontend polls those endpoints on matching cadences —
- * crypto every 8s (5–10s), global stats every 15s, chart candles every 6s.
+ * crypto every 10s, global stats every 30s, chart candles every 10s.
+ *
+ * Everything is a single bulk request: one /markets call, one /global call and
+ * one /sparks call (all symbols in a single response). The browser never fans
+ * out per-symbol requests, so the per-IP rate limiter is never tripped.
  */
 
-/** Polling cadences (crypto 5–10s, global 15s, chart candles ~6s). */
+/**
+ * Polling cadences. The backend refreshes crypto every 10s, so polling every
+ * 8s guarantees we never miss a refresh and visible updates stay within the
+ * requested 5–10s window (two equal clocks could otherwise drift a full cycle).
+ */
 const CRYPTO_POLL_MS = 8000;
-const GLOBAL_POLL_MS = 15000;
-const KLINE_POLL_MS = 6000;
+const GLOBAL_POLL_MS = 30000;
+const KLINE_POLL_MS = 10000;
 
 export type MarketStatus = "static" | "live" | "offline";
 
@@ -165,6 +173,7 @@ export function useMarketStatus(): MarketStatus {
 let started = false;
 let cryptoTimer: number | null = null;
 let globalTimer: number | null = null;
+let sparksLoaded = false;
 
 function pushSpark(spark: number[], price: number): number[] {
   const next = [...spark, price];
@@ -180,6 +189,9 @@ async function pollMarkets() {
     useMarketStore.getState()._setStatus("offline");
     return;
   }
+  // Retry the one-time sparkline seed if it hasn't succeeded yet (e.g. the
+  // backend was still waking up on first load).
+  if (!sparksLoaded) void loadSparks();
   const bySymbol = new Map(snaps.map((s) => [s.symbol, s]));
   useMarketStore.getState()._merge((assets) =>
     assets.map((a) => {
@@ -240,25 +252,25 @@ async function pollGlobal() {
   }
 }
 
-/** Seed each asset's sparkline with real 15m closes (once, on start). */
+/**
+ * Seed every asset's sparkline in a single bulk request (/api/live/sparks
+ * returns the 15m close series for all symbols at once). Previously this fired
+ * one /klines request per symbol on every page load — the burst that tripped
+ * the API rate limiter with a 429.
+ */
 async function loadSparks() {
-  const entries = await Promise.all(
-    staticAssets.map(async (a) => {
-      try {
-        const rows = await fetchKlines(a.symbol, "15m", 32);
-        return [a.id, rows.map((r) => r.close)] as const;
-      } catch {
-        return [a.id, null] as const;
-      }
-    }),
-  );
-  const sparkById = new Map(entries);
-  useMarketStore.getState()._merge((assets) =>
-    assets.map((a) => {
-      const spark = sparkById.get(a.id);
-      return spark && spark.length >= 2 ? { ...a, spark } : a;
-    }),
-  );
+  try {
+    const bySymbol = await api.get<Record<string, number[]>>("/live/sparks");
+    useMarketStore.getState()._merge((assets) =>
+      assets.map((a) => {
+        const spark = bySymbol[a.symbol];
+        return spark && spark.length >= 2 ? { ...a, spark } : a;
+      }),
+    );
+    sparksLoaded = true;
+  } catch {
+    /* keep static sparks; pollMarkets retries until the first success */
+  }
 }
 
 /**

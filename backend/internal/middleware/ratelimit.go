@@ -3,6 +3,7 @@ package middleware
 import (
 	"net"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -109,11 +110,17 @@ func (rl *RateLimit) Middleware() func(http.Handler) http.Handler {
 	}
 }
 
+// clientIP resolves the real client address for rate limiting. Render (and most
+// proxies) forward the client IP in X-Forwarded-For, which may be a comma-
+// separated chain ("client, proxy1, proxy2"). Only the left-most entry is the
+// client — using the whole chain or falling back to RemoteAddr (the load
+// balancer) would put every visitor in one bucket and 429 everyone together.
 func clientIP(r *http.Request) string {
 	if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
-		if ip, _, err := net.SplitHostPort(forwarded); err == nil {
-			return ip
+		if i := strings.IndexByte(forwarded, ','); i >= 0 {
+			forwarded = forwarded[:i]
 		}
+		forwarded = strings.TrimSpace(forwarded)
 		if ip := net.ParseIP(forwarded); ip != nil {
 			return ip.String()
 		}

@@ -84,6 +84,14 @@ func (h *LiveHandler) Forex(w http.ResponseWriter, r *http.Request) {
 	WriteOK(w, snapshot.Forex, map[string]any{"providers": snapshot.Providers["forex"]})
 }
 
+// Sparks GET /api/live/sparks — 15m close series for every crypto symbol in
+// one response, so the frontend seeds all sparklines with a single request
+// instead of firing one /klines call per symbol (the source of 429 bursts).
+func (h *LiveHandler) Sparks(w http.ResponseWriter, r *http.Request) {
+	sparks := h.live.Sparks()
+	WriteOK(w, sparks, map[string]any{"timeframe": "15m", "count": len(sparks)})
+}
+
 // Providers GET /api/live/providers — active provider + health per asset class.
 func (h *LiveHandler) Providers(w http.ResponseWriter, r *http.Request) {
 	g := h.global.Snapshot()

@@ -300,8 +300,9 @@ export const forexTickers: GlobalTicker[] = [
 /**
  * Live tickers polled from the backend (/api/live/stocks and /api/live/forex),
  * which fetches from real providers with automatic failover. Cadences: stocks
- * 30–60s, forex 15–30s. Pass `enabled = false` to pause polling (e.g. when the
- * tab isn't visible). Falls back to the static catalog while the backend loads.
+ * 60s, forex 30s (the requested 30–60s / 15–30s ranges). Pass `enabled = false`
+ * to pause polling (e.g. when the tab isn't visible). Falls back to the static
+ * catalog while the backend loads.
  */
 export function useLiveTickers(kind: TickerKind, enabled = true): GlobalTicker[] {
   const seed = kind === "stocks" ? stockTickers : forexTickers;
@@ -311,7 +312,7 @@ export function useLiveTickers(kind: TickerKind, enabled = true): GlobalTicker[]
     if (!enabled) return;
     let disposed = false;
     const path = kind === "stocks" ? "/live/stocks" : "/live/forex";
-    const intervalMs = kind === "stocks" ? 45_000 : 20_000;
+    const intervalMs = kind === "stocks" ? 60_000 : 30_000;
 
     const tick = async () => {
       try {

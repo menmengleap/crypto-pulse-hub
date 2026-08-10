@@ -79,8 +79,8 @@ GlobalProvider (stocks & forex, with automatic failover)
 - **Failover is automatic.** If the active provider fails on consecutive refresh cycles
   it flips to the backup; a successful refresh resets the counter, so the two providers
   keep switching back and forth as required.
-- **Cadences** match the data's volatility: crypto ~8s (5–10s), forex ~20s (15–30s),
-  stocks ~45s (30–60s). All tunable via env vars.
+- **Cadences** match the data's volatility: crypto 10s, forex 30s, stocks 60s (within the
+  requested 5–10s / 15–30s / 30–60s ranges). All tunable via env vars.
 - The live providers cache in memory and **degrade gracefully** to the deterministic
   mock when a provider is unreachable, so the API never goes down with a third party.
 
@@ -97,7 +97,7 @@ Full reference: **[API.md](./API.md)**. Quick overview:
 | --- | --- |
 | Auth | `POST /api/auth/register`, `login`, `refresh`, `logout`, `forgot-password`, `reset-password` |
 | Me | `GET/PATCH /api/me`, `PATCH /api/me/preferences` |
-| Live markets | `GET /api/live/markets`, `/api/live/global`, `/api/live/klines?symbol=&timeframe=&limit=`, `/api/live/stocks`, `/api/live/forex`, `/api/live/providers` |
+| Live markets | `GET /api/live/markets`, `/api/live/global`, `/api/live/klines?symbol=&timeframe=&limit=`, `/api/live/sparks`, `/api/live/stocks`, `/api/live/forex`, `/api/live/providers` |
 | Markets (seeded) | `GET /api/markets`, `/api/markets/:symbol`, `/:symbol/history`, `/:symbol/indicators` |
 | Market structure | `/api/market-overview`, `/api/market-cap`, `/api/market-volume`, `/api/open-interest`, `/api/bitcoin-dominance` |
 | Sentiment | `/api/sentiment`, `/api/fear-greed`, `/api/heatmap` |
@@ -157,9 +157,9 @@ Live providers: `LIVE_DATA_ENABLED`, `FINNHUB_API_KEY`, `EXCHANGERATE_API_KEY`,
 `CRYPTO_REFRESH_SECONDS` (5–10s), `FOREX_REFRESH_SECONDS` (15–30s),
 `STOCK_REFRESH_SECONDS` (30–60s). Keys are never sent to the client.
 
-> Note: the free exchangerate-api tier is limited to ~1,500 requests/month. The default
-> 20s forex cadence can exhaust that quota quickly; when it does, the failover
-> automatically switches to Frankfurter (free/unlimited). Lower the cadence or upgrade
+> Note: the free exchangerate-api tier is limited to ~1,500 requests/month. The 30s
+> forex cadence would exhaust that quota in under a day — when it does, the failover
+> automatically switches to Frankfurter (free/unlimited). Raise the cadence or upgrade
 > the plan if you need sustained exchangerate-api coverage.
 
 ## Development

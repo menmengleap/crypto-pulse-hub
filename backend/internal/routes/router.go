@@ -67,6 +67,7 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.Marke
 	r.Get("/api/live/markets", liveH.Markets)
 	r.Get("/api/live/global", liveH.Global)
 	r.Get("/api/live/klines", liveH.Klines)
+	r.Get("/api/live/sparks", liveH.Sparks)
 	r.Get("/api/live/stocks", liveH.Stocks)
 	r.Get("/api/live/forex", liveH.Forex)
 	r.Get("/api/live/providers", liveH.Providers)

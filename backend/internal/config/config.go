@@ -58,8 +58,8 @@ func Load() (*Config, error) {
 		JWTAccessTTL:   getDurationEnv("JWT_ACCESS_TTL", 15*time.Minute),
 		JWTRefreshTTL:  getDurationEnv("JWT_REFRESH_TTL", 720*time.Hour),
 		CORSOrigins:    splitCSV(getEnv("CORS_ORIGINS", "http://localhost:3001,http://localhost:5173")),
-		RateLimitRPS:   getFloatEnv("RATE_LIMIT_RPS", 20),
-		RateLimitBurst: getIntEnv("RATE_LIMIT_BURST", 40),
+		RateLimitRPS:   getFloatEnv("RATE_LIMIT_RPS", 30),
+		RateLimitBurst: getIntEnv("RATE_LIMIT_BURST", 60),
 		SeedOnStartup:  getBoolEnv("SEED_ON_STARTUP", true),
 		WSEnabled:      getBoolEnv("WS_ENABLED", true),
 
@@ -72,10 +72,11 @@ func Load() (*Config, error) {
 		// Live provider settings. The API keys below are the project's free-tier
 		// keys; override them with FINNHUB_API_KEY / EXCHANGERATE_API_KEY in the
 		// environment (they are only used server-side, never sent to the client).
+		// Cadences match the requested ranges: crypto 10s, forex 30s, stocks 60s.
 		LiveEnabled:          getBoolEnv("LIVE_DATA_ENABLED", true),
-		CryptoRefreshSeconds: getIntEnv("CRYPTO_REFRESH_SECONDS", 8),
-		ForexRefreshSeconds:  getIntEnv("FOREX_REFRESH_SECONDS", 20),
-		StockRefreshSeconds:  getIntEnv("STOCK_REFRESH_SECONDS", 45),
+		CryptoRefreshSeconds: getIntEnv("CRYPTO_REFRESH_SECONDS", 10),
+		ForexRefreshSeconds:  getIntEnv("FOREX_REFRESH_SECONDS", 30),
+		StockRefreshSeconds:  getIntEnv("STOCK_REFRESH_SECONDS", 60),
 		FinnhubAPIKey:        getEnv("FINNHUB_API_KEY", "d9sjmqhr01qopv47qtdgd9sjmqhr01qopv47qte0"),
 		ExchangeRateAPIKey:   getEnv("EXCHANGERATE_API_KEY", "d7a369cd5aa48c44fd198e05"),
 	}

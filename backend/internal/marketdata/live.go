@@ -89,6 +89,8 @@ type LiveProvider struct {
 	dailyClose  map[string]float64 // close 7 days ago, used for change7d
 	dailyAt     time.Time
 	indAt       time.Time // last time snapshot RSI was recomputed
+	sparks      map[string][]float64 // 15m close series per symbol (bulk sparklines)
+	sparksAt    time.Time
 	candles     map[candleKey]cachedCandles
 	indicators  map[candleKey]cachedIndicators
 	metrics     GlobalMetrics
@@ -113,6 +115,7 @@ func NewLiveProvider(assets []AssetMeta, refresh time.Duration) *LiveProvider {
 		symbolOf:   map[string]string{},
 		snapshots:  map[string]Snapshot{},
 		dailyClose: map[string]float64{},
+		sparks:     map[string][]float64{},
 		candles:    map[candleKey]cachedCandles{},
 		indicators: map[candleKey]cachedIndicators{},
 		metrics:      mock.GlobalMetrics(),
@@ -237,6 +240,9 @@ func (p *LiveProvider) refresh() {
 	if time.Since(p.indAt) > 5*time.Minute {
 		p.refreshRSI()
 	}
+	if time.Since(p.sparksAt) > 2*time.Minute {
+		p.refreshSparks()
+	}
 }
 
 // fetchTickers pulls the 24hr ticker batch from Binance and builds snapshots.
@@ -356,6 +362,55 @@ func (p *LiveProvider) refreshRSI() {
 	p.mu.Lock()
 	p.indAt = at
 	p.mu.Unlock()
+}
+
+// refreshSparks caches the 15m close series per symbol (throttled to every 2
+// minutes by the caller) so the bulk /api/live/sparks endpoint can seed every
+// frontend sparkline with a single request instead of one klines call per
+// symbol — the change that eliminated the per-symbol request burst.
+func (p *LiveProvider) refreshSparks() {
+	at := time.Now()
+	sparks := map[string][]float64{}
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, 5) // limit outbound fan-out, like fetchYahoo
+	for _, sym := range p.symbols {
+		wg.Add(1)
+		go func(symbol string) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			candles, err := p.fetchKlinesRaw(p.pair[symbol], "15m", 32)
+			if err != nil || len(candles) < 2 {
+				return
+			}
+			closes := make([]float64, len(candles))
+			for i, c := range candles {
+				closes[i] = c.Close
+			}
+			mu.Lock()
+			sparks[symbol] = closes
+			mu.Unlock()
+		}(sym)
+	}
+	wg.Wait()
+	if len(sparks) > 0 {
+		p.mu.Lock()
+		p.sparks = sparks
+		p.sparksAt = at
+		p.mu.Unlock()
+	}
+}
+
+// Sparks returns the cached 15m close series per symbol (deep copy).
+func (p *LiveProvider) Sparks() map[string][]float64 {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	out := make(map[string][]float64, len(p.sparks))
+	for sym, series := range p.sparks {
+		out[sym] = append([]float64(nil), series...)
+	}
+	return out
 }
 
 // ---------------------------------------------------------------------------

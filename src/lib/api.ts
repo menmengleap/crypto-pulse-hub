@@ -101,12 +101,14 @@ const HEALTH_URL = apiUrl("/health");
 
 /**
  * Polls the backend health endpoint so the UI can reflect whether the API is
- * reachable. Works whether BASE is the Vite proxy ("/api") or an absolute
- * backend origin (VITE_API_BASE=https://cryptolytic-api.onrender.com →
+ * reachable, and keeps the Render free-tier instance warm between visits
+ * (it spins down after ~15 min idle). Works whether BASE is the Vite proxy
+ * ("/api") or an absolute backend origin
+ * (VITE_API_BASE=https://cryptolytic-api.onrender.com →
  * https://cryptolytic-api.onrender.com/api/health). Returns "connecting" until
- * the first check resolves.
+ * the first check resolves. 45s is well inside the requested 30–60s window.
  */
-export function useBackendHealth(intervalMs = 15_000): BackendStatus {
+export function useBackendHealth(intervalMs = 45_000): BackendStatus {
   const [status, setStatus] = useState<BackendStatus>("connecting");
 
   useEffect(() => {

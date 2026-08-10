@@ -5,6 +5,39 @@ import (
 	"time"
 )
 
+func TestLiveProviderSparksDeepCopy(t *testing.T) {
+	assets := []AssetMeta{
+		{Symbol: "BTC", Name: "Bitcoin"},
+		{Symbol: "ETH", Name: "Ethereum"},
+	}
+	p := NewLiveProvider(assets, 10*time.Second)
+
+	// Seed the spark cache the way refreshSparks() would.
+	p.mu.Lock()
+	p.sparks["BTC"] = []float64{1, 2, 3}
+	p.sparks["ETH"] = []float64{4, 5, 6}
+	p.mu.Unlock()
+
+	a := p.Sparks()
+	b := p.Sparks()
+
+	// Mutating a returned map must not alias the cache or another copy.
+	a["BTC"][0] = 999
+	b["ETH"][0] = 888
+
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	if p.sparks["BTC"][0] != 1 {
+		t.Fatalf("Sparks() aliases the BTC cache: %v", p.sparks["BTC"])
+	}
+	if p.sparks["ETH"][0] != 4 {
+		t.Fatalf("Sparks() aliases the ETH cache: %v", p.sparks["ETH"])
+	}
+	if a["ETH"][0] != 4 {
+		t.Fatalf("BTC copy aliases the ETH copy: %v", a["ETH"])
+	}
+}
+
 func TestSnapshotDeepCopiesSparks(t *testing.T) {
 	p := NewGlobalProvider("finnhub-key", "fx-key", 45*time.Second, 20*time.Second)
 
