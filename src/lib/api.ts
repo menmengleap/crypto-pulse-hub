@@ -47,21 +47,113 @@ export class ApiError extends Error {
   }
 }
 
+// ---------------------------------------------------------------------------
+// 401 handling — automatic token refresh + purge
+// ---------------------------------------------------------------------------
+
+/**
+ * Endpoints that must never trigger the refresh flow (they're the ones that
+ * create/rotate tokens, and a 401 there means the credentials themselves are
+ * bad — purging is correct).
+ */
+const AUTH_PATHS = new Set(["/auth/refresh", "/auth/login", "/auth/register", "/auth/logout"]);
+
+// Single-flight refresh: the backend rotates the session (the old refresh
+// token is revoked), so concurrent 401s must share one in-flight refresh —
+// otherwise the second call would fail with the already-rotated token.
+let refreshInFlight: Promise<boolean> | null = null;
+
+async function attemptRefresh(): Promise<boolean> {
+  if (!refreshInFlight) {
+    refreshInFlight = doRefresh().finally(() => {
+      refreshInFlight = null;
+    });
+  }
+  return refreshInFlight;
+}
+
+async function doRefresh(): Promise<boolean> {
+  const refreshToken = useAuth.getState().refreshToken;
+  if (!refreshToken) return false;
+
+  try {
+    const res = await fetch(apiUrl("/auth/refresh"), {
+      method: "POST",
+      credentials: "include",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (!res.ok) return false;
+
+    const body = (await res.json()) as ApiEnvelope<{
+      user?: AuthUser;
+      tokens: { accessToken: string; refreshToken: string };
+    }>;
+    if (
+      body.success !== true ||
+      !body.data?.tokens?.accessToken ||
+      !body.data.tokens.refreshToken
+    ) {
+      return false;
+    }
+    const { tokens, user } = body.data;
+    const prev = useAuth.getState();
+    useAuth.getState().setSession({
+      user: user ?? prev.user, // refresh response may not include the user
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Purge the invalid session and send the user back to the sign-in page. */
+function purgeSession() {
+  useAuth.getState().clearSession();
+  // Avoid a redirect loop if the user is already on an auth page; otherwise
+  // preserve the current path so login can send them back after re-auth.
+  if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+    const dest = encodeURIComponent(window.location.pathname + window.location.search);
+    window.location.replace(`/login?redirect=${dest}`);
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const doFetch = (token: string | null) =>
+    fetch(apiUrl(path), {
+      ...init,
+      // Cross-origin Render frontend ⇄ backend: send cookies if the backend ever
+      // sets them (CORS_ORIGINS is the explicit origin, so credentials are
+      // allowed). Harmless for the current Bearer-token flow.
+      credentials: "include",
+      headers: {
+        "content-type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(init?.headers ?? {}),
+      },
+    });
+
   // Attach the session access token when present.
-  const token = useAuth.getState().accessToken;
-  const res = await fetch(apiUrl(path), {
-    ...init,
-    // Cross-origin Render frontend ⇄ backend: send cookies if the backend ever
-    // sets them (CORS_ORIGINS is the explicit origin, so credentials are
-    // allowed). Harmless for the current Bearer-token flow.
-    credentials: "include",
-    headers: {
-      "content-type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(init?.headers ?? {}),
-    },
-  });
+  let token = useAuth.getState().accessToken;
+  let res = await doFetch(token);
+
+  // Access token expired mid-session: refresh once, then retry the request.
+  // If the refresh token is also invalid — or the retry still 401s (session
+  // revoked server-side) — drop the session and redirect to the sign-in page.
+  if (res.status === 401 && !AUTH_PATHS.has(path)) {
+    const refreshed = await attemptRefresh();
+    if (refreshed) {
+      token = useAuth.getState().accessToken;
+      res = await doFetch(token);
+      if (res.status === 401) {
+        purgeSession();
+      }
+    } else {
+      purgeSession();
+    }
+  }
 
   let body: ApiEnvelope<T> | undefined;
   try {
