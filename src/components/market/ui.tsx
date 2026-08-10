@@ -30,7 +30,7 @@ export function Panel({
   return (
     <section className={cn("panel overflow-hidden", className)}>
       {(title || action) && (
-        <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border px-4 py-3 sm:px-5">
+        <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border px-4 py-2.5 sm:px-5">
           <div className="min-w-0">
             {title && <h2 className="truncate text-sm font-semibold tracking-tight">{title}</h2>}
             {description && <p className="truncate text-xs text-muted-foreground">{description}</p>}
@@ -48,8 +48,8 @@ export function ChangeBadge({ value, className }: { value: number; className?: s
   return (
     <span
       className={cn(
-        "num inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-xs font-medium",
-        up ? "bg-up/10 text-up" : "bg-down/10 text-down",
+        "num inline-flex items-center gap-0.5 rounded-full border border-border/40 px-2 py-0.5 text-[11px] font-semibold tracking-tight",
+        up ? "border-up/15 bg-up/12 text-up" : "border-down/15 bg-down/12 text-down",
         className,
       )}
     >
@@ -90,7 +90,11 @@ export function StatCard({
           <p className="truncate text-xs text-muted-foreground">{label}</p>
           <p className="num mt-1.5 truncate text-xl font-semibold tracking-tight">{value}</p>
         </div>
-        {icon && <span className={cn("grid size-9 shrink-0 place-items-center rounded-lg", ring)}>{icon}</span>}
+        {icon && (
+          <span className={cn("grid size-9 shrink-0 place-items-center rounded-lg", ring)}>
+            {icon}
+          </span>
+        )}
       </div>
       <div className="mt-3 flex items-center gap-2">
         {typeof change === "number" && <ChangeBadge value={change} />}
@@ -122,7 +126,9 @@ export function MarketCard({ asset }: { asset: Asset }) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <Link to="/chart">Open chart</Link>
+              <Link to="/chart" search={{ symbol: asset.symbol }}>
+                Open chart
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/watchlist">Add to watchlist</Link>
@@ -137,7 +143,9 @@ export function MarketCard({ asset }: { asset: Asset }) {
       <p className="num mt-3 text-lg font-semibold tracking-tight">{fmtPrice(asset.price)}</p>
       <div className="mt-1 flex items-center justify-between gap-2">
         <ChangeBadge value={asset.change24h} />
-        <span className="truncate text-[11px] text-muted-foreground">Vol {fmtCompact(asset.volume24h)}</span>
+        <span className="truncate text-[11px] text-muted-foreground">
+          Vol {fmtCompact(asset.volume24h)}
+        </span>
       </div>
       <div className="mt-3">
         <Sparkline data={asset.spark} positive={up} />
@@ -167,21 +175,45 @@ export function IndicatorCard({
       <p className="num mt-1.5 text-lg font-semibold tracking-tight">{value}</p>
       <p className={cn("mt-0.5 truncate text-xs font-medium", text)}>{signal}</p>
       <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-        <div className={cn("h-full rounded-full transition-all", color)} style={{ width: `${progress}%` }} />
+        <div
+          className={cn("h-full rounded-full transition-all", color)}
+          style={{ width: `${progress}%` }}
+        />
       </div>
     </div>
   );
 }
 
-export function SentimentGauge({ score, label, size = 220 }: { score: number; label: string; size?: number }) {
+export function SentimentGauge({
+  score,
+  label,
+  size = 220,
+}: {
+  score: number;
+  label: string;
+  size?: number;
+}) {
   const r = 80;
   const c = Math.PI * r;
   const offset = c - (score / 100) * c;
-  const color = score >= 75 ? "var(--up)" : score >= 55 ? "var(--btc)" : score >= 45 ? "var(--muted-foreground)" : "var(--down)";
+  const color =
+    score >= 75
+      ? "var(--up)"
+      : score >= 55
+        ? "var(--btc)"
+        : score >= 45
+          ? "var(--muted-foreground)"
+          : "var(--down)";
   return (
     <div className="relative mx-auto" style={{ width: size }}>
       <svg viewBox="0 0 200 110" className="w-full">
-        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--muted)" strokeWidth="14" strokeLinecap="round" />
+        <path
+          d="M 20 100 A 80 80 0 0 1 180 100"
+          fill="none"
+          stroke="var(--muted)"
+          strokeWidth="14"
+          strokeLinecap="round"
+        />
         <path
           d="M 20 100 A 80 80 0 0 1 180 100"
           fill="none"
@@ -219,7 +251,15 @@ export function AreaChartMini({
   );
 }
 
-export function EmptyState({ title, description, action }: { title: string; description: string; action?: ReactNode }) {
+export function EmptyState({
+  title,
+  description,
+  action,
+}: {
+  title: string;
+  description: string;
+  action?: ReactNode;
+}) {
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border px-6 py-14 text-center">
       <p className="text-sm font-medium">{title}</p>
@@ -242,8 +282,14 @@ export function AssetRowCell({ asset }: { asset: Asset }) {
 }
 
 export function TrendBadge({ trend }: { trend: Asset["trend"] }) {
-  const tone = trend.includes("Bull") ? "bg-up/10 text-up" : trend.includes("Bear") ? "bg-down/10 text-down" : "bg-muted text-muted-foreground";
-  return <span className={cn("rounded-md px-2 py-0.5 text-[11px] font-medium", tone)}>{trend}</span>;
+  const tone = trend.includes("Bull")
+    ? "bg-up/10 text-up"
+    : trend.includes("Bear")
+      ? "bg-down/10 text-down"
+      : "bg-muted text-muted-foreground";
+  return (
+    <span className={cn("rounded-md px-2 py-0.5 text-[11px] font-medium", tone)}>{trend}</span>
+  );
 }
 
 export function MarketCapCell({ value }: { value: number }) {

@@ -49,7 +49,7 @@ function MarketOverview() {
 
   return (
     <AppShell title="Market Overview" subtitle="Crypto, stocks & forex — real-time market flows">
-      <div className="space-y-5">
+      <div className="space-y-4">
         <TickerBoard />
 
         <div className="grid gap-4 xl:grid-cols-3">
@@ -59,16 +59,19 @@ function MarketOverview() {
             description="Total capitalization, last 90 days"
             action={<ChangeBadge value={globalStats.marketCapChange} />}
           >
-            <p className="num text-3xl font-semibold tracking-tight">
-              {fmtCompact(globalStats.marketCap)}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              24h volume {fmtCompact(globalStats.volume24h)}
-            </p>
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <p className="num text-3xl font-semibold tracking-tight">
+                {fmtCompact(globalStats.marketCap)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                24h volume {fmtCompact(globalStats.volume24h)}
+              </p>
+            </div>
             <Sparkline
               data={marketCapHistory.map((d) => d.value)}
               positive
-              className="mt-4 h-56"
+              dot
+              className="mt-4 h-44"
               strokeWidth={2}
             />
           </Panel>
@@ -175,19 +178,23 @@ function MarketOverview() {
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
               {heat.map((a) => {
                 const up = a.change24h >= 0;
-                const intensity = Math.min(Math.abs(a.change24h) / 8, 1) * 0.35 + 0.08;
+                const intensity = Math.min(Math.abs(a.change24h) / 8, 1) * 0.32 + 0.1;
                 return (
                   <Link
                     key={a.id}
                     to="/chart"
-                    className="rounded-lg border border-border p-3 transition-transform hover:scale-[1.02]"
+                    search={{ symbol: a.symbol }}
+                    className="group rounded-xl border border-border p-3 transition-all hover:-translate-y-0.5 hover:border-primary/40"
                     style={{
                       background: `color-mix(in oklab, var(--${up ? "up" : "down"}) ${intensity * 100}%, transparent)`,
                     }}
                   >
-                    <p className="truncate text-xs font-semibold">{a.symbol}</p>
+                    <p className="truncate text-xs font-semibold tracking-wide">{a.symbol}</p>
                     <p
-                      className={cn("num mt-1 text-sm font-semibold", up ? "text-up" : "text-down")}
+                      className={cn(
+                        "num mt-1.5 text-base font-semibold tracking-tight",
+                        up ? "text-up" : "text-down",
+                      )}
                     >
                       {fmtPct(a.change24h)}
                     </p>
@@ -206,12 +213,22 @@ function MarketOverview() {
                 <li key={a.id}>
                   <Link
                     to="/chart"
-                    className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 transition-colors hover:bg-accent/40"
+                    search={{ symbol: a.symbol }}
+                    className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5 transition-colors hover:bg-accent/40 sm:px-5"
                   >
                     <AssetRowCell asset={a} />
-                    <div className="text-right">
-                      <p className="num text-sm font-medium">{fmtPrice(a.price)}</p>
-                      <ChangeBadge value={a.change24h} className="mt-1" />
+                    <div className="flex items-center gap-4">
+                      <Sparkline
+                        data={a.spark}
+                        positive={a.change24h >= 0}
+                        dot
+                        className="hidden h-7 w-20 sm:block"
+                        fill={false}
+                      />
+                      <div className="w-24 text-right">
+                        <p className="num text-sm font-medium">{fmtPrice(a.price)}</p>
+                        <ChangeBadge value={a.change24h} className="mt-1" />
+                      </div>
                     </div>
                   </Link>
                 </li>
@@ -260,14 +277,15 @@ function MarketOverview() {
               {assets.slice(0, 6).map((a) => (
                 <li
                   key={a.id}
-                  className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3"
+                  className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5 sm:px-5"
                 >
                   <AssetRowCell asset={a} />
                   <div className="flex items-center gap-4">
                     <Sparkline
                       data={a.spark}
                       positive={a.change24h >= 0}
-                      className="hidden h-7 w-24 sm:block"
+                      dot
+                      className="hidden h-7 w-20 sm:block"
                       fill={false}
                     />
                     <div className="text-right">

@@ -49,6 +49,9 @@ import {
 import type { ChartDrawing, DrawingToolId } from "@/lib/chart-drawings";
 
 export const Route = createFileRoute("/chart")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    ...(typeof search["symbol"] === "string" ? { symbol: search["symbol"] } : {}),
+  }),
   head: () => ({
     meta: [
       { title: "Advanced Chart — Cryptolytic" },
@@ -131,7 +134,8 @@ function SwatchRow({
 
 function ChartPage() {
   const navigate = useNavigate();
-  const [symbol, setSymbol] = useState("BTC");
+  const { symbol: urlSymbol } = Route.useSearch();
+  const [symbol, setSymbol] = useState(urlSymbol ?? "BTC");
   const [tf, setTf] = useState<string>("4H");
   const [fullscreen, setFullscreen] = useState(false);
   const [activeTool, setActiveTool] = useState<DrawingToolId | null>(null);
@@ -145,6 +149,12 @@ function ChartPage() {
   const asset = assets.find((a) => a.symbol === symbol) ?? assets[0]!;
 
   const drawingActive = activeTool !== null && activeTool !== "pointer";
+
+  // Deep-link support: when arriving with ?symbol=X (e.g. from the market
+  // table), keep the chart in sync with the URL symbol.
+  useEffect(() => {
+    if (urlSymbol && urlSymbol !== symbol) setSymbol(urlSymbol);
+  }, [urlSymbol, symbol]);
 
   const toggleIndicator = (key: string) =>
     setActiveIndicators((prev) =>

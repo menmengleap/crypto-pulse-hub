@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import { ChangeBadge, MarketCard, Panel } from "@/components/market/ui";
+import { ChangeBadge, Panel } from "@/components/market/ui";
 import { LiveBadge } from "@/components/market/live-badge";
 import { Sparkline } from "@/components/market/sparkline";
-import { fmtCompact, fmtPrice } from "@/lib/market-data";
+import { AssetLogo } from "@/components/market/asset-logo";
+import { fmtCompact, fmtPrice, type Asset } from "@/lib/market-data";
 import { useLiveAssets } from "@/lib/realtime";
 import { useLiveTickers, type GlobalTicker } from "@/lib/global-market";
 
@@ -22,37 +23,117 @@ const descriptions: Record<Tab, string> = {
   forex: "FX & metals · exchangerate-api ⇄ Frankfurter",
 };
 
-function TickerRow({ t }: { t: GlobalTicker }) {
-  const up = t.change >= 0;
+/** Unified row shape — crypto rows carry the full Asset (real logo). */
+type Row = {
+  id: string;
+  symbol: string;
+  name: string;
+  asset?: Asset;
+  price: number;
+  change: number;
+  volume: number;
+  marketCap: number | undefined;
+  spark: number[];
+  /** Link target for clickable rows (crypto → chart). */
+  to?: "/chart";
+};
+
+function AssetCell({ row }: { row: Row }) {
   return (
-    <li className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3">
-      <div className="flex min-w-0 items-center gap-2.5">
-        <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-border bg-surface text-[10px] font-bold text-muted-foreground">
-          {t.symbol.slice(0, 3)}
+    <div className="flex min-w-0 items-center gap-2.5">
+      {row.asset ? (
+        <AssetLogo asset={row.asset} className="size-7 rounded-md" />
+      ) : (
+        <span className="grid size-7 shrink-0 place-items-center rounded-md border border-border bg-surface text-[10px] font-bold text-muted-foreground">
+          {row.symbol.slice(0, 3)}
         </span>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium">{t.symbol}</p>
-          <p className="truncate text-[11px] text-muted-foreground">{t.name}</p>
-        </div>
+      )}
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium leading-tight text-foreground">{row.symbol}</p>
+        <p className="truncate text-[11px] leading-tight text-muted-foreground">{row.name}</p>
       </div>
-      <div className="flex items-center gap-5 sm:gap-6">
-        <Sparkline data={t.spark} positive={up} className="hidden h-7 w-24 md:block" fill={false} />
-        <div className="hidden w-20 text-right sm:block">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Vol</p>
-          <p className="num text-[11px] font-medium">{fmtCompact(t.volume)}</p>
-        </div>
-        {t.marketCap !== undefined && (
-          <div className="hidden w-20 text-right lg:block">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Mkt cap</p>
-            <p className="num text-[11px] font-medium">{fmtCompact(t.marketCap)}</p>
-          </div>
-        )}
-        <div className="w-24 text-right">
-          <p className="num truncate text-sm font-semibold">{fmtPrice(t.price)}</p>
-          <ChangeBadge value={t.change} className="mt-1" />
-        </div>
-      </div>
-    </li>
+    </div>
+  );
+}
+
+function TickerRows({ rows }: { rows: Row[] }) {
+  const navigate = useNavigate();
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[680px] border-separate border-spacing-0">
+        <caption className="sr-only">Live global market prices</caption>
+        <thead>
+          <tr className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70">
+            <th className="border-b border-border py-2 pl-4 text-left font-semibold sm:pl-5">
+              Asset
+            </th>
+            <th className="border-b border-border py-2 pr-2 text-right font-semibold">Price</th>
+            <th className="border-b border-border py-2 px-2 text-right font-semibold">24h %</th>
+            <th className="hidden border-b border-border py-2 px-2 text-right font-semibold md:table-cell">
+              24h Vol
+            </th>
+            <th className="hidden border-b border-border py-2 px-2 text-right font-semibold lg:table-cell">
+              Mkt Cap
+            </th>
+            <th className="border-b border-border py-2 pl-2 pr-4 text-right font-semibold sm:pr-5">
+              Last 7d
+            </th>
+          </tr>
+        </thead>
+        <tbody className="[&>tr:last-child>td]:border-0">
+          {rows.map((row) => (
+            <tr
+              key={row.id}
+              onClick={
+                row.to
+                  ? () => void navigate({ to: "/chart", search: { symbol: row.symbol } })
+                  : undefined
+              }
+              onKeyDown={
+                row.to
+                  ? (e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        void navigate({ to: "/chart", search: { symbol: row.symbol } });
+                      }
+                    }
+                  : undefined
+              }
+              tabIndex={row.to ? 0 : undefined}
+              role={row.to ? "link" : undefined}
+              aria-label={row.to ? `Open ${row.symbol} chart` : undefined}
+              className={cn("transition-colors", row.to && "cursor-pointer hover:bg-accent/40")}
+            >
+              <td className="border-b border-border/60 py-2.5 pl-4 pr-2 sm:pl-5">
+                <AssetCell row={row} />
+              </td>
+              <td className="border-b border-border/60 py-2.5 pr-2 text-right">
+                <p className="num text-sm font-semibold tracking-tight">{fmtPrice(row.price)}</p>
+              </td>
+              <td className="border-b border-border/60 py-2.5 px-2 text-right">
+                <ChangeBadge value={row.change} />
+              </td>
+              <td className="hidden border-b border-border/60 py-2.5 px-2 text-right md:table-cell">
+                <p className="num text-xs text-muted-foreground">{fmtCompact(row.volume)}</p>
+              </td>
+              <td className="hidden border-b border-border/60 py-2.5 px-2 text-right lg:table-cell">
+                <p className="num text-xs text-muted-foreground">
+                  {row.marketCap !== undefined ? fmtCompact(row.marketCap) : "—"}
+                </p>
+              </td>
+              <td className="border-b border-border/60 py-2.5 pl-2 pr-4 text-right sm:pr-5">
+                <Sparkline
+                  data={row.spark}
+                  positive={row.change >= 0}
+                  dot
+                  className="ml-auto h-7 w-20"
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -61,66 +142,70 @@ export function TickerBoard() {
   const assets = useLiveAssets();
   const stocks = useLiveTickers("stocks", tab === "stocks");
   const forex = useLiveTickers("forex", tab === "forex");
-  const top = assets.slice(0, 6);
+
+  const cryptoRows: Row[] = assets.slice(0, 8).map((a) => ({
+    id: a.id,
+    symbol: a.symbol,
+    name: a.name,
+    asset: a,
+    price: a.price,
+    change: a.change24h,
+    volume: a.volume24h,
+    marketCap: a.marketCap,
+    spark: a.spark,
+    to: "/chart",
+  }));
+
+  const toRows = (list: GlobalTicker[]): Row[] =>
+    list.map((t) => ({
+      id: t.id,
+      symbol: t.symbol,
+      name: t.name,
+      price: t.price,
+      change: t.change,
+      volume: t.volume,
+      marketCap: t.marketCap,
+      spark: t.spark,
+    }));
+
+  const rows = tab === "crypto" ? cryptoRows : tab === "stocks" ? toRows(stocks) : toRows(forex);
 
   return (
-    <Panel title="Global Markets" description={descriptions[tab]} action={<LiveBadge />}>
-      <div className="mb-4 flex items-center gap-1 rounded-xl border border-border bg-surface p-1 w-fit">
-        {tabs.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            className={cn(
-              "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
-              tab === t.key
-                ? "bg-primary/15 text-primary"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {t.label}
-          </button>
-        ))}
+    <Panel
+      title="Global Markets"
+      description={descriptions[tab]}
+      action={<LiveBadge />}
+      bodyClassName="p-0"
+    >
+      {" "}
+      <div className="flex flex-wrap items-center gap-3 px-4 pb-1 pt-4 sm:px-5">
+        <div
+          role="tablist"
+          aria-label="Market asset class"
+          className="flex items-center gap-1 rounded-full border border-border bg-surface p-1"
+        >
+          {tabs.map((t) => (
+            <button
+              key={t.key}
+              role="tab"
+              aria-selected={tab === t.key}
+              onClick={() => setTab(t.key)}
+              className={cn(
+                "rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors",
+                tab === t.key
+                  ? "bg-primary/15 text-primary"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
-
-      {tab === "crypto" && (
-        <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:overflow-visible sm:px-0">
-          <div className="grid w-max grid-flow-col gap-3 sm:w-auto sm:grid-flow-row sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-            {top.map((a) => (
-              <MarketCard key={a.id} asset={a} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {(tab === "stocks" || tab === "forex") && (
-        <div className="hidden grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 pb-2 text-[10px] uppercase tracking-wider text-muted-foreground/70 sm:grid">
-          <span>Instrument</span>
-          <div className="flex items-center gap-5 sm:gap-6">
-            <span className="hidden w-24 md:block" />
-            <span className="hidden w-20 sm:block">24h vol</span>
-            <span className="hidden w-20 lg:block">Market cap</span>
-            <span className="w-24 text-right">Price</span>
-          </div>
-        </div>
-      )}
-
-      {tab === "stocks" && (
-        <ul className="divide-y divide-border rounded-xl border border-border">
-          {stocks.map((t) => (
-            <TickerRow key={t.id} t={t} />
-          ))}
-        </ul>
-      )}
-
-      {tab === "forex" && (
-        <ul className="divide-y divide-border rounded-xl border border-border">
-          {forex.map((t) => (
-            <TickerRow key={t.id} t={t} />
-          ))}
-        </ul>
-      )}
-
-      <p className="mt-4 text-[11px] text-muted-foreground">
+      <div className="pb-1">
+        <TickerRows rows={rows} />
+      </div>
+      <p className="px-4 pb-4 pt-3 text-[11px] text-muted-foreground sm:px-5">
         All prices stream live from the Cryptolytic API — Binance (crypto), Yahoo Finance ⇄ Finnhub
         (stocks) and exchangerate-api ⇄ Frankfurter (forex), with automatic provider failover.{" "}
         <Link to="/chart" className="text-primary hover:underline">
