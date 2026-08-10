@@ -1,676 +1,306 @@
-# Crypto Pulse Hub
+# Cryptolytic — Market Intelligence Terminal
+
+A production-ready **read-only market analytics platform**. Cryptolytic is a
+three-service system that turns public market data (crypto, forex, stocks) and
+fresh news into a dense, professional analyst terminal — charts, technical
+indicators, AI-style analysis, watchlists, alerts, sentiment and a research
+section — with **no trading, orders, wallets, deposits or withdrawals** anywhere
+in the stack. By design.
 
-បាន។ ខាងក្រោមនេះជា Prompt សម្រាប់ AI Coding Agent ដើម្បី Build Frontend ដោយ ផ្តោតខ្លាំងលើ UI/UX និងយករូបដែលអ្នកផ្ញើជាផ្នែកមួយនៃ Design Reference។
-
-Build a modern professional Crypto Market Analytics Web App frontend.
-
-IMPORTANT:
-Focus primarily on FRONTEND UI/UX, visual quality, layout, interactions, responsiveness, and component architecture.
-Do NOT build trading execution, Buy/Sell, Orders, Wallet, Deposit, Withdrawal, or payment functionality.
-Use mock/static data for now.
-Do NOT build backend or database functionality yet.
-
-DESIGN DIRECTION
-----------------
-Use the uploaded reference image as the primary visual inspiration.
-
-The design should feel like a premium professional crypto market intelligence platform:
-- Dark theme
-- Black / graphite background
-- Elegant green market-positive accents
-- Red market-negative accents
-- Orange Bitcoin accents
-- Subtle gradients
-- Soft glow effects
-- Thin borders
-- Rounded cards
-- Clean typography
-- Dense but organized financial dashboard
-- Desktop-first
-- Fully responsive
-- Professional, minimal, modern
-- Do NOT copy the reference image exactly.
-- Create our own branding, layout details, components, spacing, and UX.
-
-PRODUCT PURPOSE
----------------
-This is a MARKET ANALYSIS platform.
-
-Users can:
-- Monitor markets
-- View charts
-- Analyze technical indicators
-- Read crypto news
-- Use market screener
-- Create watchlists
-- View market sentiment
-- View market statistics
-- Use AI analysis UI
-- Save analysis
-- Manage their profile
-
-Users CANNOT:
-- Buy
-- Sell
-- Place orders
-- Trade
-- Deposit
-- Withdraw
-- Connect trading execution accounts
-
-TECH STACK
-----------
-Use:
-- Next.js
-- TypeScript
-- Tailwind CSS
-- shadcn/ui
-- Lucide React icons
-- Zustand where useful
-- TanStack Query where useful
-- TradingView Lightweight Charts for chart rendering
-
-Use clean reusable React components.
-Keep the frontend architecture scalable.
-
-PAGES
------
-Create these frontend pages:
-
-1. Landing Page
-2. Login
-3. Register
-4. Forgot Password
-5. Market Overview
-6. Spot Market
-7. Derivatives Market
-8. Crypto Assets
-9. Advanced Chart
-10. Compare
-11. Watchlist
-12. Fear & Greed
-13. Market Sentiment
-14. Market Cycle
-15. Bitcoin Dominance
-16. Market Heatmap
-17. News
-18. News Article
-19. Market Screener
-20. AI Analysis
-21. Alerts
-22. Saved Analysis
-23. Profile
-24. Settings
-
-MAIN APP SHELL
---------------
-Create a professional application shell:
-
-Left sidebar:
-- Logo / brand
-- Market Overview
-- Spot Market
-- Derivatives
-- Crypto Assets
-- Fear & Greed
-- Market Sentiment
-- Market Cycle
-- Bitcoin Dominance
-- Market Heatmap
-- Advanced Chart
-- Compare
-- Watchlist
-- News
-- Screener
-- AI Analysis
-- Alerts
-- Saved Analysis
-- Profile
-- Settings
-
-Sidebar requirements:
-- Collapsible
-- Active state
-- Hover state
-- Icons
-- Smooth transitions
-- Tooltips when collapsed
-- Clean section labels
-
-Top navigation:
-- Page title
-- Global search
-- Search assets/news
-- Notifications
-- Theme/settings
-- User avatar/profile menu
-
-MARKET OVERVIEW
----------------
-Create a dashboard inspired by the uploaded reference.
-
-Top market cards:
-- Bitcoin
-- Ethereum
-- Tether
-- Solana
-- XRP
-- BNB
-
-Each card should show:
-- Icon
-- Symbol
-- Name
-- Price
-- 24h change
-- Mini sparkline
-- Positive/negative state
-- More menu
-
-Main dashboard layout:
-- Crypto Market Cap chart
-- Market Sentiment card
-- Fear & Greed card
-- Bitcoin Dominance
-- Open Interest
-- Market Volume
-- Market Index
-- Market Heatmap preview
-- Trending assets
-
-Use responsive CSS grid layouts.
-
-CHART EXPERIENCE
-----------------
-Create a dedicated Advanced Chart page.
-
-Use TradingView Lightweight Charts only as the chart rendering engine.
-
-Do NOT reproduce the entire TradingView UI.
-
-Build our own surrounding UI.
-
-Chart header:
-- Symbol
-- Current price
-- 24h change
-- Market status
-- Search/change asset
-
-Chart toolbar:
-- 1m
-- 5m
-- 15m
-- 30m
-- 1H
-- 4H
-- 1D
-- 1W
-- Indicators
-- Compare
-- Drawing
-- Chart settings
-- Fullscreen
-
-Chart workspace:
-- Candlestick chart
-- Volume
-- Crosshair
-- Zoom
-- Pan
-- Responsive chart
-- Custom toolbar
-- Clean dark styling
-
-Below chart create:
-- Technical Analysis
-- Market Structure
-- Momentum
-- Volume
-- Support & Resistance
-- AI Analysis
-
-TECHNICAL ANALYSIS UI
----------------------
-Create polished analysis cards for:
-- RSI
-- MACD
-- EMA 20
-- EMA 50
-- EMA 200
-- Bollinger Bands
-- Volume
-- Trend
-- Momentum
-- Market Structure
-
-Example:
-
-RSI
-64.2
-Neutral / Bullish
-
-MACD
-Bullish
-
-Trend
-Strong Bullish
-
-Market Structure
-Higher High / Higher Low
-
-Support
-$116,400
-
-Resistance
-$120,200
-
-Use visual indicators, progress bars, badges, mini charts, and clear hierarchy.
-
-WATCHLIST
----------
-Create customizable watchlists.
-
-Features:
-- Create watchlist
-- Rename
-- Delete
-- Add asset
-- Remove asset
-- Reorder assets
-- Search
-- Favorite
-
-Show:
-- Symbol
-- Price
-- Change
-- Volume
-- RSI
-- Trend
-- Mini chart
-
-MARKET SCREENER
----------------
-Create a professional market screener.
-
-Filters:
-- All
-- Bullish
-- Bearish
-- Breakout
-- Oversold
-- Overbought
-- High Volume
-- RSI
-- Market Cap
-- Price Change
-
-Table columns:
-- Asset
-- Price
-- 24h
-- Market Cap
-- Volume
-- RSI
-- Trend
-- Momentum
-
-Include:
-- Sorting
-- Filtering
-- Search
-- Pagination
-- Hover states
-
-NEWS PAGE
----------
-Create a premium crypto news interface.
-
-Categories:
-- All
-- Crypto
-- Bitcoin
-- Ethereum
-- Altcoins
-- DeFi
-- ETF
-- Regulation
-- Macro
-- Markets
-- Technology
-
-Layout:
-- Featured article
-- Trending topics
-- Latest news
-- News cards
-- Category filters
-- Search
-- Time labels
-- Source labels
-
-News card:
-- Image
-- Headline
-- Source
-- Time
-- Category
-- Related assets
-- Sentiment badge
-
-NEWS ARTICLE PAGE
------------------
-Create:
-- Large article header
-- Category
-- Title
-- Source
-- Published time
-- Hero image
-- Article body
-- Related assets
-- Market impact
-- Related news
-- "View Chart" action
-- AI summary UI
-
-AI ANALYSIS
------------
-Create an AI Analysis interface focused on market research.
-
-DO NOT make it look like a generic ChatGPT clone.
-
-Use an analyst-style interface.
-
-Example:
-
-AI MARKET ANALYSIS
-
-BTC / USDT
-4H
-
-Trend
-Bullish
-
-Momentum
-Strong
-
-Market Structure
-Higher High / Higher Low
-
-Key Resistance
-$120,200
-
-Key Support
-$116,400
-
-Market Context
-...
-
-Actions:
-- Analyze Current Chart
-- Analyze Multiple Timeframes
-- Explain Indicators
-- Summarize Market
-- Analyze News Impact
-
-Use loading states and skeletons.
-
-FEAR & GREED
-------------
-Create a visually impressive sentiment page.
-
-Show:
-- Large sentiment gauge
-- Current score
-- Previous score
-- 7-day history
-- 30-day history
-- Market explanation
-- Related market metrics
-
-BITCOIN DOMINANCE
------------------
-Create:
-- BTC dominance percentage
-- ETH dominance
-- Other assets
-- Historical chart
-- Market interpretation
-- Dominance comparison
-
-MARKET HEATMAP
---------------
-Create an interactive visual heatmap.
-
-Groups:
-- Bitcoin
-- Ethereum
-- Layer 1
-- Layer 2
-- DeFi
-- AI
-- Meme
-- Gaming
-
-Each block:
-- Symbol
-- Price change
-- Market cap
-- Hover information
-
-PROFILE
--------
-Create polished profile/settings pages.
-
-Profile:
-- Avatar
-- Name
-- Email
-- Username
-- Account information
-
-Preferences:
-- Default asset
-- Default timeframe
-- Chart preferences
-- Theme
-- Notifications
-
-Saved:
-- Watchlists
-- Charts
-- Analyses
-- AI history
-
-RESPONSIVE DESIGN
------------------
-Desktop:
-- Full sidebar
-- Large charts
-- Multi-column dashboard
-
-Tablet:
-- Collapsible sidebar
-- Adaptive grids
-
-Mobile:
-- Bottom navigation
-- Compact header
-- Horizontally scrollable market cards
-- Stacked dashboard cards
-- Full-width charts
-- Mobile-friendly tables
-- Bottom sheets for filters
-
-COMPONENT SYSTEM
-----------------
-Create reusable components:
-
-AppShell
-Sidebar
-Topbar
-MarketCard
-AssetCard
-Sparkline
-ChartContainer
-ChartToolbar
-IndicatorCard
-AnalysisCard
-SentimentGauge
-DominanceCard
-MarketCapCard
-VolumeCard
-Watchlist
-WatchlistRow
-ScreenerTable
-FilterBar
-NewsCard
-FeaturedNews
-NewsList
-AIAnalysisPanel
-StatCard
-Heatmap
-ProfileCard
-SettingsPanel
-Modal
-Dropdown
-Tooltip
-Tabs
-Badge
-Button
-Input
-Skeleton
-EmptyState
-
-INTERACTIONS
-------------
-Add polished UI interactions:
-- Sidebar collapse
-- Hover animations
-- Card hover
-- Dropdowns
-- Tabs
-- Filters
-- Search
-- Modal
-- Tooltips
-- Skeleton loading
-- Toast notifications
-- Smooth page transitions
-- Chart fullscreen
-- Watchlist interactions
-- Responsive navigation
-
-Do not overuse animations.
-Keep everything professional.
-
-DESIGN TOKENS
--------------
-Background:
-#08090B
-#0D0F12
-#111418
-
-Borders:
-#1E2329
-
-Text:
-#F5F7FA
-#9AA1AA
-
-Positive:
-Green
-
-Negative:
-Red
-
-Accent:
-Orange / Emerald
-
-Use subtle gradients only where appropriate.
-
-TYPOGRAPHY
-----------
-Use a modern UI font such as Inter.
-
-Strong visual hierarchy:
-- Large financial numbers
-- Medium section headings
-- Small metadata
-- Clear labels
-
-IMPORTANT UI RULES
-------------------
-- No Buy button
-- No Sell button
-- No Order panel
-- No Wallet
-- No Deposit
-- No Withdrawal
-- No Trading execution UI
-- No unnecessary financial dashboard clutter
-- Do not copy TradingView's complete interface
-- Do not copy the uploaded reference exactly
-- Build an original premium analytics product
-
-MOCK DATA
----------
-Use realistic mock crypto market data.
-
-Examples:
-BTC/USDT
-ETH/USDT
-SOL/USDT
-BNB/USDT
-XRP/USDT
-ADA/USDT
-DOGE/USDT
-AVAX/USDT
-
-No backend required.
-No real API required.
-No database required.
-
-Use local mock data and reusable data structures.
-
-QUALITY REQUIREMENTS
---------------------
-The result must look like a real production SaaS product, not a demo.
-
-Prioritize:
-1. Visual quality
-2. Layout
-3. Spacing
-4. Typography
-5. Component consistency
-6. Responsive behavior
-7. Interaction quality
-8. Accessibility
-
-Build the UI completely first.
-Use mock data everywhere.
-Make every page navigable.
-Make the application feel cohesive as one professional crypto market analytics platform.
-
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/46e5018a-4144-4f10-9c9a-1b28548a2c2f).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
 ```
+┌─────────────────┐        ┌──────────────────┐        ┌───────────────────┐
+│  React Frontend │ ─────▶ │   Go API Gateway │ ─────▶ │   Python Service  │
+│  (TanStack      │  /api  │  (chi + pgx)     │  /api/ │   (FastAPI,       │
+│   Start + Vite) │ ◀───── │                  │  v1/   │    pandas/numpy)  │
+└─────────────────┘        └───────┬──────────┘        └───────────────────┘
+                                   │
+                         ┌─────────┴──────────┐
+                         │  PostgreSQL (auth, │
+                         │  watchlists, saved │
+                         │  analyses, alerts) │
+                         └────────────────────┘
+                                   │
+              Market providers (server-side only, never the browser):
+              Crypto → Binance · Forex → exchangerate-api ⇄ Frankfurter
+              Stocks → Yahoo Finance ⇄ Finnhub · Research → Finnhub
+```
+
+---
+
+## Services
+
+| Service | Stack | Live URL | Purpose |
+| --- | --- | --- | --- |
+| `frontend` (`src/`) | TanStack Start (React 19), Vite, Tailwind CSS 4, shadcn/ui, Zustand, lightweight-charts | `cryptolytic-frontend.onrender.com` | Marketing site + analyst console UI |
+| `backend` (`backend/`) | Go 1.26, chi, pgx (PostgreSQL), JWT, gorilla/websocket | `cryptolytic-api.onrender.com` | REST + WebSocket API gateway, market data, auth |
+| `python-indicators` (`python-indicators/`) | FastAPI, pandas, numpy (no indicator libraries) | `python-indicators.onrender.com` | On-demand technical indicator math |
+
+---
+
+## Feature overview
+
+### Marketing site (public)
+- Homepage with a single smart **Open terminal** CTA — signed-out visitors go to
+  `/register`, signed-in users go straight into the console.
+- **New** page with release notes, pricing, and a **Finnhub Realtime** section:
+  Economic/earnings **calendar**, **company fundamentals** (PE, EPS growth, beta,
+  52-week range, target price…) and **Market News** panels.
+- Blog (changelog), team, testimonials, audience map, legal pages (terms,
+  policy, disclaimer), support FAQ, coming-soon.
+
+### Console (authenticated)
+- **Market overview** — TradingView/CoinMarketCap-inspired compact dashboard:
+  charcoal theme (`#0F172A`), dense ticker table, gradient sparklines, pill
+  change badges, live badges.
+- **Spot / Derivatives / Assets / Screener** — per-asset tables, sorting,
+  filtering, search, pagination.
+- **Advanced chart** (`lightweight-charts`) — candlesticks + volume, 8
+  timeframes, drawing overlay, **indicator overlay & sub-pane rendering**
+  (SMA, EMA, RSI, MACD, Bollinger, ATR, Stochastic, OBV) computed by the Python
+  microservice through the Go gateway.
+- **Compare / Watchlist / Saved analyses / Alerts** — real database-backed,
+  analysis-only alerts (price/RSA/EMA-cross conditions) that notify but never
+  trade.
+- **Fear & Greed / Sentiment / Market cycle / Bitcoin dominance / Heatmap** —
+  market-wide analytics pages.
+- **AI analysis** — rule-based structured market analysis generated server-side.
+- **Profile & Settings** — real user data from the database (name, avatar with
+  upload, member-since date) shown in the sidebar and navbar.
+- **News** — categorized headlines, article pages, sentiment badges.
+
+### Live market data (server-side only)
+Clients **never call providers directly** — the browser only ever talks to the Go
+backend (`User → Frontend → Backend → Provider`). The backend prefetches into an
+in-memory cache on background tickers and serves every frontend request from it:
+
+| Asset class | Provider(s) | Refresh cadence |
+| --- | --- | --- |
+| Crypto | Binance (public REST) | every 10 s |
+| Forex | exchangerate-api ⇄ Frankfurter (ECB) | every 30 s |
+| Stocks | Yahoo Finance ⇄ Finnhub | every 60 s |
+
+- **Automatic failover**: if the active provider fails on consecutive refresh
+  cycles it flips to the backup; a successful refresh resets the counter, so
+  forex and stocks keep switching back and forth as required.
+- **Graceful degradation**: when every provider is unreachable the API serves
+  deterministic mock data — the API never goes down with a third party.
+- **Bulk endpoints** (`/api/live/markets`, `/api/live/sparks`, …) replace the
+  old per-symbol fan-out, eliminating 429 rate-limit bursts from the frontend.
+- **Finnhub research endpoints** (`/api/finnhub/*`) with TTL caches and
+  single-flight fetch protection.
+
+---
+
+## Repository layout
+
+```
+.
+├── src/                      # React frontend (TanStack Start, file-based routing)
+│   ├── routes/               #   one .tsx per page (market, chart, news, settings…)
+│   ├── components/           #   ui/ (shadcn), layout/, market/, chart/
+│   └── lib/                  #   api client, auth store, realtime, global-market data
+├── backend/                  # Go API gateway
+│   ├── cmd/api/main.go       #   entrypoint: config → db → migrate → seed → http/ws
+│   ├── internal/
+│   │   ├── marketdata/       #   live providers, failover, mock fallback, Finnhub
+│   │   ├── handlers/  middleware/  routes/  repositories/  services/  ws/
+│   │   ├── config/  database/  models/  indicators/
+│   └── migrations/           #   embedded SQL schema
+├── python-indicators/        # FastAPI microservice
+│   ├── app/                  #   main.py, indicators.py (pure math), schemas.py
+│   └── tests/
+├── render.yaml               # Render blueprint for the Python service
+├── nitro.config.ts           # production /api/* proxy → Go backend
+└── vite.config.ts            # dev proxy /api → local Go backend (:8787)
+```
+
+---
+
+## Quick start (local development)
+
+### 1. Backend (Go) + PostgreSQL
+
+```bash
+cd backend
+cp .env.example .env          # set DATABASE_URL + JWT_SECRET (≥ 32 chars)
+docker compose up --build     # Postgres + API on :8080
+# or without Docker:
+#   PORT=8787 go run ./cmd/api
+```
+
+On first boot the server runs embedded SQL migrations, seeds the database with
+deterministic mock data (only when empty), then starts the HTTP API and the
+WebSocket stream. Health: `GET /api/health`.
+
+### 2. Python indicator microservice
+
+```bash
+cd python-indicators
+python -m venv .venv
+.venv/Scripts/pip install -r requirements.txt
+.venv/Scripts/python -m uvicorn app.main:app --reload --port 8000
+# smoke test
+curl -s http://localhost:8000/health        # {"status":"healthy"}
+```
+
+### 3. Frontend
+
+```bash
+npm i
+npm run dev                     # Vite dev server on :8080, /api proxied to :8787
+```
+
+> Locally the Go API runs on `:8787` (the port the Vite proxy expects) and the
+> frontend dev server on `:8080`. Production builds proxy `/api/*` through Nitro
+> to the deployed backend origin (see `nitro.config.ts`).
+
+---
+
+## Environment variables
+
+### Backend (`backend/.env`)
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `DATABASE_URL` | — | PostgreSQL DSN (**required**) |
+| `JWT_SECRET` | — | JWT signing secret (**required**, ≥ 32 chars in prod) |
+| `PORT` / `APP_ENV` | `8080` / `development` | HTTP port, strictness mode |
+| `JWT_ACCESS_TTL` / `JWT_REFRESH_TTL` | `15m` / `720h` | Token lifetimes |
+| `CORS_ORIGINS` | localhost origins | Allowed browser origins |
+| `RATE_LIMIT_RPS` / `RATE_LIMIT_BURST` | `20` / `40` | Per-IP token bucket |
+| `LIVE_DATA_ENABLED` | `true` | Enable live provider prefetching |
+| `CRYPTO_REFRESH_SECONDS` | `10` | 5–10 s window |
+| `FOREX_REFRESH_SECONDS` | `30` | 15–30 s window |
+| `STOCK_REFRESH_SECONDS` | `60` | 30–60 s window |
+| `FINNHUB_API_KEY` / `EXCHANGERATE_API_KEY` | — | Provider keys (never sent to the client) |
+| `INDICATOR_SERVICE_URL` | `http://localhost:8000` | Python microservice base URL |
+| `WS_ENABLED` / `SEED_ON_STARTUP` | `true` | WebSocket stream / first-boot seeding |
+
+### Frontend (`.env` / Render env)
+
+| Variable | Description |
+| --- | --- |
+| `VITE_API_BASE` | Optional; absolute backend origin (e.g. `https://cryptolytic-api.onrender.com`). Defaults to the same-origin `/api` proxy. |
+| `NITRO_API_PROXY` | Production `/api` proxy target (defaults to the deployed backend). |
+
+### Python service
+
+| Variable | Description |
+| --- | --- |
+| `PORT` | Uvicorn port (Render sets it automatically) |
+
+---
+
+## API surface
+
+The full reference lives in **[`backend/API.md`](./backend/API.md)**. Every
+response uses the envelope `{ success, data, meta }` / `{ success, error }`.
+Highlights:
+
+| Area | Endpoints |
+| --- | --- |
+| Auth | `POST /api/auth/register`, `login`, `refresh`, `logout`, `forgot-password`, `reset-password` |
+| Me | `GET/PATCH /api/me`, `PATCH /api/me/preferences` |
+| Live markets | `GET /api/live/markets`, `/api/live/global`, `/api/live/klines`, `/api/live/sparks`, `/api/live/stocks`, `/api/live/forex`, `/api/live/providers` |
+| Finnhub research | `GET /api/finnhub/events` (economic ⇄ earnings fallback), `/api/finnhub/fundamentals?symbol=`, `/api/finnhub/news` |
+| Indicators | `POST /api/indicators/calculate` (proxies to the Python service) |
+| Market structure | `/api/market-overview`, `/api/market-cap`, `/api/market-volume`, `/api/open-interest`, `/api/bitcoin-dominance` |
+| Sentiment | `/api/sentiment`, `/api/fear-greed`, `/api/heatmap` |
+| Watchlists / Analyses / Alerts | CRUD under `/api/watchlists`, `/api/analyses`, `/api/alerts` |
+| News | `GET /api/news`, `/api/news/:id`, `/api/news/categories`, `/api/news/trending` |
+| AI analysis | `POST /api/ai/analyze`, `GET /api/ai/analyses`, `/api/ai/analyses/:id` |
+| Realtime | `GET /api/ws/markets` (WebSocket, `market_snapshot` every 2 s) |
+| Health | `GET /api/health` and `GET /health` (monitor alias) |
+
+---
+
+## Technical indicators pipeline
+
+```
+React chart (OHLCV + indicator specs)
+        │  POST /api/indicators/calculate
+        ▼
+Go API gateway ── forwards payload verbatim ──▶ FastAPI /api/v1/indicators/calculate
+        ▲                                            │  pandas/numpy from scratch
+        └───────────── computed series ◀─────────────┘
+```
+
+- **Pure math**: SMA, EMA, RSI (Wilder), MACD, Bollinger, ATR, Stochastic, OBV —
+  implemented from first principles in `python-indicators/app/indicators.py`.
+  No ta-lib, no tti.
+- Warm-up NaNs are stripped; returned series align to candle timestamps.
+- The gateway never fabricates indicator data: if the Python service is
+  unreachable it returns `503 SERVICE_UNAVAILABLE` and the chart degrades
+  gracefully to candles only.
+
+---
+
+## Authentication & session handling
+
+- **bcrypt** password hashing; short-lived **JWT access tokens** (15 m) plus
+  opaque, revocable **refresh tokens** stored hashed in the `sessions` table.
+- OAuth sign-in with **Google & GitHub**; provider callbacks hit the frontend
+  origin and are proxied to the backend (`nitro.config.ts`).
+- Frontend API client auto-injects `Authorization: Bearer <token>`, refreshes
+  the access token exactly once on `401` (single-flight), retries the request,
+  and purges the session only when the refresh token itself is dead.
+- **Session gate**: route guards wait for storage hydration *and* a backend
+  `/api/me` validation before deciding where to redirect — closing the classic
+  `/login ⇄ /market` infinite redirect loop. Validation is cached 60 s per
+  token so console navigation never bursts `/me` calls, and network errors
+  (Render cold starts) never log users out.
+- A `/health` poll (45 s) keeps the free-tier instance warm and surfaces
+  backend status in the UI.
+
+---
+
+## Deployment (Render)
+
+The platform runs as three Render services; `render.yaml` manages the Python
+microservice blueprint (the Go API and frontend were deployed via the Render
+dashboard).
+
+1. **Python microservice** — blueprint service `python-indicators`
+   (root dir `python-indicators`, `uvicorn app.main:app`). Verify
+   `https://python-indicators.onrender.com/health`.
+2. **Go API** — set `INDICATOR_SERVICE_URL=https://python-indicators.onrender.com`
+   (and the provider keys / `JWT_SECRET` / `DATABASE_URL`) and redeploy.
+3. **Frontend** — set `NITRO_API_PROXY=https://cryptolytic-api.onrender.com`.
+   Pushing to `main` auto-deploys.
+
+**Cold starts**: free-tier instances spin down after ~15 min idle. The gateway
+pings the Python `/health` every 60 s while awake, and the frontend polls
+`/health` every 45 s — add an external uptime monitor hitting both health
+endpoints every 5 min for 24/7 wakefulness.
+
+---
+
+## Security
+
+- Parameterized queries everywhere (pgx); bcrypt hashing; JWT verification with
+  issuer + HMAC-method checks; per-IP token-bucket rate limiting; CORS
+  allow-list; hardened headers (nosniff, framing DENY, Referrer-Policy, CSP,
+  no-store). Provider API keys stay server-side. `JWT_SECRET` ≥ 32 chars is
+  enforced in production.
+
+## Testing
+
+```bash
+cd backend && go test ./... && go vet ./...
+cd python-indicators && .venv/Scripts/python -m pytest tests -q
+cd .. && npx tsc --noEmit && npm run build
+```
+
+---
+
+## Disclaimer
+
+Market data from third-party providers is for **research and education only**.
+Nothing in this system — including the rule-based AI analysis — constitutes
+financial advice or a prediction of future returns.
+
+---
+
+This project was built with [Lovable](https://lovable.dev) and developed further
+in this repository. Continue developing in the [Lovable editor](https://lovable.dev/projects/46e5018a-4144-4f10-9c9a-1b28548a2c2f); every change
+committed to `main` syncs back into Lovable.
