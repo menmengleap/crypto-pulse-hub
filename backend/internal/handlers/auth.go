@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"strings"
 
 	"cryptolytic/backend/internal/config"
 	"cryptolytic/backend/internal/middleware"
@@ -181,6 +182,40 @@ func (h *UserHandler) UpdateMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	WriteOK(w, user, nil)
+}
+
+type updateProfileRequest struct {
+	DisplayName string `json:"displayName" validate:"max=120"`
+	Bio         string `json:"bio" validate:"max=1000"`
+	// AvatarURL is a client-resized image data URL (data:image/...;base64,...)
+	// or an external https URL (e.g. an OAuth provider avatar).
+	AvatarURL string `json:"avatarUrl" validate:"max=2000000"`
+}
+
+func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+	var req updateProfileRequest
+	if err := DecodeJSON(r, &req); err != nil {
+		writeBadRequest(w, err)
+		return
+	}
+
+	// Reject a fully-empty payload so a buggy client can't wipe the profile.
+	if req.DisplayName == "" && req.Bio == "" && req.AvatarURL == "" {
+		WriteError(w, http.StatusUnprocessableEntity, "VALIDATION_ERROR", "nothing to update")
+		return
+	}
+	// Only accept image data URLs or https avatars (never javascript:, data:html, etc).
+	if u := req.AvatarURL; u != "" && !strings.HasPrefix(u, "data:image/") && !strings.HasPrefix(u, "https://") {
+		WriteError(w, http.StatusUnprocessableEntity, "VALIDATION_ERROR", "avatarUrl must be an image or https URL")
+		return
+	}
+
+	profile, err := h.auth.UpdateProfile(r.Context(), middleware.UserID(r.Context()), req.DisplayName, req.Bio, req.AvatarURL)
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	WriteOK(w, profile, nil)
 }
 
 type preferencesRequest struct {

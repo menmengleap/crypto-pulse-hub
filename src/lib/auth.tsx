@@ -7,6 +7,8 @@ export type AuthUser = {
   email: string;
   name: string;
   role: string;
+  /** Account registration date (ISO) — used for the "Member since" display. */
+  createdAt?: string;
 };
 
 export type AuthSession = {
@@ -15,8 +17,20 @@ export type AuthSession = {
   refreshToken: string | null;
 };
 
+/** The user's profile row from the backend (profiles table). */
+export type UserProfile = {
+  userId: string;
+  displayName: string;
+  bio: string;
+  avatarUrl: string;
+};
+
 type AuthStore = AuthSession & {
+  profile: UserProfile | null;
   setSession: (session: AuthSession) => void;
+  setProfile: (profile: UserProfile) => void;
+  /** Merge a freshly-fetched /api/me response into the store. */
+  applyMe: (me: { user: AuthUser; profile: UserProfile }) => void;
   clearSession: () => void;
 };
 
@@ -30,8 +44,11 @@ export const useAuth = create<AuthStore>()(
       user: null,
       accessToken: null,
       refreshToken: null,
+      profile: null,
       setSession: (session) => set(session),
-      clearSession: () => set({ user: null, accessToken: null, refreshToken: null }),
+      setProfile: (profile) => set({ profile }),
+      applyMe: ({ user, profile }) => set({ user, profile }),
+      clearSession: () => set({ user: null, accessToken: null, refreshToken: null, profile: null }),
     }),
     { name: "cryptolytic-auth" },
   ),

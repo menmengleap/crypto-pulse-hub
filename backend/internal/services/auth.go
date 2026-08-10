@@ -239,6 +239,18 @@ func (s *AuthService) UpdateMe(ctx context.Context, userID, name, email string) 
 	return s.users.GetByID(ctx, userID)
 }
 
+// UpdateProfile updates the user's profile (display name, bio, avatar) and
+// returns the fresh row. The avatar is stored as an image data URL in the
+// avatar_url column (client-resized before upload), so it lives in the same
+// database as the rest of the user's data.
+func (s *AuthService) UpdateProfile(ctx context.Context, userID, displayName, bio, avatarURL string) (*models.Profile, error) {
+	p := &models.Profile{UserID: userID, DisplayName: displayName, Bio: bio, AvatarURL: avatarURL}
+	if err := s.users.UpdateProfile(ctx, p); err != nil {
+		return nil, err
+	}
+	return s.users.GetProfile(ctx, userID)
+}
+
 func (s *AuthService) UpdatePreferences(ctx context.Context, prefs *models.UserPreference) error {
 	return s.users.UpdatePreferences(ctx, prefs)
 }

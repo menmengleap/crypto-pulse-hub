@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { z } from "zod";
-import { api, type MeResponse } from "@/lib/api";
+import { refreshMe } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
 const callbackSearch = z.object({
@@ -26,11 +26,9 @@ function AuthCallbackPage() {
     if (accessToken && refreshToken) {
       setSession({ user: null, accessToken, refreshToken });
 
-      // Hydrate the user in the background — never blocks the redirect.
-      void api
-        .get<MeResponse>("/me")
-        .then((me) => setSession({ user: me.user, accessToken, refreshToken }))
-        .catch(() => {});
+      // Hydrate the user + profile in the background — never blocks the
+      // redirect. Real database data (name, avatar, member-since date).
+      void refreshMe().catch(() => {});
 
       const dest = sessionStorage.getItem("auth_redirect");
       sessionStorage.removeItem("auth_redirect");

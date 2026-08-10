@@ -37,7 +37,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GlobalSearch } from "./global-search";
+import { refreshMe } from "@/lib/api";
 import { useAuth, useAuthHydrated } from "@/lib/auth";
+
+// AppShell remounts on every console route navigation, but the profile only
+// changes through /api/me/profile — refetch at most once per minute so page
+// navigation doesn't spam the API.
+const PROFILE_REFRESH_MS = 60_000;
+let lastProfileRefresh = 0;
 import myioLogo from "@/Img/myio.png";
 
 type NavItem = { label: string; to: string; icon: LucideIcon };
@@ -187,6 +194,7 @@ export function AppShell({
   // sent to /login (client-side only — no SSR redirects).
   const accessToken = useAuth((s) => s.accessToken);
   const user = useAuth((s) => s.user);
+  const profile = useAuth((s) => s.profile);
   const clearSession = useAuth((s) => s.clearSession);
   const hydrated = useAuthHydrated();
   const navigate = useNavigate();
@@ -208,6 +216,16 @@ export function AppShell({
         search: { redirect: window.location.pathname },
         replace: true,
       });
+      return;
+    }
+    // Signed in — pull the real user + profile from the database so the
+    // sidebar/navbar show fresh name, avatar and member-since date (covers
+    // existing localStorage sessions; OAuth flow hydrates too). Throttled so
+    // route navigation doesn't fire a request every page change.
+    const now = Date.now();
+    if (now - lastProfileRefresh > PROFILE_REFRESH_MS) {
+      lastProfileRefresh = now;
+      void refreshMe().catch(() => {});
     }
   }, [accessToken, hydrated, navigate]);
 
@@ -219,11 +237,23 @@ export function AppShell({
     );
   }
 
-  const displayName = user?.name?.trim() || "Analyst";
+  const displayName = profile?.displayName?.trim() || user?.name?.trim() || "Analyst";
   const email = user?.email ?? "";
+  const avatarUrl = profile?.avatarUrl ?? "";
   const initials =
-    ((user?.name || user?.email || "??").match(/\b\w/g) ?? []).slice(0, 2).join("").toUpperCase() ||
-    "?";
+    ((displayName || user?.email || "??").match(/\b\w/g) ?? [])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "?";
+
+  /** "Aug 10, 2026" from an ISO registration date. */
+  const memberSince = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : "";
 
   return (
     <TooltipProvider delayDuration={120}>
@@ -245,7 +275,33 @@ export function AppShell({
           <div className="flex-1 overflow-y-auto px-3 py-5">
             <NavLinks collapsed={collapsed} />
           </div>
-          <div className="border-t border-sidebar-border p-3">
+          <div className="space-y-3 border-t border-sidebar-border p-3">
+            {!collapsed && (
+              <Link
+                to="/settings"
+                className="group flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-sidebar-accent/60"
+              >
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt=""
+                    className="size-9 shrink-0 rounded-lg object-cover ring-1 ring-primary/30"
+                  />
+                ) : (
+                  <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/15 text-xs font-semibold text-primary">
+                    {initials}
+                  </span>
+                )}
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-medium text-foreground">
+                    {displayName}
+                  </span>
+                  <span className="block truncate text-[11px] text-muted-foreground">
+                    {memberSince ? `Member since ${memberSince}` : email || "Account"}
+                  </span>
+                </span>
+              </Link>
+            )}
             <button
               onClick={() => setCollapsed((c) => !c)}
               className={cn(
@@ -333,17 +389,45 @@ export function AppShell({
                 </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex items-center gap-2 rounded-lg border border-border p-1 pr-2 transition-colors hover:border-primary/40">
-                    <span className="grid size-7 place-items-center rounded-md bg-primary/15 text-[11px] font-semibold text-primary">
-                      {initials}
-                    </span>
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt=""
+                        className="size-7 rounded-md object-cover ring-1 ring-primary/30"
+                      />
+                    ) : (
+                      <span className="grid size-7 place-items-center rounded-md bg-primary/15 text-[11px] font-semibold text-primary">
+                        {initials}
+                      </span>
+                    )}
                     <span className="hidden text-xs font-medium sm:block">{displayName}</span>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-52">
+                  <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel className="font-normal">
-                      <p className="text-sm font-medium">{displayName}</p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {email || "Signed in via OAuth"}
-                      </p>
+                      <div className="flex items-center gap-3">
+                        {avatarUrl ? (
+                          <img
+                            src={avatarUrl}
+                            alt=""
+                            className="size-10 rounded-lg object-cover ring-1 ring-primary/30"
+                          />
+                        ) : (
+                          <span className="grid size-10 place-items-center rounded-lg bg-primary/15 text-sm font-semibold text-primary">
+                            {initials}
+                          </span>
+                        )}
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">{displayName}</p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {email || "Signed in via OAuth"}
+                          </p>
+                          {memberSince && (
+                            <p className="truncate text-[11px] text-muted-foreground/70">
+                              Member since {memberSince}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>

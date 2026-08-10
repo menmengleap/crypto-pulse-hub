@@ -113,6 +113,7 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.Marke
 
 		r.Get("/api/me", userH.Me)
 		r.Patch("/api/me", userH.UpdateMe)
+		r.Patch("/api/me/profile", userH.UpdateProfile)
 		r.Patch("/api/me/preferences", userH.UpdatePreferences)
 
 		r.Get("/api/watchlists", watchlistH.List)

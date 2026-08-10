@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAuth, type AuthUser } from "./auth";
+import { useAuth, type AuthUser, type UserProfile } from "./auth";
 
 /**
  * Client for the Cryptolytic Go backend.
@@ -97,9 +97,20 @@ export type BackendStatus = "connecting" | "online" | "offline";
 /** Response shape of GET /api/me. */
 export type MeResponse = {
   user: AuthUser;
-  profile: { displayName: string; bio: string; avatarUrl: string };
+  profile: UserProfile;
   preferences: Record<string, unknown>;
 };
+
+/**
+ * Fetch the authenticated user + profile from the backend and hydrate the auth
+ * store. Call once after login/OAuth and on console mount so the sidebar and
+ * navbar always show real database data (name, avatar, member-since date).
+ */
+export async function refreshMe(): Promise<MeResponse> {
+  const me = await api.get<MeResponse>("/me");
+  useAuth.getState().applyMe({ user: me.user, profile: me.profile });
+  return me;
+}
 
 const HEALTH_URL = apiUrl("/health");
 
