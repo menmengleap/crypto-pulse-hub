@@ -357,6 +357,24 @@ database is unreachable.
 
 ---
 
+## Deployment notes (Render)
+
+1. Deploy the Python microservice first: **Dashboard → New → Blueprint** → this
+   repo → `render.yaml` creates `python-indicators` (or create a Web Service with
+   root dir `python-indicators`). Verify `https://python-indicators.onrender.com/health`
+   returns `{"status":"healthy"}`.
+2. On the `cryptolytic-api` service set
+   `INDICATOR_SERVICE_URL=https://python-indicators.onrender.com` and redeploy.
+   The gateway only proxies through this URL — the browser never talks to Python
+   directly. Without it the gateway dials the local default and returns
+   `503 SERVICE_UNAVAILABLE` on `/api/indicators/calculate`.
+3. Keep-alive: the gateway pings the Python `/health` endpoint every 60 s while
+   it is awake. For free-tier cold starts (both services spin down after ~15 min
+   idle) add an external monitor (e.g. UptimeRobot) hitting both `/health`
+   endpoints every 5 min.
+
+---
+
 ## Environment variables
 
 | Variable | Default | Description |
