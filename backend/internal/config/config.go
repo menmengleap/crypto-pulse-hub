@@ -43,6 +43,12 @@ type Config struct {
 	StockRefreshSeconds  int // cadence for stock tickers (30–60s recommended)
 	FinnhubAPIKey        string
 	ExchangeRateAPIKey   string
+
+	// IndicatorServiceURL points at the Python technical-indicator microservice
+	// (FastAPI). The gateway forwards OHLCV + indicator specs to it and returns
+	// the computed series. In production set it to the Render service URL, e.g.
+	// https://python-indicators.onrender.com.
+	IndicatorServiceURL string
 }
 
 // Load reads configuration from the environment. A local .env file is loaded
@@ -79,6 +85,7 @@ func Load() (*Config, error) {
 		StockRefreshSeconds:  getIntEnv("STOCK_REFRESH_SECONDS", 60),
 		FinnhubAPIKey:        getEnv("FINNHUB_API_KEY", "d9sjmqhr01qopv47qtdgd9sjmqhr01qopv47qte0"),
 		ExchangeRateAPIKey:   getEnv("EXCHANGERATE_API_KEY", "d7a369cd5aa48c44fd198e05"),
+		IndicatorServiceURL:  getEnv("INDICATOR_SERVICE_URL", "http://localhost:8000"),
 	}
 
 	if cfg.DatabaseURL == "" {

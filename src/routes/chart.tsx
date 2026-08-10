@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import {
   ArrowUpDown,
   Brain,
+  Check,
   Crosshair,
   Eraser,
   Expand,
@@ -17,12 +18,14 @@ import {
   SlidersHorizontal,
   Square,
   TrendingUp,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { PriceChart, type ChartStyle } from "@/components/chart/price-chart";
 import { Panel, IndicatorCard, ChangeBadge } from "@/components/market/ui";
 import { indicators, timeframes, fmtCompact, fmtPrice } from "@/lib/market-data";
+import { INDICATOR_PRESETS, presetByKey } from "@/lib/indicators";
 import { useLiveAssets, useMarketStatus } from "@/lib/realtime";
 import { cn } from "@/lib/utils";
 import {
@@ -136,11 +139,17 @@ function ChartPage() {
   const [chartType, setChartType] = useState<ChartStyle>("candles");
   const [upColor, setUpColor] = useState("#2ED3A0");
   const [downColor, setDownColor] = useState("#F0616D");
+  const [activeIndicators, setActiveIndicators] = useState<string[]>([]);
   const assets = useLiveAssets();
   const status = useMarketStatus();
   const asset = assets.find((a) => a.symbol === symbol) ?? assets[0]!;
 
   const drawingActive = activeTool !== null && activeTool !== "pointer";
+
+  const toggleIndicator = (key: string) =>
+    setActiveIndicators((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+    );
 
   // Keyboard shortcuts for the drawing tools (matches the dropdown hints).
   useEffect(() => {
@@ -247,32 +256,68 @@ function ChartPage() {
             </div>
             <span className="mx-1 hidden h-5 w-px bg-border sm:block" />
             <div className="flex flex-wrap items-center gap-1">
-              {/* Indicators — coming soon */}
+              {/* Indicators — computed by the Python microservice */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button type="button" className={toolBtn}>
+                  <button
+                    type="button"
+                    className={cn(toolBtn, activeIndicators.length > 0 && toolBtnActive)}
+                  >
                     <SlidersHorizontal className="size-3.5" />
                     <span className="hidden sm:inline">Indicators</span>
+                    {activeIndicators.length > 0 && (
+                      <span className="rounded-full bg-primary/20 px-1.5 text-[10px] font-semibold text-primary">
+                        {activeIndicators.length}
+                      </span>
+                    )}
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-64 p-0">
-                  <div className="flex items-start gap-3 p-4">
-                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/12 text-primary">
-                      <SlidersHorizontal className="size-4" />
+                <DropdownMenuContent align="start" className="w-64 p-1">
+                  <DropdownMenuLabel className="flex items-center justify-between px-2 pt-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+                    Indicators
+                    <span className="rounded-full border border-border px-1.5 py-0.5 text-[10px] font-medium normal-case tracking-normal">
+                      live from service
                     </span>
-                    <div className="min-w-0">
-                      <p className="flex items-center gap-2 text-sm font-medium">
-                        Indicators
-                        <span className="rounded-full border border-up/25 bg-up/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-up">
-                          Coming soon
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {INDICATOR_PRESETS.map((p) => {
+                    const on = activeIndicators.includes(p.key);
+                    return (
+                      <DropdownMenuItem
+                        key={p.key}
+                        onClick={() => toggleIndicator(p.key)}
+                        className={cn("justify-between", on && "bg-primary/12 text-primary")}
+                      >
+                        <span className="flex min-w-0 items-center gap-2">
+                          {on ? (
+                            <Check className="size-3.5 shrink-0" />
+                          ) : (
+                            <span className="size-3.5 shrink-0" />
+                          )}
+                          <span className="truncate">{p.label}</span>
                         </span>
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        RSI, MACD, EMA, Bollinger Bands and more are in the works. Follow the blog
-                        for release notes.
-                      </p>
-                    </div>
-                  </div>
+                        <span
+                          className={cn(
+                            "shrink-0 rounded-full border px-1.5 py-0.5 text-[10px] uppercase tracking-wider",
+                            p.kind === "overlay"
+                              ? "border-primary/25 bg-primary/10 text-primary"
+                              : "border-[#B18CFF]/25 bg-[#B18CFF]/10 text-[#B18CFF]",
+                          )}
+                        >
+                          {p.kind === "overlay" ? "Overlay" : "Pane"}
+                        </span>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                  {activeIndicators.length > 0 && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setActiveIndicators([])}>
+                        <Eraser />
+                        Clear all indicators
+                      </DropdownMenuItem>
+                    </>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
 
@@ -387,6 +432,35 @@ function ChartPage() {
             </div>
           </div>
 
+          {activeIndicators.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 border-b border-border px-4 py-2">
+              <span className="mr-1 text-[11px] uppercase tracking-wider text-muted-foreground">
+                Active
+              </span>
+              {activeIndicators.map((key) => {
+                const p = presetByKey(key);
+                if (!p) return null;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => toggleIndicator(key)}
+                    className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/40 px-2.5 py-1 text-xs transition-colors hover:border-primary/40 hover:bg-primary/5"
+                  >
+                    <span
+                      className={cn(
+                        "size-1.5 rounded-full",
+                        p.kind === "overlay" ? "bg-[#F7931A]" : "bg-[#B18CFF]",
+                      )}
+                    />
+                    {p.label}
+                    <X className="size-3 opacity-40 transition-opacity group-hover:opacity-100" />
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           <div className="p-2 sm:p-3">
             <PriceChart
               symbol={symbol}
@@ -398,6 +472,7 @@ function ChartPage() {
               activeTool={activeTool}
               drawings={drawings}
               onDrawingsChange={setDrawings}
+              indicators={activeIndicators}
             />
           </div>
         </Panel>

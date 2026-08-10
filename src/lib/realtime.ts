@@ -66,7 +66,7 @@ export type Candle = {
 };
 
 /** Normalize a frontend timeframe label to the backend's canonical label. */
-function normalizeInterval(tf: string): string {
+export function normalizeInterval(tf: string): string {
   const map: Record<string, string> = {
     "1m": "1m",
     "5m": "5m",

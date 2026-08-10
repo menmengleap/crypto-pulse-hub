@@ -42,6 +42,7 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.Marke
 	aiH := handlers.NewAIHandler(aiSvc)
 	healthH := handlers.NewHealthHandler(pool)
 	liveH := handlers.NewLiveHandler(live, global)
+	indicatorH := handlers.NewIndicatorHandler(services.NewIndicatorService(cfg.IndicatorServiceURL))
 
 	rateLimit := middleware.NewRateLimit(cfg.RateLimitRPS, cfg.RateLimitBurst)
 
@@ -71,6 +72,10 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.Marke
 	r.Get("/api/live/stocks", liveH.Stocks)
 	r.Get("/api/live/forex", liveH.Forex)
 	r.Get("/api/live/providers", liveH.Providers)
+
+	// --- Technical indicators (forwarded to the Python microservice) ---
+	r.Post("/api/indicators/calculate", indicatorH.Calculate)
+
 	r.Get("/api/market-cap", marketH.MarketCap)
 	r.Get("/api/market-volume", marketH.MarketVolume)
 	r.Get("/api/open-interest", marketH.OpenInterest)

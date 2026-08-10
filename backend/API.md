@@ -180,6 +180,52 @@ Array of `{ symbol, name, sector, change24h, marketCap }` tiles.
 
 ---
 
+## Technical indicators (public)
+
+Indicators are computed by the **Python microservice** (`python-indicators/`)
+and proxied through this gateway. The browser sends OHLCV candles + indicator
+specs; the gateway forwards the payload verbatim and returns the series.
+
+### POST /api/indicators/calculate
+
+```json
+{
+  "symbol": "BTC",
+  "timeframe": "4h",
+  "candles": [
+    { "time": 1700000000, "open": 42000.0, "high": 42500.0, "low": 41800.0, "close": 42300.0, "volume": 1200.5 }
+  ],
+  "indicators": [
+    { "type": "sma", "params": { "period": 20 } },
+    { "type": "macd", "params": { "fast": 12, "slow": 26, "signal": 9 } }
+  ]
+}
+```
+
+- `candles`: 5–2000 bars, ascending unique `time` (epoch seconds).
+- `indicators`: 1–10 specs. Types: `sma ema rsi macd bollinger atr stochastic obv`.
+- `200` → `{ symbol, timeframe, computedAt, results[] }` where `results[i]`
+  matches the request order: `{ type, params, lines: { <label>: [{ time, value }] } }`
+  (warm-up values dropped).
+- `400 VALIDATION_ERROR` — bad timeframe or indicator params.
+- `503 SERVICE_UNAVAILABLE` — the Python service is unreachable; the chart
+  degrades to candles only. The gateway never fabricates indicator data.
+
+```json
+{
+  "success": true,
+  "data": {
+    "symbol": "BTC", "timeframe": "4h", "computedAt": "2026-08-10T12:00:00Z",
+    "results": [
+      { "type": "sma", "params": { "period": 20 },
+        "lines": { "sma": [ { "time": 1700000000, "value": 42300.0 } ] } }
+    ]
+  }
+}
+```
+
+---
+
 ## Watchlists (auth)
 
 ### GET /api/watchlists · POST /api/watchlists
@@ -326,3 +372,4 @@ database is unreachable.
 | `RATE_LIMIT_BURST` | `40` | Burst allowance per IP |
 | `SEED_ON_STARTUP` | `true` | Seed mock data when the DB is empty |
 | `WS_ENABLED` | `true` | Enable the WebSocket market stream |
+| `INDICATOR_SERVICE_URL` | `http://localhost:8000` | Base URL of the Python indicator microservice |
