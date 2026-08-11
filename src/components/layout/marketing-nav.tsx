@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { TerminalLink } from "./terminal-link";
+import { useAuth, useAuthHydrated } from "@/lib/auth";
 import myioLogo from "@/Img/myio.png";
 
 export type MarketingTab = "new" | "pricing" | "market";
@@ -29,10 +30,8 @@ function isActive(pathname: string, search: unknown, tab: MarketingTab) {
 
 function pillLink(active: boolean) {
   return cn(
-    "rounded-full px-3.5 py-1.5 text-sm transition-colors",
-    active
-      ? "bg-background text-foreground shadow-sm ring-1 ring-border"
-      : "text-muted-foreground hover:bg-background/70 hover:text-foreground",
+    "text-sm transition-colors",
+    active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
   );
 }
 
@@ -42,22 +41,24 @@ export function MarketingNav() {
     select: (s) => ({ pathname: s.location.pathname, search: s.location.search }),
   });
   const onMore = pathname === "/support" || pathname === "/blog";
+  const hydrated = useAuthHydrated();
+  const accessToken = useAuth((s) => s.accessToken);
+  // A persisted token means the user is signed in — show "Open terminal";
+  // visitors with no session see "Sign up" instead. Hydration is awaited so a
+  // signed-in user never briefly sees the wrong button on first paint.
+  const signedIn = hydrated && Boolean(accessToken);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl">
-      <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
+      <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-3.5 sm:px-6">
         {/* Brand */}
-        <Link to="/" className="flex min-w-0 items-center gap-2.5">
-          <img
-            src={myioLogo}
-            alt=""
-            className="h-9 w-auto shrink-0 rounded-lg object-contain ring-1 ring-primary/30"
-          />
+        <Link to="/" className="flex min-w-0 items-center gap-3">
+          <img src={myioLogo} alt="" className="h-9 w-auto shrink-0 object-contain" />
           <span className="truncate text-sm font-semibold tracking-tight">Cryptolytic</span>
         </Link>
 
         {/* Centered desktop nav: New · Pricing · Market · More */}
-        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-0.5 rounded-full border border-border bg-surface/70 p-1 backdrop-blur-md lg:flex">
+        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 lg:flex">
           {navItems.map((n) => (
             <Link
               key={n.tab}
@@ -97,12 +98,21 @@ export function MarketingNav() {
           </DropdownMenu>
         </nav>
 
-        {/* Actions — one entry point: Open terminal (register first if signed out) */}
-        <div className="flex items-center gap-2">
-          <TerminalLink
-            to="/market"
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-[0_8px_24px_-12px_var(--primary)] transition-opacity hover:opacity-90"
-          />
+        {/* Actions — Sign up for visitors, Open terminal once signed in */}
+        <div className="flex items-center gap-3">
+          {!hydrated ? (
+            <span
+              aria-hidden
+              className="inline-flex h-9 w-28 animate-pulse items-center justify-center rounded-full bg-muted"
+            />
+          ) : (
+            <TerminalLink
+              to="/market"
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-[0_8px_24px_-12px_var(--primary)] transition-opacity hover:opacity-90"
+            >
+              {signedIn ? "Open terminal" : "Sign up"}
+            </TerminalLink>
+          )}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger
               className="grid size-9 shrink-0 place-items-center rounded-lg border border-border text-muted-foreground lg:hidden"
@@ -112,12 +122,8 @@ export function MarketingNav() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px] border-sidebar-border bg-sidebar p-0">
               <SheetTitle className="sr-only">Navigation</SheetTitle>
-              <div className="flex h-16 items-center gap-2.5 border-b border-sidebar-border px-4">
-                <img
-                  src={myioLogo}
-                  alt=""
-                  className="h-8 w-auto rounded-lg object-contain ring-1 ring-primary/30"
-                />
+              <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-4">
+                <img src={myioLogo} alt="" className="h-8 w-auto object-contain" />
                 <span className="text-sm font-semibold tracking-tight">Cryptolytic</span>
               </div>
               <nav className="flex flex-col gap-1 p-4">
@@ -146,11 +152,15 @@ export function MarketingNav() {
                 >
                   Blog
                 </Link>
-                <TerminalLink
-                  to="/market"
-                  onClick={() => setMobileOpen(false)}
-                  className="mt-2 block rounded-lg bg-primary px-3 py-2.5 text-center text-sm font-medium text-primary-foreground"
-                />
+                {hydrated && (
+                  <TerminalLink
+                    to="/market"
+                    onClick={() => setMobileOpen(false)}
+                    className="mt-2 block rounded-lg bg-primary px-3 py-2.5 text-center text-sm font-medium text-primary-foreground"
+                  >
+                    {signedIn ? "Open terminal" : "Sign up"}
+                  </TerminalLink>
+                )}
               </nav>
             </SheetContent>
           </Sheet>

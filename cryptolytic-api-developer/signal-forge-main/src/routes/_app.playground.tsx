@@ -19,13 +19,13 @@ import { EmptyState, Panel } from "@/components/common/primitives";
 export const Route = createFileRoute("/_app/playground")({
   head: () => ({
     meta: [
-      { title: "API Playground — Cryptolutic API" },
+      { title: "API Playground — Cryptolytic API" },
       {
         name: "description",
         content:
           "Build indicator requests, run them against the calculation endpoint and inspect the exact JSON response.",
       },
-      { property: "og:title", content: "API Playground — Cryptolutic API" },
+      { property: "og:title", content: "API Playground — Cryptolytic API" },
       {
         property: "og:description",
         content: "Compose candles and indicators, then run a live calculation request.",
@@ -58,7 +58,9 @@ function PlaygroundPage() {
   const rowErrors = useMemo(
     () =>
       new Set(
-        issues.filter((issue) => issue.scope === "candles" && issue.row !== undefined).map((i) => i.row as number),
+        issues
+          .filter((issue) => issue.scope === "candles" && issue.row !== undefined)
+          .map((i) => i.row as number),
       ),
     [issues],
   );
@@ -87,7 +89,11 @@ function PlaygroundPage() {
       const apiError =
         caught instanceof ApiRequestError
           ? caught
-          : new ApiRequestError({ status: 0, code: "unknown_error", message: "The request failed." });
+          : new ApiRequestError({
+              status: 0,
+              code: "unknown_error",
+              message: "The request failed.",
+            });
       setError(apiError);
       setStage(-1);
       toast.error(apiError.message);
@@ -113,8 +119,8 @@ function PlaygroundPage() {
           <h1 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">API Playground</h1>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
             Compose a request, run it against{" "}
-            <span className="font-mono text-foreground">/api/v1/indicators/calculate</span> and inspect
-            the exact response.
+            <span className="font-mono text-foreground">/api/v1/indicators/calculate</span> and
+            inspect the exact response.
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -179,8 +185,14 @@ function PlaygroundPage() {
               <p className="mono-label text-destructive">Validation</p>
               <ul className="mt-3 space-y-1.5">
                 {issues.slice(0, 8).map((issue, index) => (
-                  <li key={index} className="flex gap-2 text-xs leading-relaxed text-muted-foreground">
-                    <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-destructive" aria-hidden />
+                  <li
+                    key={index}
+                    className="flex gap-2 text-xs leading-relaxed text-muted-foreground"
+                  >
+                    <AlertTriangle
+                      className="mt-0.5 h-3.5 w-3.5 shrink-0 text-destructive"
+                      aria-hidden
+                    />
                     {issue.message}
                   </li>
                 ))}

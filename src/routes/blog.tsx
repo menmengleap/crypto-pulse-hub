@@ -36,9 +36,27 @@ type Post = {
   title: string;
   excerpt: string;
   body: string[];
+  /** Optional version badge shown next to the date (e.g. "v0.6.12"). */
+  version?: string;
 };
 
 const posts: Post[] = [
+  {
+    id: "v0.6.12",
+    tag: "Release",
+    version: "v0.6.12",
+    date: "Aug 11, 2026",
+    title: "Version 0.6.12 — a quieter, faster homepage and a market analyst's dashboard",
+    excerpt:
+      "Full-screen hero video, a Bloomberg-style Market Summary dashboard, a live 10-pair crypto row, an Audience ⇄ Economy map switcher and a decluttered, session-aware navbar.",
+    body: [
+      "The homepage is quieter and denser. The hero now runs a full-screen product video, section-label pills and decorative chips are gone, and every section heading aligns left — the page reads like a terminal, not a landing deck.",
+      "A new 'Market Summary' dashboard sits under the live pairs: an S&P 500 intraday chart, major indices, crypto market cap with BTC/ETH/others dominance, the US Dollar Index with futures, and the US 10Y yield with inflation — all driven by a single typed mock-data module that's ready to be wired to a real market-data API.",
+      "The live crypto row streams the ten pairs that matter — BTC, ETH, PEPE, BNB, XRP, ARB, OP, SOL, DOGE, USDT — in one straight line that glides left and right, with prices ticking straight from the backend.",
+      "The Audience section gained an Audience ⇄ Economy switcher: the sessions heatmap now sits next to a global inflation heatmap (darker = higher CPI), both hoverable and explorable.",
+      "The navbar was cleaned up — logo and nav boxes removed, more breathing room between elements, and the CTA is now session-aware: visitors see 'Sign up', signed-in users see 'Open terminal'. The logo's ring boxes were removed across the navbar, footer and console.",
+    ],
+  },
   {
     id: "new-page-refresh",
     tag: "Update",
@@ -157,6 +175,12 @@ function PostCard({ post, featured = false }: { post: Post; featured?: boolean }
             <CalendarDays className="size-3" />
             {post.date}
           </span>
+          {post.version && (
+            <span className="inline-flex items-center gap-1 rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 font-semibold text-primary">
+              <GitBranch className="size-3" />
+              {post.version}
+            </span>
+          )}
         </div>
         <h2
           className={cn(

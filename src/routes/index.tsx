@@ -1,14 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  BarChart3,
-  Bell,
-  Brain,
-  Gauge,
-  LineChart,
-  Newspaper,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowRight, BarChart3, Bell, Brain, Gauge, LineChart, Newspaper } from "lucide-react";
 import { fmtCompact, fmtDominance, fmtPrice } from "@/lib/market-data";
 import { useLiveAssets, useLiveGlobal } from "@/lib/realtime";
 import { ChangeBadge } from "@/components/market/ui";
@@ -21,9 +12,10 @@ import { AudienceSection } from "@/components/layout/audience-map";
 import { ProductShowcase } from "@/components/layout/product-showcase";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { TestimonialSection } from "@/components/layout/testimonials";
-import { TeamSection } from "@/components/layout/team-section";
+import { LiveCryptoFan } from "@/components/market/live-crypto-fan";
+import { MarketSummary } from "@/components/market/market-summary";
 import { cn } from "@/lib/utils";
-import bannerVideo from "@/Video/Banner.mp4";
+import heroVideo from "@/Video/new-op.mp4";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -151,19 +143,15 @@ function Landing() {
     <div className="min-h-screen">
       <MarketingNav />
 
-      <section className="relative overflow-hidden border-b border-border">
-        {/* Homepage banner video — loops continuously behind the hero content */}
+      <section className="relative flex min-h-[100svh] items-center overflow-hidden border-b border-border">
+        {/* Homepage video — full-screen background */}
         <div aria-hidden className="pointer-events-none absolute inset-0">
-          <LoopingVideo src={bannerVideo} preload="auto" overlayClassName="bg-black/45" />
+          <LoopingVideo src={heroVideo} preload="auto" overlayClassName="bg-black/60" />
         </div>
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
+        <div className="relative mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
             <div className="max-w-3xl">
-              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted-foreground">
-                <ShieldCheck className="size-3.5 text-primary" />
-                Analysis-only platform · no trading execution
-              </span>
-              <h1 className="mt-6 text-4xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
+              <h1 className="text-4xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
                 Read the market
                 <span className="block text-muted-foreground">before it moves.</span>
               </h1>
@@ -252,7 +240,20 @@ function Landing() {
 
       <TestimonialSection />
 
-      <TeamSection id="team" />
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+        <div className="max-w-2xl">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            Ten pairs. One terminal. Live.
+          </h2>
+          <p className="mt-3 text-sm text-muted-foreground">
+            The same realtime feed that powers the terminal — prices, momentum, and volume for the
+            pairs that matter, streaming straight from the backend.
+          </p>
+        </div>
+        <LiveCryptoFan className="mt-8" />
+
+        <MarketSummary className="mt-12" />
+      </section>
 
       <AudienceSection />
 

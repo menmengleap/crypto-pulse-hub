@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Cryptolutic API — monochrome premium design system.
+ * Cryptolytic API — monochrome premium design system.
  * Near-black surfaces, hairline borders, single light-gray accent.
  * All colors are oklch tokens. Never hardcode colors in components.
  */
@@ -64,6 +64,24 @@
 
   --shadow-elevated: 0 1px 0 0 oklch(1 0 0 / 6%) inset, 0 24px 60px -30px oklch(0 0 0 / 90%);
   --shadow-glow: 0 0 0 1px oklch(1 0 0 / 10%), 0 0 42px -14px oklch(1 0 0 / 22%);
+}
+
+/* Testimonials marquee block — animation + container width (Tailwind v4 theme). */
+@theme {
+  --animate-marquee: marquee var(--duration) linear infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+}
+
+@utility max-w-container {
+  max-width: 80rem;
 }
 
 :root,

@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/site/Navbar";
-import { StatusDot } from "@/components/common/primitives";
 import { useAuth } from "@/hooks/use-auth";
 import { API_CONFIGURED } from "@/lib/api/config";
 
@@ -75,41 +74,37 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-xl">
-          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-6">
+          <div className="flex items-center gap-3 px-4 py-3 sm:px-6">
             <button
               type="button"
               onClick={() => setMobileOpen(true)}
               aria-label="Open navigation"
-              className="grid h-9 w-9 place-items-center rounded-md border border-border text-muted-foreground lg:hidden"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-border text-muted-foreground lg:hidden"
             >
               <Menu className="h-4 w-4" aria-hidden />
             </button>
-            <div className="relative min-w-0 lg:max-w-sm">
-              <Search
-                className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-subtle"
-                aria-hidden
-              />
-              <input
-                type="search"
-                placeholder="Search indicators, docs…"
-                aria-label="Search"
-                className="h-9 w-full rounded-md border border-border bg-surface pl-9 pr-3 text-sm text-foreground placeholder:text-subtle focus:border-border-strong focus:outline-none"
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") navigate({ to: "/indicators" });
-                }}
-              />
-            </div>
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-3">
+              <div className="relative w-full max-w-[13rem] sm:max-w-xs">
+                <Search
+                  className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-subtle"
+                  aria-hidden
+                />
+                <input
+                  type="search"
+                  placeholder="Search indicators, docs…"
+                  aria-label="Search"
+                  className="h-9 w-full rounded-md border border-border bg-surface pl-9 pr-3 text-sm text-foreground placeholder:text-subtle focus:border-border-strong focus:outline-none"
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") navigate({ to: "/indicators" });
+                  }}
+                />
+              </div>
               <Link
                 to="/docs"
-                className="hidden text-[13px] text-muted-foreground transition-colors hover:text-foreground sm:block"
+                className="hidden shrink-0 text-[13px] text-muted-foreground transition-colors hover:text-foreground sm:block"
               >
                 Docs
               </Link>
-              <span className="hidden items-center gap-2 rounded-md border border-border px-2.5 py-1.5 sm:flex">
-                <StatusDot tone={API_CONFIGURED ? "live" : "neutral"} />
-                <span className="mono-label">{API_CONFIGURED ? "API linked" : "API unset"}</span>
-              </span>
               {ready && isAuthenticated ? (
                 <button
                   type="button"
@@ -117,7 +112,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     signOut();
                     navigate({ to: "/login" });
                   }}
-                  className="inline-flex items-center gap-2 rounded-md border border-border px-2.5 py-1.5 text-[13px] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
+                  className="inline-flex shrink-0 items-center gap-2 rounded-md border border-border px-2.5 py-1.5 text-[13px] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
                 >
                   <LogOut className="h-3.5 w-3.5" aria-hidden />
                   <span className="hidden sm:inline">Sign out</span>
@@ -125,7 +120,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               ) : (
                 <Link
                   to="/login"
-                  className="inline-flex items-center gap-2 rounded-md border border-border px-2.5 py-1.5 text-[13px] text-muted-foreground hover:text-foreground"
+                  className="inline-flex shrink-0 items-center gap-2 rounded-md border border-border px-2.5 py-1.5 text-[13px] text-muted-foreground hover:text-foreground"
                 >
                   <User className="h-3.5 w-3.5" aria-hidden />
                   <span className="hidden sm:inline">Sign in</span>

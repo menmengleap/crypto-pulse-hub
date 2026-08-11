@@ -151,21 +151,6 @@
   letter-spacing: -0.01em;
 }
 
-/* Infinite team marquee — the track is duplicated in JSX so a -50% loop is seamless. */
-@keyframes marquee-scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.marquee-track {
-  animation: marquee-scroll 36s linear infinite;
-  will-change: transform;
-}
-
 /* Product showcase — gently floating terminal screenshot. */
 @keyframes showcase-float {
   0%,
@@ -214,13 +199,23 @@
   animation: showcase-shine 7s ease-in-out infinite;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .marquee-track {
-    animation: none;
+/* Market summary charts — thin line draws in on load. */
+@keyframes chart-draw {
+  to {
+    stroke-dashoffset: 0;
   }
-  /* Static view: hide the duplicated second half so members aren't shown twice. */
-  .marquee-track > :nth-child(n + 4) {
-    display: none;
+}
+.chart-draw {
+  /* Hidden start lives here (not inline) so reduced-motion can override it. */
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: chart-draw 1.4s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chart-draw {
+    animation: none;
+    stroke-dashoffset: 0 !important;
   }
   .showcase-float,
   .showcase-glow,

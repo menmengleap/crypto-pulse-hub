@@ -3,20 +3,22 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { AuthLayout, Field, ApiNotice } from "./login";
-import { ApiRequestError, setToken } from "@/lib/api/client";
+import { GithubAuthButton } from "@/components/auth/github-button";
+import { ApiRequestError } from "@/lib/api/client";
 import { register as registerAccount } from "@/lib/api/indicators";
-import { API_CONFIGURED } from "@/lib/api/config";
+import { AUTH_EXPLICIT } from "@/lib/api/config";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
-      { title: "Create an account — Cryptolutic API" },
+      { title: "Create an account — Cryptolytic API" },
       {
         name: "description",
-        content: "Create a Cryptolutic account to generate indicator API keys and run live calculations.",
+        content:
+          "Create a Cryptolytic account to generate indicator API keys and run live calculations.",
       },
-      { property: "og:title", content: "Create an account — Cryptolutic API" },
-      { property: "og:description", content: "Get API keys for the Cryptolutic indicator engine." },
+      { property: "og:title", content: "Create an account — Cryptolytic API" },
+      { property: "og:description", content: "Get API keys for the Cryptolytic indicator engine." },
     ],
   }),
   component: RegisterPage,
@@ -33,9 +35,10 @@ function RegisterPage() {
     event.preventDefault();
     setPending(true);
     try {
+      // register() persists the session (access + refresh token) itself when
+      // the backend returns tokens.
       const result = await registerAccount(email, password, name);
       if (result.token) {
-        setToken(result.token);
         toast.success("Account created");
         navigate({ to: "/dashboard" });
       } else {
@@ -58,31 +61,49 @@ function RegisterPage() {
           Already registered?{" "}
           <Link to="/login" className="text-foreground underline underline-offset-4">
             Sign in
+          </Link>{" "}
+          or{" "}
+          <Link to="/" className="text-foreground underline underline-offset-4">
+            Back
           </Link>
         </p>
       }
     >
-      <form onSubmit={submit} className="space-y-4">
-        <Field label="Name" value={name} onChange={setName} autoComplete="name" />
-        <Field label="Email" type="email" value={email} onChange={setEmail} autoComplete="email" />
-        <Field
-          label="Password"
-          type="password"
-          value={password}
-          onChange={setPassword}
-          autoComplete="new-password"
-        />
-        <button
-          type="submit"
-          disabled={pending}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
-        >
-          {pending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
-          Create account
-          {!pending && <ArrowRight className="h-4 w-4" aria-hidden />}
-        </button>
-        {!API_CONFIGURED && <ApiNotice />}
-      </form>
+      <div className="space-y-4">
+        <GithubAuthButton mode="register" />
+        <div className="flex items-center gap-3" aria-hidden>
+          <span className="h-px flex-1 bg-border" />
+          <span className="text-[11px] uppercase tracking-widest text-subtle">or</span>
+          <span className="h-px flex-1 bg-border" />
+        </div>
+        <form onSubmit={submit} className="space-y-4">
+          <Field label="Name" value={name} onChange={setName} autoComplete="name" />
+          <Field
+            label="Email"
+            type="email"
+            value={email}
+            onChange={setEmail}
+            autoComplete="email"
+          />
+          <Field
+            label="Password"
+            type="password"
+            value={password}
+            onChange={setPassword}
+            autoComplete="new-password"
+          />
+          <button
+            type="submit"
+            disabled={pending}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
+          >
+            {pending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
+            Create account
+            {!pending && <ArrowRight className="h-4 w-4" aria-hidden />}
+          </button>
+        </form>
+        {!AUTH_EXPLICIT && <ApiNotice />}
+      </div>
     </AuthLayout>
   );
 }

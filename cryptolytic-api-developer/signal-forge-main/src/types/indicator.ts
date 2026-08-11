@@ -1,4 +1,4 @@
-/** Core domain types mirroring the Cryptolutic Indicator API contract. */
+/** Core domain types mirroring the Cryptolytic Indicator API contract. */
 
 export const TIMEFRAMES = ["1m", "5m", "15m", "30m", "1h", "4h", "1d", "1w"] as const;
 export type Timeframe = (typeof TIMEFRAMES)[number];

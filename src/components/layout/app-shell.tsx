@@ -102,11 +102,7 @@ const mobileNav: NavItem[] = [
 export function Brand({ collapsed }: { collapsed?: boolean }) {
   return (
     <Link to="/" className="flex items-center gap-2.5 px-1">
-      <img
-        src={myioLogo}
-        alt=""
-        className="h-9 w-auto shrink-0 rounded-lg object-contain ring-1 ring-primary/30"
-      />
+      <img src={myioLogo} alt="" className="h-9 w-auto shrink-0 object-contain" />
       {!collapsed && (
         <span className="min-w-0">
           <span className="block truncate text-sm font-semibold tracking-tight">Cryptolytic</span>

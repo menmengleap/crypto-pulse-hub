@@ -1,11 +1,6 @@
-import type {
-  APIKey,
-  IndicatorRequest,
-  IndicatorResponse,
-  UsageStats,
-} from "@/types/indicator";
+import type { APIKey, IndicatorRequest, IndicatorResponse, UsageStats } from "@/types/indicator";
 import { ENDPOINTS } from "./config";
-import { apiFetch, type RequestResult } from "./client";
+import { apiFetch, authFetch, setSession, type RequestResult } from "./client";
 
 export function calculateIndicators(
   request: IndicatorRequest,
@@ -46,13 +41,52 @@ export async function revokeApiKey(id: string): Promise<void> {
   await apiFetch<unknown>(`${ENDPOINTS.keys}/${encodeURIComponent(id)}`, { method: "DELETE" });
 }
 
-export async function login(email: string, password: string): Promise<{ token: string }> {
-  const { data } = await apiFetch<{ token: string }>(ENDPOINTS.login, {
+// ---------------------------------------------------------------------------
+// Shared auth backend (Crypto Pulse Hub Go API)
+//
+// Login/Register hit the same backend (and therefore the same Postgres
+// database) as the main platform. The backend answers with a
+// { success, data, error } envelope containing a JWT access token plus a
+// rotating refresh token; the session is stored in sessionStorage.
+// ---------------------------------------------------------------------------
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  isActive: boolean;
+}
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
+  expiresIn: number;
+}
+
+export interface AuthResult {
+  user: AuthUser;
+  tokens: AuthTokens;
+}
+
+export async function login(
+  email: string,
+  password: string,
+): Promise<{ token: string; refreshToken: string | null; user: AuthUser }> {
+  const result = await authFetch<AuthResult>(ENDPOINTS.login, {
     method: "POST",
-    auth: false,
     body: JSON.stringify({ email, password }),
   });
-  return data;
+  setSession({
+    accessToken: result.tokens.accessToken,
+    refreshToken: result.tokens.refreshToken,
+  });
+  return {
+    token: result.tokens.accessToken,
+    refreshToken: result.tokens.refreshToken,
+    user: result.user,
+  };
 }
 
 export async function register(
@@ -60,10 +94,24 @@ export async function register(
   password: string,
   name?: string,
 ): Promise<{ token?: string }> {
-  const { data } = await apiFetch<{ token?: string }>(ENDPOINTS.register, {
+  const result = await authFetch<AuthResult>(ENDPOINTS.register, {
     method: "POST",
-    auth: false,
     body: JSON.stringify({ email, password, name }),
   });
-  return data;
+  if (result?.tokens?.accessToken) {
+    setSession({
+      accessToken: result.tokens.accessToken,
+      refreshToken: result.tokens.refreshToken,
+    });
+    return { token: result.tokens.accessToken };
+  }
+  return {};
+}
+
+/** Revoke the session server-side so the refresh token is invalidated too. */
+export async function logout(refreshToken: string): Promise<void> {
+  await authFetch<{ loggedOut: boolean }>(ENDPOINTS.logout, {
+    method: "POST",
+    body: JSON.stringify({ refreshToken }),
+  });
 }

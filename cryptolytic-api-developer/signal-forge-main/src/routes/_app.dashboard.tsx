@@ -9,12 +9,13 @@ import { ApiRequestError } from "@/lib/api/client";
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({
     meta: [
-      { title: "Overview — Cryptolutic API" },
+      { title: "Overview — Cryptolytic API" },
       {
         name: "description",
-        content: "Monitor your Cryptolutic indicator API requests, success rate, latency and active keys.",
+        content:
+          "Monitor your Cryptolytic indicator API requests, success rate, latency and active keys.",
       },
-      { property: "og:title", content: "Overview — Cryptolutic API" },
+      { property: "og:title", content: "Overview — Cryptolytic API" },
       { property: "og:description", content: "Monitor your indicator API activity." },
     ],
   }),
@@ -73,7 +74,12 @@ function DashboardPage() {
             hint="Last 24 hours"
             loading={usage.isLoading}
           />
-          <StatCard label="Success rate" value={successRate} hint="Reported by the API" loading={usage.isLoading} />
+          <StatCard
+            label="Success rate"
+            value={successRate}
+            hint="Reported by the API"
+            loading={usage.isLoading}
+          />
           <StatCard
             label="Avg latency"
             value={stats?.avgLatencyMs ? `${Math.round(stats.avgLatencyMs)} ms` : null}

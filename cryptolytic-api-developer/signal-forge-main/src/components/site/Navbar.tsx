@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Menu, X, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
+import logoImage from "@/Img/image.png";
 
 const NAV = [
   { label: "Indicators", to: "/indicators" },
@@ -15,15 +16,15 @@ const NAV = [
 export function Logo({ compact = false }: { compact?: boolean }) {
   return (
     <span className="flex min-w-0 items-center gap-2.5">
-      <span
+      <img
+        src={logoImage}
+        alt=""
         aria-hidden
-        className="grid h-7 w-7 shrink-0 place-items-center rounded-md border border-border-strong bg-surface-2 font-mono text-[11px] tracking-tight text-foreground"
-      >
-        C
-      </span>
+        className="h-7 w-7 shrink-0 rounded-md border border-border-strong object-contain"
+      />
       {!compact && (
         <span className="truncate text-sm font-semibold tracking-tight">
-          Cryptolutic<span className="text-subtle"> API</span>
+          Cryptolytic<span className="text-subtle"> API</span>
         </span>
       )}
     </span>
@@ -93,7 +94,10 @@ export function Navbar() {
                 className="group inline-flex items-center gap-1.5 rounded-md bg-primary px-3.5 py-2 text-[13px] font-medium text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98]"
               >
                 Get API Key
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden />
+                <ArrowRight
+                  className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+                  aria-hidden
+                />
               </Link>
             </>
           )}
@@ -192,20 +196,14 @@ export function Footer() {
       </div>
       <div className="border-t border-border px-5 py-6 sm:px-8">
         <p className="mx-auto max-w-7xl font-mono text-[11px] uppercase tracking-widest text-subtle">
-          Cryptolutic API — Indicator infrastructure
+          Cryptolytic API — Indicator infrastructure
         </p>
       </div>
     </footer>
   );
 }
 
-function FooterCol({
-  title,
-  links,
-}: {
-  title: string;
-  links: { label: string; to: string }[];
-}) {
+function FooterCol({ title, links }: { title: string; links: { label: string; to: string }[] }) {
   return (
     <div>
       <p className="mono-label">{title}</p>

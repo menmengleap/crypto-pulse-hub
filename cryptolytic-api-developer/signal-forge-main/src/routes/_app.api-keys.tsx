@@ -12,13 +12,17 @@ import { API_CONFIGURED } from "@/lib/api/config";
 export const Route = createFileRoute("/_app/api-keys")({
   head: () => ({
     meta: [
-      { title: "API keys — Cryptolutic API" },
+      { title: "API keys — Cryptolytic API" },
       {
         name: "description",
-        content: "Create, inspect and revoke the API keys your applications use to call the indicator engine.",
+        content:
+          "Create, inspect and revoke the API keys your applications use to call the indicator engine.",
       },
-      { property: "og:title", content: "API keys — Cryptolutic API" },
-      { property: "og:description", content: "Manage credentials for the Cryptolutic indicator API." },
+      { property: "og:title", content: "API keys — Cryptolytic API" },
+      {
+        property: "og:description",
+        content: "Manage credentials for the Cryptolytic indicator API.",
+      },
     ],
   }),
   component: ApiKeysPage,

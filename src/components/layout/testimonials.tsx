@@ -132,12 +132,8 @@ export function TestimonialSection({ id }: { id?: string }) {
   return (
     <section id={id} className="mx-auto max-w-7xl scroll-mt-24 px-4 py-16 sm:px-6">
       <Reveal>
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted-foreground">
-            <MessageSquareQuote className="size-3.5 text-primary" />
-            Testimonials
-          </span>
-          <h2 className="mt-5 text-2xl font-semibold tracking-tight sm:text-3xl">
+        <div className="max-w-2xl">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
             Trusted by analysts who read charts for a living.
           </h2>
           <p className="mt-3 text-sm text-muted-foreground">

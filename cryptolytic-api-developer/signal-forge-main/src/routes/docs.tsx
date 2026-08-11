@@ -8,13 +8,13 @@ import { ENDPOINTS, LIMITS } from "@/lib/api/config";
 export const Route = createFileRoute("/docs")({
   head: () => ({
     meta: [
-      { title: "API Reference — Cryptolutic API" },
+      { title: "API Reference — Cryptolytic API" },
       {
         name: "description",
         content:
-          "Reference for the Cryptolutic indicator API: authentication, the calculate endpoint, request limits, errors and supported indicators.",
+          "Reference for the Cryptolytic indicator API: authentication, the calculate endpoint, request limits, errors and supported indicators.",
       },
-      { property: "og:title", content: "API Reference — Cryptolutic API" },
+      { property: "og:title", content: "API Reference — Cryptolytic API" },
       {
         property: "og:description",
         content: "Authentication, endpoints, limits and error codes for the indicator engine.",
@@ -110,7 +110,10 @@ function DocsPage() {
           <h2 className="text-lg font-medium">Errors</h2>
           <div className="panel divide-y divide-border overflow-hidden">
             {ERRORS.map(([status, code, description]) => (
-              <div key={code} className="grid gap-1 px-4 py-3.5 sm:grid-cols-[4rem_10rem_minmax(0,1fr)]">
+              <div
+                key={code}
+                className="grid gap-1 px-4 py-3.5 sm:grid-cols-[4rem_10rem_minmax(0,1fr)]"
+              >
                 <p className="font-mono text-xs text-foreground">{status}</p>
                 <p className="font-mono text-xs text-muted-foreground">{code}</p>
                 <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>

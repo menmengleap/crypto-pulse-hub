@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { ShieldCheck } from "lucide-react";
 import myioLogo from "@/Img/myio.png";
 import { useBackendHealth } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -44,7 +43,7 @@ export function SiteFooter() {
               <img
                 src={myioLogo}
                 alt="Cryptolytic logo"
-                className="h-9 w-auto shrink-0 rounded-lg object-contain ring-1 ring-primary/30"
+                className="h-9 w-auto shrink-0 object-contain"
               />
               <span className="text-base font-semibold tracking-tight">Cryptolytic</span>
             </Link>
@@ -52,10 +51,6 @@ export function SiteFooter() {
               Market intelligence for serious crypto analysts — live charts, sentiment and
               AI-assisted research in one quiet terminal.
             </p>
-            <span className="mt-6 inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
-              <ShieldCheck className="size-3" />
-              Analysis-only · no trading
-            </span>
           </div>
 
           {/* Link columns */}
