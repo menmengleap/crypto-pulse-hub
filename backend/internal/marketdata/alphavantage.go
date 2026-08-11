@@ -2,12 +2,14 @@ package marketdata
 
 import (
 	"context"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -55,8 +57,24 @@ func (p *TradFiProvider) refreshAVMacro(ctx context.Context) {
 
 	for _, ep := range avEndpoints {
 		pts, err := p.avSeriesFetch(ep.function, ep.extra)
+		// Alpha Vantage free tier enforces 1 request/second.
+		time.Sleep(1500 * time.Millisecond)
+
+		// The AV free tier sometimes blocks datacenter egress (e.g. Render's
+		// IP range) — transparently fall back to the St. Louis Fed's keyless
+		// CSV download for the same series.
 		if err != nil || len(pts) == 0 {
-			log.Printf("alphavantage %s failed: %v", ep.function, err)
+			if fb := fredFor(ep.key); fb != nil {
+				if pts, err = p.fredFetch(ctx, fb); err == nil && len(pts) > 0 {
+					log.Printf("macro %s: Alpha Vantage failed, using FRED %s", ep.key, fb.fredID)
+				} else {
+					log.Printf("macro %s failed (av + fred %s): %v", ep.key, fb.fredID, err)
+				}
+			} else {
+				log.Printf("macro %s: Alpha Vantage failed: %v", ep.key, err)
+			}
+		}
+		if err != nil || len(pts) == 0 {
 			continue
 		}
 		p.mu.Lock()
@@ -79,8 +97,6 @@ func (p *TradFiProvider) refreshAVMacro(ctx context.Context) {
 		}
 		p.mu.Unlock()
 		okCount++
-		// Alpha Vantage free: max 1 request/second.
-		time.Sleep(1500 * time.Millisecond)
 	}
 
 	p.mu.Lock()
@@ -99,6 +115,119 @@ func (p *TradFiProvider) refreshAVMacro(ctx context.Context) {
 	// Persist whatever succeeded so the next cold start reuses it.
 	if okCount > 0 {
 		_ = cacheSetJSON(ctx, p.cache, macroCacheKey, snapshot, 8*time.Hour)
+	}
+}
+
+/* ---------------------------------------------------------------------------
+ * FRED fallback (St. Louis Fed — keyless CSV download)
+ * ------------------------------------------------------------------------- */
+
+// fredFallback maps a macro key to its FRED series id.
+type fredFallback struct {
+	key    string
+	fredID string
+	cpi    bool // compute YoY % from the monthly consumer-price index
+}
+
+var fredFallbacks = []fredFallback{
+	{key: "us10y", fredID: "DGS10"},
+	{key: "us02y", fredID: "DGS2"},
+	{key: "us30y", fredID: "DGS30"},
+	{key: "inflation", fredID: "CPIAUCSL", cpi: true},
+	{key: "wti", fredID: "DCOILWTICO"},
+	{key: "brent", fredID: "DCOILBRENTEU"},
+	{key: "natural_gas", fredID: "MHHNGSP"},
+}
+
+func fredFor(key string) *fredFallback {
+	for i := range fredFallbacks {
+		if fredFallbacks[i].key == key {
+			return &fredFallbacks[i]
+		}
+	}
+	return nil
+}
+
+// fredFetch downloads one series from FRED's keyless CSV endpoint and returns
+// monthly MacroPoints newest-first (matching the Alpha Vantage ordering).
+func (p *TradFiProvider) fredFetch(ctx context.Context, fb *fredFallback) ([]MacroPoint, error) {
+	u := fmt.Sprintf("https://fred.stlouisfed.org/graph/fredgraph.csv?id=%s", url.QueryEscape(fb.fredID))
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	if err != nil {
+		return nil, err
+	}
+	res, err := p.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = res.Body.Close() }()
+	if res.StatusCode != http.StatusOK {
+		_, _ = io.Copy(io.Discard, res.Body)
+		return nil, fmt.Errorf("fred %s status %d", fb.fredID, res.StatusCode)
+	}
+	records, err := csv.NewReader(res.Body).ReadAll()
+	if err != nil {
+		return nil, err
+	}
+
+	dates := make([]string, 0, len(records))
+	values := make([]float64, 0, len(records))
+	for _, rec := range records[1:] { // skip header
+		if len(rec) < 2 {
+			continue
+		}
+		date := strings.TrimSpace(rec[0])
+		val := strings.TrimSpace(rec[1])
+		if date == "" || val == "" || val == "." {
+			continue
+		}
+		v := parseFloat(val)
+		if v <= 0 {
+			continue
+		}
+		dates = append(dates, date)
+		values = append(values, v)
+	}
+	if len(dates) == 0 {
+		return nil, fmt.Errorf("fred %s: no data", fb.fredID)
+	}
+
+	if fb.cpi {
+		// YoY inflation from the monthly CPI index.
+		out := []MacroPoint{}
+		for i := 12; i < len(values); i++ {
+			if values[i-12] <= 0 {
+				continue
+			}
+			out = append(out, MacroPoint{
+				Date:  dates[i][:7],
+				Value: (values[i]/values[i-12] - 1) * 100,
+			})
+		}
+		if len(out) == 0 {
+			return nil, fmt.Errorf("fred %s: no inflation history", fb.fredID)
+		}
+		reverseMacro(out)
+		return out, nil
+	}
+
+	// Daily series (yields, oil) → last observation per month, newest-first.
+	monthly := []MacroPoint{}
+	for i, date := range dates {
+		month := date[:7]
+		if n := len(monthly); n == 0 || monthly[n-1].Date != month {
+			monthly = append(monthly, MacroPoint{Date: month, Value: values[i]})
+		} else {
+			monthly[n-1].Value = values[i]
+		}
+	}
+	reverseMacro(monthly)
+	return monthly, nil
+}
+
+func reverseMacro(pts []MacroPoint) {
+	for i, j := 0, len(pts)-1; i < j; i, j = i+1, j-1 {
+		pts[i], pts[j] = pts[j], pts[i]
 	}
 }
 
