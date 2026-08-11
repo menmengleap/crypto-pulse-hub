@@ -10,15 +10,17 @@ import (
 )
 
 // LiveHandler serves live market data that the backend fetches from external
-// providers (Binance, exchangerate-api/Frankfurter, Yahoo/Finnhub). Clients
-// never call providers directly — everything flows User → Frontend → Backend.
+// providers (Binance, exchangerate-api/Frankfurter, Yahoo/Finnhub, TWELVE
+// DATA, Alpha Vantage). Clients never call providers directly — everything
+// flows User → Frontend → Backend.
 type LiveHandler struct {
 	live   *marketdata.LiveProvider
 	global *marketdata.GlobalProvider
+	tradfi *marketdata.TradFiProvider
 }
 
-func NewLiveHandler(live *marketdata.LiveProvider, global *marketdata.GlobalProvider) *LiveHandler {
-	return &LiveHandler{live: live, global: global}
+func NewLiveHandler(live *marketdata.LiveProvider, global *marketdata.GlobalProvider, tradfi *marketdata.TradFiProvider) *LiveHandler {
+	return &LiveHandler{live: live, global: global, tradfi: tradfi}
 }
 
 // Markets GET /api/live/markets — live crypto snapshots (Binance, cached).
@@ -96,8 +98,51 @@ func (h *LiveHandler) Sparks(w http.ResponseWriter, r *http.Request) {
 func (h *LiveHandler) Providers(w http.ResponseWriter, r *http.Request) {
 	g := h.global.Snapshot()
 	WriteOK(w, map[string]any{
-		"crypto": h.live.Status(),
-		"forex":  g.Providers["forex"],
-		"stocks": g.Providers["stocks"],
+		"crypto":       h.live.Status(),
+		"forex":        g.Providers["forex"],
+		"stocks":       g.Providers["stocks"],
+		"tradfi":       h.tradfi.Status(),
 	}, map[string]any{"updatedAt": time.Now().UTC()})
+}
+
+// TradFi GET /api/live/tradfi — the full traditional-markets quote snapshot
+// (forex, indices, DXY, commodities, futures, bonds). Realtime fans out over
+// the WebSocket hub (tradfi_snapshot, ~500ms); this REST call hydrates the
+// initial page and covers WS outages.
+func (h *LiveHandler) TradFi(w http.ResponseWriter, r *http.Request) {
+	WriteOK(w, h.tradfi.Quotes(), map[string]any{"sources": h.tradfi.Status()})
+}
+
+// TradFiMacro GET /api/live/tradfi/macro — Alpha Vantage macro block: treasury
+// yield history, US inflation and commodity history (monthly).
+func (h *LiveHandler) TradFiMacro(w http.ResponseWriter, r *http.Request) {
+	WriteOK(w, h.tradfi.Macro(), nil)
+}
+
+// TradFiHistory GET /api/live/tradfi/history?symbol=SPX&interval=1d&limit=200
+// — OHLCV candles for traditional-market instruments (REST, cached 5 min).
+func (h *LiveHandler) TradFiHistory(w http.ResponseWriter, r *http.Request) {
+	symbol := strings.ToUpper(strings.TrimSpace(r.URL.Query().Get("symbol")))
+	if symbol == "" {
+		WriteError(w, http.StatusBadRequest, "INVALID_SYMBOL", "symbol is required")
+		return
+	}
+	if !h.tradfi.KnownSymbol(symbol) {
+		WriteError(w, http.StatusNotFound, "NOT_FOUND", "unknown trad-fi symbol")
+		return
+	}
+	tf := r.URL.Query().Get("interval")
+	if tf == "" {
+		tf = "1d"
+	}
+	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+	if limit <= 0 {
+		limit = 200
+	}
+	candles, err := h.tradfi.Historical(r.Context(), symbol, tf, limit)
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	WriteOK(w, candles, map[string]any{"symbol": symbol, "interval": tf, "count": len(candles)})
 }

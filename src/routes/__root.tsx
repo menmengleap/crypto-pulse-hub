@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { initRealtime } from "../lib/realtime";
+import { initTradFi } from "../lib/tradfi";
 
 function NotFoundComponent() {
   return (
@@ -119,8 +120,11 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
-    // Client-side only: connect realtime price streams (Binance WS + snapshots).
+    // Client-side only: connect the realtime price streams — crypto snapshots
+    // (Binance via the backend) and the traditional-markets feed (forex /
+    // indices / DXY / commodities / futures / bonds over the backend WS).
     initRealtime();
+    initTradFi();
   }, []);
 
   return (

@@ -44,6 +44,19 @@ type Config struct {
 	FinnhubAPIKey        string
 	ExchangeRateAPIKey   string
 
+	// Traditional-markets feed (forex / indices / DXY / commodities / futures /
+	// bonds). TWELVE DATA streams forex + gold over a realtime WebSocket; Yahoo
+	// Finance fills indices, the Dollar Index, CME futures and treasury yields
+	// (the free TWELVE DATA plan 403/404s those); Alpha Vantage serves treasury
+	// yield history, US inflation and commodity history. Redis is an optional
+	// cache (REDIS_URL); without it an in-process TTL cache is used.
+	TwelveDataAPIKey     string
+	AlphaVantageAPIKey   string
+	TradFiRefreshSeconds int  // cadence for the trad-fi snapshot (10–30s recommended)
+	TradFiWSEnabled      bool // realtime WebSocket to TWELVE DATA
+	RedisURL             string
+
+
 	// IndicatorServiceURL points at the Python technical-indicator microservice
 	// (FastAPI). The gateway forwards OHLCV + indicator specs to it and returns
 	// the computed series. In production set it to the Render service URL, e.g.
@@ -85,6 +98,16 @@ func Load() (*Config, error) {
 		StockRefreshSeconds:  getIntEnv("STOCK_REFRESH_SECONDS", 60),
 		FinnhubAPIKey:        getEnv("FINNHUB_API_KEY", "d9sjmqhr01qopv47qtdgd9sjmqhr01qopv47qte0"),
 		ExchangeRateAPIKey:   getEnv("EXCHANGERATE_API_KEY", "d7a369cd5aa48c44fd198e05"),
+
+		// Traditional-markets feed. Keys are the project's free-tier keys (used
+		// server-side only); override via TWELVE_DATA_API_KEY /
+		// ALPHA_VANTAGE_API_KEY. REDIS_URL is optional — leave empty for the
+		// in-process cache.
+		TwelveDataAPIKey:     getEnv("TWELVE_DATA_API_KEY", "7f94a7cbfb0148e098b12a0c66f37d97"),
+		AlphaVantageAPIKey:   getEnv("ALPHA_VANTAGE_API_KEY", "XEH4PTWLSQ783CZ5"),
+		TradFiRefreshSeconds: getIntEnv("TRADFI_REFRESH_SECONDS", 15),
+		TradFiWSEnabled:      getBoolEnv("TRADFI_WS_ENABLED", true),
+		RedisURL:             getEnv("REDIS_URL", ""),
 		IndicatorServiceURL:  getEnv("INDICATOR_SERVICE_URL", "http://localhost:8000"),
 	}
 

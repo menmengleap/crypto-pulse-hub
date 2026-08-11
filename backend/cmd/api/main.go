@@ -48,9 +48,30 @@ func main() {
 		time.Duration(cfg.StockRefreshSeconds)*time.Second,
 		time.Duration(cfg.ForexRefreshSeconds)*time.Second,
 	)
+
+	// Traditional markets (forex / indices / DXY / commodities / futures /
+	// bonds): TWELVE DATA streams forex + gold over a realtime WebSocket,
+	// Yahoo fills indices/DXY/futures/bonds, Alpha Vantage serves treasury /
+	// inflation / commodity history. Results are cached (Redis when
+	// REDIS_URL is set, otherwise in-process).
+	cache, err := marketdata.NewCache(cfg.RedisURL)
+	if err != nil {
+		// A misconfigured or unreachable Redis must never take the API down —
+		// fall back to the in-process TTL cache.
+		log.Printf("warning: Redis cache unavailable (%v) — using in-process cache", err)
+		cache = marketdata.NewMemoryCache()
+	}
+	tradfiProvider := marketdata.NewTradFiProvider(marketdata.TradFiOptions{
+		TwelveDataAPIKey: cfg.TwelveDataAPIKey,
+		AlphaVantageKey:  cfg.AlphaVantageAPIKey,
+		WSEnabled:        cfg.TradFiWSEnabled,
+		RefreshEvery:     time.Duration(cfg.TradFiRefreshSeconds) * time.Second,
+		Cache:            cache,
+	})
 	if cfg.LiveEnabled {
 		go liveProvider.Run(ctx)
 		go globalProvider.Run(ctx)
+		go tradfiProvider.Run(ctx)
 	}
 
 	provider := marketdata.MarketDataProvider(liveProvider)
@@ -69,7 +90,7 @@ func main() {
 		}
 	}
 
-	hub := ws.NewHub(provider)
+	hub := ws.NewHub(provider, tradfiProvider)
 	wsCtx, cancelWS := context.WithCancel(ctx)
 	defer cancelWS()
 	if cfg.WSEnabled {
@@ -78,7 +99,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,
-		Handler:           routes.NewRouter(cfg, pool, provider, liveProvider, globalProvider, finnhubData, hub),
+		Handler:           routes.NewRouter(cfg, pool, provider, liveProvider, globalProvider, tradfiProvider, finnhubData, hub),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      30 * time.Second,

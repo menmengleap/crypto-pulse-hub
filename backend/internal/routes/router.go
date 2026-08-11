@@ -16,9 +16,9 @@ import (
 )
 
 // NewRouter assembles the full HTTP API. `provider` backs the WebSocket stream
-// and AI analysis; `live` and `global` back the /api/live/* market-data routes;
-// `finnhub` backs the /api/finnhub/* research routes.
-func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.MarketDataProvider, live *marketdata.LiveProvider, global *marketdata.GlobalProvider, finnhub *marketdata.FinnhubData, hub *ws.Hub) http.Handler {
+// and AI analysis; `live`, `global` and `tradfi` back the /api/live/*
+// market-data routes; `finnhub` backs the /api/finnhub/* research routes.
+func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.MarketDataProvider, live *marketdata.LiveProvider, global *marketdata.GlobalProvider, tradfi *marketdata.TradFiProvider, finnhub *marketdata.FinnhubData, hub *ws.Hub) http.Handler {
 	// Repositories
 	userRepo := repositories.NewUserRepo(pool)
 	sessionRepo := repositories.NewSessionRepo(pool)
@@ -43,7 +43,7 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.Marke
 	newsH := handlers.NewNewsHandler(newsRepo)
 	aiH := handlers.NewAIHandler(aiSvc)
 	healthH := handlers.NewHealthHandler(pool)
-	liveH := handlers.NewLiveHandler(live, global)
+	liveH := handlers.NewLiveHandler(live, global, tradfi)
 	indicatorH := handlers.NewIndicatorHandler(services.NewIndicatorService(cfg.IndicatorServiceURL))
 	finnhubH := handlers.NewFinnhubHandler(finnhub)
 
@@ -75,6 +75,11 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.Marke
 	r.Get("/api/live/stocks", liveH.Stocks)
 	r.Get("/api/live/forex", liveH.Forex)
 	r.Get("/api/live/providers", liveH.Providers)
+
+	// --- Traditional markets (TWELVE DATA / Yahoo / Alpha Vantage) ---
+	r.Get("/api/live/tradfi", liveH.TradFi)
+	r.Get("/api/live/tradfi/macro", liveH.TradFiMacro)
+	r.Get("/api/live/tradfi/history", liveH.TradFiHistory)
 
 	// --- Technical indicators (forwarded to the Python microservice) ---
 	r.Post("/api/indicators/calculate", indicatorH.Calculate)

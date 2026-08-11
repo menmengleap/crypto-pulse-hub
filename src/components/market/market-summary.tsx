@@ -6,9 +6,11 @@ import {
   liveAnchoredSeries,
   marketSummaryData,
   type MarketInstrument,
+  type SeriesInstrument,
   type SeriesPoint,
 } from "@/lib/market-summary";
 import { useLiveAssets, useLiveGlobal } from "@/lib/realtime";
+import { useTradFiMacro, useTradFiQuotes, type TradMacro, type TradQuote } from "@/lib/tradfi";
 import { AssetLogo } from "@/components/market/asset-logo";
 import { TerminalLink } from "@/components/layout/terminal-link";
 
@@ -36,6 +38,117 @@ function fmtUsd(v: number): string {
   if (v >= 1000) return `$${fmtNum(v, 0)}`;
   if (v >= 1) return `$${fmtNum(v, 2)}`;
   return `$${fmtNum(v, 3)}`;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Live-data adapters (TWELVE DATA / Yahoo / Alpha Vantage via the backend)  */
+/* ------------------------------------------------------------------------- */
+
+/** US session (09:30–16:00) labels for equities; 24h labels for FX/metals. */
+function sessionLabels(n: number, kind?: string): string[] {
+  const round24 = kind === "forex" || kind === "commodity";
+  const startMin = round24 ? 0 : 9 * 60 + 30;
+  const endMin = round24 ? 24 * 60 : 16 * 60;
+  const step = (endMin - startMin) / Math.max(1, n - 1);
+  const out: string[] = [];
+  for (let i = 0; i < n; i++) {
+    const m = Math.round(startMin + i * step);
+    out.push(`${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`);
+  }
+  return out;
+}
+
+/** Deterministic seed per symbol for the fallback anchored series. */
+function seedOf(symbol: string): number {
+  let h = 7;
+  for (let i = 0; i < symbol.length; i++) h = (h * 31 + symbol.charCodeAt(i)) >>> 0;
+  return h % 1000;
+}
+
+/** Convert a live quote's intraday spark into SeriesPoints for the charts. */
+function sparkToSeries(q: TradQuote, points = 48): SeriesPoint[] {
+  let spark = q.spark && q.spark.length >= 2 ? q.spark.slice(-points) : [];
+  if (spark.length < 2) {
+    return liveAnchoredSeries(seedOf(q.symbol), q.price, q.changePct, points);
+  }
+  const last = spark[spark.length - 1] ?? 0;
+  if (q.price > 0 && Math.abs(last - q.price) / Math.max(q.price, 1e-9) > 0.0005) {
+    spark = [...spark, q.price].slice(-points);
+  }
+  const labels = sessionLabels(spark.length, q.category);
+  return spark.map((v, i) => ({ label: labels[i] ?? "", value: v }));
+}
+
+/** Adapt a live quote to the row shape, keeping the fallback's brand info. */
+function toMarketInstrument(
+  q: TradQuote | undefined,
+  fallback: MarketInstrument,
+): MarketInstrument {
+  if (!q || !Number.isFinite(q.price) || q.price <= 0) return fallback;
+  return {
+    symbol: q.symbol,
+    name: q.name,
+    ticker: fallback.ticker,
+    price: q.price,
+    change: Number.isFinite(q.change) ? q.change : fallback.change,
+    changePercent: Number.isFinite(q.changePct) ? q.changePct : fallback.changePercent,
+    color: fallback.color,
+    badge: fallback.badge,
+  };
+}
+
+/** Adapt a live quote to the chart shape (value + series). */
+function toSeriesInstrument(
+  q: TradQuote | undefined,
+  fallback: SeriesInstrument,
+  points = 48,
+): SeriesInstrument {
+  if (!q || !Number.isFinite(q.price) || q.price <= 0) return fallback;
+  return {
+    symbol: q.symbol,
+    name: q.name,
+    ticker: fallback.ticker,
+    value: q.price,
+    change: Number.isFinite(q.change) ? q.change : fallback.change,
+    changePercent: Number.isFinite(q.changePct) ? q.changePct : fallback.changePercent,
+    series: sparkToSeries(q, points),
+  };
+}
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function monthLabel(date: string): string {
+  const m = Number(date.slice(5, 7));
+  return MONTHS[m - 1] ?? date;
+}
+
+/** Build the inflation panel from the live Alpha Vantage series. */
+function inflationFromMacro(macro: TradMacro): typeof marketSummaryData.inflation {
+  const rows = macro.inflation ?? [];
+  if (rows.length === 0) return marketSummaryData.inflation;
+  const series = rows
+    .slice(0, 7)
+    .reverse()
+    .map((r) => ({ label: monthLabel(r.date), value: r.value }));
+  const last12 = rows
+    .slice(0, 12)
+    .map((r) => r.value)
+    .filter((v) => Number.isFinite(v));
+  const avg = last12.length ? last12.reduce((a, b) => a + b, 0) / last12.length : 3.0;
+  const latest = rows[0]?.value ?? 2.7;
+  return {
+    series,
+    avg: `${avg.toFixed(1)}%`,
+    forecast: `${latest.toFixed(1)}%`,
+    nextRelease: marketSummaryData.inflation.nextRelease,
+  };
+}
+
+/** Decimals that suit an FX rate (JPY crosses need fewer digits). */
+function fxDigits(v: number): number {
+  if (v >= 100) return 3;
+  if (v >= 10) return 4;
+  return 5;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -535,10 +648,10 @@ export function FuturesList({ items }: { items: MarketInstrument[] }) {
 
 export function DollarIndex({
   dxy,
-  futures,
+  commodities,
 }: {
-  dxy: typeof marketSummaryData.dollarIndex;
-  futures: MarketInstrument[];
+  dxy: SeriesInstrument;
+  commodities: MarketInstrument[];
 }) {
   return (
     <MarketCard
@@ -549,7 +662,7 @@ export function DollarIndex({
       <div className="grid gap-0 lg:grid-cols-2">
         <div className="border-b border-[#171C26] p-3 lg:border-b-0 lg:border-r">
           <div className="flex items-baseline gap-2">
-            <p className="num text-lg font-semibold tracking-tight">{fmtNum(dxy.value, 2)}</p>
+            <p className="num text-lg font-semibold tracking-tight">{fmtNum(dxy.value, 3)}</p>
             <span className="text-[9px] uppercase tracking-wider text-muted-foreground">DXY</span>
           </div>
           <div className="mt-4">
@@ -557,14 +670,69 @@ export function DollarIndex({
               data={dxy.series}
               color={RED}
               height={96}
-              formatValue={(v) => fmtNum(v, 2)}
+              formatValue={(v) => fmtNum(v, 3)}
             />
           </div>
         </div>
         <div className="p-3">
-          <FuturesList items={futures} />
+          <FuturesList items={commodities} />
           <div className="mt-2">
             <CardLink to="/derivatives">See all futures</CardLink>
+          </div>
+        </div>
+      </div>
+    </MarketCard>
+  );
+}
+
+/* ------------------------------------------------------------------------- */
+/* Forex & futures panel (new)                                               */
+/* ------------------------------------------------------------------------- */
+
+export function ForexFuturesPanel({
+  forex,
+  futures,
+}: {
+  forex: MarketInstrument[];
+  futures: MarketInstrument[];
+}) {
+  return (
+    <MarketCard title="Forex & futures" bodyClassName="p-0">
+      <div className="grid gap-0 lg:grid-cols-2">
+        <div className="border-b border-[#171C26] p-3 lg:border-b-0 lg:border-r">
+          <p className="px-0.5 pb-1 text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
+            Forex majors
+          </p>
+          <div className="grid grid-cols-1 gap-x-5 sm:grid-cols-2">
+            {forex.map((f) => (
+              <MarketRow
+                key={f.symbol}
+                icon={<CircleBadge color={f.color} label={f.badge} />}
+                name={f.name}
+                ticker={f.ticker}
+                value={f.price}
+                changePercent={f.changePercent}
+                formatValue={(v) => fmtNum(v, fxDigits(v))}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="p-3">
+          <p className="px-0.5 pb-1 text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
+            CME futures
+          </p>
+          <div className="grid grid-cols-1 gap-x-5 sm:grid-cols-2">
+            {futures.map((f) => (
+              <MarketRow
+                key={f.symbol}
+                icon={<CircleBadge color={f.color} label={f.badge} />}
+                name={f.name}
+                ticker={f.ticker}
+                value={f.price}
+                changePercent={f.changePercent}
+                formatValue={(v) => `$${fmtNum(v, 2)}`}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -609,9 +777,11 @@ export function EconomicIndicators({ data }: { data: typeof marketSummaryData.in
 
 export function TreasuryYield({
   t,
+  yields,
   inflation,
 }: {
-  t: typeof marketSummaryData.treasury10y;
+  t: SeriesInstrument;
+  yields: MarketInstrument[];
   inflation: typeof marketSummaryData.inflation;
 }) {
   return (
@@ -622,16 +792,33 @@ export function TreasuryYield({
         ticker={t.ticker}
         value={t.value}
         changePercent={t.changePercent}
-        formatValue={(v) => `${fmtNum(v, 2)}%`}
+        formatValue={(v) => `${fmtNum(v, 3)}%`}
       />
       <div className="mt-4">
         <MarketAreaChart
           data={t.series}
           color={TEAL}
           height={84}
-          formatValue={(v) => `${v.toFixed(2)}%`}
+          formatValue={(v) => `${v.toFixed(3)}%`}
         />
       </div>
+
+      {yields.length > 0 && (
+        <div className="mt-3 border-t border-[#171C26] pt-2">
+          {yields.map((y) => (
+            <MarketRow
+              key={y.symbol}
+              icon={<CircleBadge color={y.color} label={y.badge} />}
+              name={y.name}
+              ticker={y.ticker}
+              value={y.price}
+              changePercent={y.changePercent}
+              formatValue={(v) => `${fmtNum(v, 3)}%`}
+            />
+          ))}
+        </div>
+      )}
+
       <EconomicIndicators data={inflation} />
     </MarketCard>
   );
@@ -647,6 +834,22 @@ export function MarketSummary({ className }: { className?: string }) {
   const liveAssets = useLiveAssets();
   const cryptoAssets = liveAssets.filter((a) => a.symbol === "BTC" || a.symbol === "ETH");
 
+  // Live traditional markets — forex / indices / DXY / commodities / futures /
+  // bonds stream from the backend (TWELVE DATA WS + Yahoo + Alpha Vantage).
+  const quotes = useTradFiQuotes();
+  const macro = useTradFiMacro();
+  const q = (sym: string) => quotes.find((x) => x.symbol === sym);
+
+  const sp500 = toSeriesInstrument(q("SPX"), d.sp500, 56);
+  const indices = d.indices.map((fb) => toMarketInstrument(q(fb.symbol), fb));
+  const dxy = toSeriesInstrument(q("DXY"), d.dollarIndex, 44);
+  const commodities = d.commodities.map((fb) => toMarketInstrument(q(fb.symbol), fb));
+  const forex = d.forex.map((fb) => toMarketInstrument(q(fb.symbol), fb));
+  const futures = d.futures.map((fb) => toMarketInstrument(q(fb.symbol), fb));
+  const bonds = d.bonds.map((fb) => toMarketInstrument(q(fb.symbol), fb));
+  const us10y = toSeriesInstrument(q("US10Y"), d.treasury10y, 40);
+  const inflation = inflationFromMacro(macro);
+
   return (
     <section
       className={cn("rounded-lg border border-[#1C2230] bg-[#07090D] p-2.5 sm:p-3", className)}
@@ -660,17 +863,21 @@ export function MarketSummary({ className }: { className?: string }) {
 
       <div className="grid gap-2.5 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <MarketChart data={d.sp500} />
+          <MarketChart data={sp500} />
         </div>
-        <MajorIndices items={d.indices} />
+        <MajorIndices items={indices} />
 
         <div className="lg:col-span-2">
           <CryptoMarketCap assets={cryptoAssets} />
         </div>
-        <TreasuryYield t={d.treasury10y} inflation={d.inflation} />
+        <TreasuryYield t={us10y} yields={bonds} inflation={inflation} />
 
         <div className="lg:col-span-3">
-          <DollarIndex dxy={d.dollarIndex} futures={d.futures} />
+          <DollarIndex dxy={dxy} commodities={commodities} />
+        </div>
+
+        <div className="lg:col-span-3">
+          <ForexFuturesPanel forex={forex} futures={futures} />
         </div>
       </div>
     </section>

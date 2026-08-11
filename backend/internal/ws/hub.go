@@ -20,11 +20,20 @@ const (
 	pongWait       = 60 * time.Second
 	pingPeriod     = 50 * time.Second
 	broadcastEvery = 2 * time.Second
+	// Traditional markets (forex/indices/DXY/futures/bonds) stream faster than
+	// the crypto snapshot — the requested 250–500ms UI throttle.
+	tradFiEvery = 500 * time.Millisecond
 )
+
+// TradQuoter streams the traditional-markets quote feed over the socket.
+type TradQuoter interface {
+	Quotes() []marketdata.TradQuote
+}
 
 // Hub manages all connected clients and broadcasts snapshots.
 type Hub struct {
 	provider marketdata.MarketDataProvider
+	tradfi   TradQuoter
 
 	mu      sync.Mutex
 	clients map[*Client]bool
@@ -32,10 +41,12 @@ type Hub struct {
 	upgrader websocket.Upgrader
 }
 
-// NewHub creates a hub backed by the given provider.
-func NewHub(provider marketdata.MarketDataProvider) *Hub {
+// NewHub creates a hub backed by the given providers. `tradfi` may be nil (the
+// traditional-markets stream is then skipped).
+func NewHub(provider marketdata.MarketDataProvider, tradfi TradQuoter) *Hub {
 	return &Hub{
 		provider: provider,
+		tradfi:   tradfi,
 		clients:  map[*Client]bool{},
 		upgrader: websocket.Upgrader{
 			ReadBufferSize:  1024,
@@ -85,7 +96,9 @@ func (h *Hub) unregister(c *Client) {
 // Run broadcasts snapshots on an interval until the context is cancelled.
 func (h *Hub) Run(ctx context.Context) {
 	ticker := time.NewTicker(broadcastEvery)
+	tradTicker := time.NewTicker(tradFiEvery)
 	defer ticker.Stop()
+	defer tradTicker.Stop()
 	for {
 		select {
 		case <-ctx.Done():
@@ -93,6 +106,44 @@ func (h *Hub) Run(ctx context.Context) {
 			return
 		case <-ticker.C:
 			h.broadcastSnapshots()
+		case <-tradTicker.C:
+			if h.tradfi != nil {
+				h.broadcastTradFi()
+			}
+		}
+	}
+}
+
+// broadcastTradFi pushes the traditional-markets quote snapshot. The spark
+// series are intentionally omitted — they are the bulk of the payload and the
+// client appends live ticks to its own spark history; fresh series arrive over
+// the REST endpoint on the 10s poll.
+func (h *Hub) broadcastTradFi() {
+	quotes := h.tradfi.Quotes()
+	slim := make([]map[string]any, 0, len(quotes))
+	for _, q := range quotes {
+		slim = append(slim, map[string]any{
+			"symbol": q.Symbol, "name": q.Name, "category": q.Category,
+			"price": q.Price, "prevClose": q.PrevClose, "change": q.Change,
+			"changePct": q.ChangePct, "high": q.High, "low": q.Low,
+			"source": q.Source, "currency": q.Currency, "digits": q.Digits,
+			"live": q.Live, "updatedAt": q.UpdatedAt,
+		})
+	}
+	payload, err := json.Marshal(map[string]any{
+		"type": "tradfi_snapshot",
+		"at":   time.Now().UTC(),
+		"data": slim,
+	})
+	if err != nil {
+		return
+	}
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	for c := range h.clients {
+		select {
+		case c.send <- payload:
+		default: // slow client: skip this frame
 		}
 	}
 }

@@ -18,7 +18,7 @@ import { useAuth, useAuthHydrated, type AuthUser, type UserProfile } from "./aut
 const RAW_BASE = (import.meta.env["VITE_API_BASE"] as string | undefined) ?? "";
 
 /** Backend origin without a trailing "/api" (normalized). */
-const API_ORIGIN = RAW_BASE.replace(/\/+$/, "").replace(/\/api$/i, "");
+export const API_ORIGIN = RAW_BASE.replace(/\/+$/, "").replace(/\/api$/i, "");
 
 /** Build an API URL: "/api<path>" on the origin (or the dev proxy). */
 function apiUrl(path: string): string {
