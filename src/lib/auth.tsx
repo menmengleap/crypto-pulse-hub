@@ -9,6 +9,8 @@ export type AuthUser = {
   role: string;
   /** Account registration date (ISO) — used for the "Member since" display. */
   createdAt?: string;
+  /** Whether the account is active (the backend returns this from the users table). */
+  isActive?: boolean;
 };
 
 export type AuthSession = {

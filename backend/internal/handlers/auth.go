@@ -54,7 +54,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		writeBadRequest(w, err)
 		return
 	}
-	result, err := h.auth.Register(r.Context(), req.Email, req.Name, req.Password)
+	result, err := h.auth.Register(r.Context(), req.Email, req.Name, req.Password, r.UserAgent(), clientIP(r))
 	if err != nil {
 		switch {
 		case errors.Is(err, services.ErrEmailTaken):
@@ -73,7 +73,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		writeBadRequest(w, err)
 		return
 	}
-	result, err := h.auth.Login(r.Context(), req.Email, req.Password)
+	result, err := h.auth.Login(r.Context(), req.Email, req.Password, r.UserAgent(), clientIP(r))
 	if err != nil {
 		WriteError(w, http.StatusUnauthorized, "INVALID_CREDENTIALS", "invalid email or password")
 		return

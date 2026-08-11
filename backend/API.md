@@ -118,6 +118,31 @@ Send `Authorization: Bearer <accessToken>` on these routes.
 }
 ```
 
+### GET /api/sessions
+
+Active device sessions for the authenticated user, newest first (max 20). The
+session that issued the request is flagged `current: true`. Login, register and
+OAuth callbacks store the browser's `User-Agent` and client IP on each session.
+
+```json
+{
+  "success": true,
+  "data": [
+    { "id": "...", "userAgent": "Mozilla/5.0 ... Chrome/126 ...", "ip": "203.0.113.7",
+      "current": true, "createdAt": "2026-08-11T09:00:00Z", "expiresAt": "2026-09-10T09:00:00Z" }
+  ]
+}
+```
+
+### DELETE /api/sessions/:id
+
+Revokes one of the user's sessions (sessions belonging to another user return
+`404`). `200 { "revoked": true }`.
+
+### POST /api/sessions/revoke-others
+
+Signs out every other device, keeping the current session. `200 { "revoked": true }`.
+
 ---
 
 ## Markets (public, read-only)

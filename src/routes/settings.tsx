@@ -1,21 +1,37 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Camera, Check, Loader2, User, X } from "lucide-react";
+import {
+  Camera,
+  Check,
+  Globe,
+  Laptop,
+  Loader2,
+  LogOut,
+  Monitor,
+  RefreshCw,
+  ShieldCheck,
+  Smartphone,
+  Tablet,
+  User,
+  X,
+} from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Panel } from "@/components/market/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { api } from "@/lib/api";
+import { api, sessionsApi, type DeviceSession } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { parseUserAgent, type DeviceKind } from "@/lib/device";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
     meta: [
       { title: "Settings — Cryptolytic" },
-      { name: "description", content: "Manage your profile, avatar and preferences." },
+      { name: "description", content: "Manage your profile, avatar, preferences and devices." },
     ],
   }),
   component: SettingsPage,
@@ -231,11 +247,190 @@ function ProfileSection() {
   );
 }
 
+const deviceIcons: Record<DeviceKind, typeof Monitor> = {
+  monitor: Monitor,
+  laptop: Laptop,
+  smartphone: Smartphone,
+  tablet: Tablet,
+  unknown: Globe,
+};
+
+function fmtDay(iso: string): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+/**
+ * Logged-in devices — active sessions fetched live from the backend's
+ * sessions table, with per-device revoke and "sign out all other devices".
+ */
+function DevicesSection() {
+  const [sessions, setSessions] = useState<DeviceSession[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      setSessions(await sessionsApi.list());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not load your devices.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const revoke = async (id: string) => {
+    setBusy(id);
+    setError(null);
+    try {
+      await sessionsApi.revoke(id);
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not revoke that device.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const revokeOthers = async () => {
+    setBusy("all");
+    setError(null);
+    try {
+      await sessionsApi.revokeOthers();
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not sign out other devices.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const list = sessions ?? [];
+  const others = list.filter((s) => !s.current).length;
+
+  return (
+    <Panel
+      title="Logged-in devices"
+      description="Where your account is currently signed in — revoke anything you don't recognise."
+      action={
+        <button
+          type="button"
+          onClick={() => void load()}
+          className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          aria-label="Refresh devices"
+        >
+          <RefreshCw className="size-3" />
+          Refresh
+        </button>
+      }
+    >
+      {loading && (
+        <div className="space-y-3 p-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <Skeleton className="size-10 shrink-0 rounded-xl" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-3.5 w-1/3" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && error && <p className="px-5 py-6 text-xs text-muted-foreground">{error}</p>}
+
+      {!loading && !error && list.length === 0 && (
+        <p className="px-5 py-6 text-center text-xs text-muted-foreground">
+          No active sessions found.
+        </p>
+      )}
+
+      {!loading && !error && list.length > 0 && (
+        <ul className="divide-y divide-border">
+          {list.map((s) => {
+            const info = parseUserAgent(s.userAgent);
+            const Icon = deviceIcons[info.kind];
+            return (
+              <li key={s.id} className="flex items-center gap-3 px-5 py-3.5">
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-border bg-surface text-muted-foreground">
+                  <Icon className="size-4.5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="truncate text-sm font-medium">{info.label}</p>
+                    {s.current && (
+                      <span className="rounded-md bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+                        This device
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">
+                    Signed in {fmtDay(s.createdAt)}
+                    {s.ip ? ` · ${s.ip}` : ""} · expires {fmtDay(s.expiresAt)}
+                  </p>
+                </div>
+                {!s.current && (
+                  <button
+                    type="button"
+                    disabled={busy !== null}
+                    onClick={() => void revoke(s.id)}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[11px] text-muted-foreground transition-colors hover:border-down/40 hover:text-down disabled:opacity-50"
+                  >
+                    {busy === s.id ? (
+                      <Loader2 className="size-3 animate-spin" />
+                    ) : (
+                      <LogOut className="size-3" />
+                    )}
+                    Revoke
+                  </button>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {!loading && !error && others > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-5 py-3.5">
+          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <ShieldCheck className="size-3.5 text-up" />
+            {others} other device{others === 1 ? "" : "s"} signed in
+          </p>
+          <button
+            type="button"
+            disabled={busy !== null}
+            onClick={() => void revokeOthers()}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[11px] text-foreground transition-colors hover:border-primary/40 disabled:opacity-50"
+          >
+            {busy === "all" ? (
+              <Loader2 className="size-3 animate-spin" />
+            ) : (
+              <LogOut className="size-3" />
+            )}
+            Sign out all other devices
+          </button>
+        </div>
+      )}
+    </Panel>
+  );
+}
+
 function SettingsPage() {
   return (
     <AppShell title="Settings" subtitle="Terminal, profile & preferences">
       <div className="max-w-3xl space-y-4">
         <ProfileSection />
+        <DevicesSection />
         <Panel
           title="Coming soon"
           description="Trading view, notifications and workspace preferences ship in an upcoming release."

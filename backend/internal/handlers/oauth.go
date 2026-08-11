@@ -49,7 +49,7 @@ func (h *AuthHandler) OAuthCallback(provider string) http.HandlerFunc {
 			return
 		}
 
-		result, err := h.auth.OAuthCallback(r.Context(), provider, code)
+		result, err := h.auth.OAuthCallback(r.Context(), provider, code, r.UserAgent(), clientIP(r))
 		if err != nil {
 			fail()
 			return

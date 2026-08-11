@@ -75,7 +75,7 @@ func (s *AuthService) OAuthAuthorizeURL(provider, state string) (string, error) 
 }
 
 // OAuthCallback exchanges an authorization code for a user session.
-func (s *AuthService) OAuthCallback(ctx context.Context, provider, code string) (*AuthResult, error) {
+func (s *AuthService) OAuthCallback(ctx context.Context, provider, code, userAgent, ip string) (*AuthResult, error) {
 	var info OAuthProfile
 	var err error
 	switch provider {
@@ -94,7 +94,7 @@ func (s *AuthService) OAuthCallback(ctx context.Context, provider, code string) 
 	if err != nil {
 		return nil, err
 	}
-	return s.issueSession(ctx, user, "")
+	return s.issueSession(ctx, user, userAgent, ip)
 }
 
 // SignOAuthState returns an HMAC-signed state value bound to the provider.

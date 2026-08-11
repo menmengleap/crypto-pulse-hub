@@ -226,6 +226,28 @@ export async function refreshMe(): Promise<MeResponse> {
   return me;
 }
 
+// ---------------------------------------------------------------------------
+// Logged-in devices (Settings)
+// ---------------------------------------------------------------------------
+
+/** A signed-in device session, as returned by GET /api/sessions. */
+export type DeviceSession = {
+  id: string;
+  userAgent: string;
+  ip: string;
+  /** True when this session issued the current request (this browser tab). */
+  current: boolean;
+  createdAt: string;
+  expiresAt: string;
+};
+
+/** Device/session management — backed by the sessions table in Postgres. */
+export const sessionsApi = {
+  list: () => api.get<DeviceSession[]>("/sessions"),
+  revoke: (id: string) => api.delete<{ revoked: boolean }>(`/sessions/${encodeURIComponent(id)}`),
+  revokeOthers: () => api.post<{ revoked: boolean }>("/sessions/revoke-others", {}),
+};
+
 /**
  * Validate the persisted session against /api/me on boot. The guards call
  * this once per page load before deciding to redirect, which closes the

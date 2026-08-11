@@ -40,6 +40,18 @@ type Post = {
 
 const posts: Post[] = [
   {
+    id: "new-page-refresh",
+    tag: "Update",
+    date: "Aug 11, 2026",
+    title: "A cleaner 'New' experience — homepage decluttered, console gets its own New page",
+    excerpt:
+      "The New homepage dropped its news, ad and release boxes for a tighter live-data flow, and the console now has its own 'New' section showing the same content behind the session.",
+    body: [
+      "The New homepage was decluttered: the static verified-news feed, ad network panel and news search box were removed, and the 'What's new' release-timeline boxes went too. The page now runs straight off live data — product video, realtime markets and Finnhub research panels.",
+      "The console gained its own 'New' page (/whats-new) under a new 'What's New' sidebar section, rendering the exact same components and Data API as the homepage behind the sign-in gate. The two stay separate by design: clicking 'New' on the homepage keeps you on the homepage, and clicking 'New' in the console keeps you in the console — one data source, two destinations.",
+    ],
+  },
+  {
     id: "indicators-live",
     tag: "Release",
     date: "Aug 10, 2026",
@@ -184,6 +196,7 @@ const changes: {
       "Crypto, forex & stock coverage with automatic provider failover",
       "Overlay & sub-pane indicator rendering on the Advanced Chart",
       "Real profile data (name, avatar, member since) from the database",
+      "Console 'New' section — the homepage's live data, inside the terminal",
     ],
   },
   {

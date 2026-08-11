@@ -35,6 +35,7 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.Marke
 	// Handlers
 	authH := handlers.NewAuthHandler(authSvc, cfg)
 	userH := handlers.NewUserHandler(authSvc)
+	sessionH := handlers.NewSessionHandler(authSvc)
 	marketH := handlers.NewMarketHandler(marketRepo)
 	watchlistH := handlers.NewWatchlistHandler(watchlistRepo)
 	analysisH := handlers.NewAnalysisHandler(analysisRepo)
@@ -127,6 +128,11 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.Marke
 		r.Patch("/api/me", userH.UpdateMe)
 		r.Patch("/api/me/profile", userH.UpdateProfile)
 		r.Patch("/api/me/preferences", userH.UpdatePreferences)
+
+		// Logged-in devices (Settings).
+		r.Get("/api/sessions", sessionH.List)
+		r.Delete("/api/sessions/{id}", sessionH.Revoke)
+		r.Post("/api/sessions/revoke-others", sessionH.RevokeOthers)
 
 		r.Get("/api/watchlists", watchlistH.List)
 		r.Post("/api/watchlists", watchlistH.Create)

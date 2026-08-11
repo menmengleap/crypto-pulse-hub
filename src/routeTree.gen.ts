@@ -38,6 +38,7 @@ import { Route as SpotRouteImport } from './routes/spot'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
+import { Route as WhatsNewRouteImport } from './routes/whats-new'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
 import { Route as NewsNewsIdRouteImport } from './routes/news.$newsId'
@@ -187,6 +188,11 @@ const WatchlistRoute = WatchlistRouteImport.update({
   path: '/watchlist',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WhatsNewRoute = WhatsNewRouteImport.update({
+  id: '/whats-new',
+  path: '/whats-new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/auth/callback',
   path: '/auth/callback',
@@ -233,6 +239,7 @@ export interface FileRoutesByFullPath {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/watchlist': typeof WatchlistRoute
+  '/whats-new': typeof WhatsNewRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/news/$newsId': typeof NewsNewsIdRoute
   '/news/': typeof NewsIndexRoute
@@ -267,6 +274,7 @@ export interface FileRoutesByTo {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/watchlist': typeof WatchlistRoute
+  '/whats-new': typeof WhatsNewRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/news/$newsId': typeof NewsNewsIdRoute
   '/news': typeof NewsIndexRoute
@@ -302,6 +310,7 @@ export interface FileRoutesById {
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/watchlist': typeof WatchlistRoute
+  '/whats-new': typeof WhatsNewRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/news/$newsId': typeof NewsNewsIdRoute
   '/news/': typeof NewsIndexRoute
@@ -338,6 +347,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/watchlist'
+    | '/whats-new'
     | '/auth/callback'
     | '/news/$newsId'
     | '/news/'
@@ -372,6 +382,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/watchlist'
+    | '/whats-new'
     | '/auth/callback'
     | '/news/$newsId'
     | '/news'
@@ -406,6 +417,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/terms'
     | '/watchlist'
+    | '/whats-new'
     | '/auth/callback'
     | '/news/$newsId'
     | '/news/'
@@ -441,6 +453,7 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   WatchlistRoute: typeof WatchlistRoute
+  WhatsNewRoute: typeof WhatsNewRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   NewsNewsIdRoute: typeof NewsNewsIdRoute
   NewsIndexRoute: typeof NewsIndexRoute
@@ -651,6 +664,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WatchlistRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/whats-new': {
+      id: '/whats-new'
+      path: '/whats-new'
+      fullPath: '/whats-new'
+      preLoaderRoute: typeof WhatsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/callback': {
       id: '/auth/callback'
       path: '/auth/callback'
@@ -705,6 +725,7 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   WatchlistRoute: WatchlistRoute,
+  WhatsNewRoute: WhatsNewRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   NewsNewsIdRoute: NewsNewsIdRoute,
   NewsIndexRoute: NewsIndexRoute,

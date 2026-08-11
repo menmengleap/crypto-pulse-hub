@@ -59,7 +59,10 @@ type AuthResult struct {
 // Registration & login
 // ---------------------------------------------------------------------------
 
-func (s *AuthService) Register(ctx context.Context, email, name, password string) (*AuthResult, error) {
+// Register creates an account and signs the browser in. The user-agent and IP
+// of the enrolling device are stored on the session so users can review (and
+// revoke) logged-in devices from Settings.
+func (s *AuthService) Register(ctx context.Context, email, name, password, userAgent, ip string) (*AuthResult, error) {
 	email = strings.ToLower(strings.TrimSpace(email))
 	if err := validatePassword(password); err != nil {
 		return nil, err
@@ -77,10 +80,10 @@ func (s *AuthService) Register(ctx context.Context, email, name, password string
 		}
 		return nil, err
 	}
-	return s.issueSession(ctx, user, "")
+	return s.issueSession(ctx, user, userAgent, ip)
 }
 
-func (s *AuthService) Login(ctx context.Context, email, password string) (*AuthResult, error) {
+func (s *AuthService) Login(ctx context.Context, email, password, userAgent, ip string) (*AuthResult, error) {
 	user, err := s.users.GetByEmail(ctx, strings.ToLower(strings.TrimSpace(email)))
 	if err != nil {
 		return nil, ErrInvalidCredentials
@@ -91,10 +94,10 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (*AuthR
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return nil, ErrInvalidCredentials
 	}
-	return s.issueSession(ctx, user, "")
+	return s.issueSession(ctx, user, userAgent, ip)
 }
 
-func (s *AuthService) issueSession(ctx context.Context, user *models.User, userAgent string) (*AuthResult, error) {
+func (s *AuthService) issueSession(ctx context.Context, user *models.User, userAgent, ip string) (*AuthResult, error) {
 	refreshToken, err := randomToken(32)
 	if err != nil {
 		return nil, err
@@ -103,6 +106,7 @@ func (s *AuthService) issueSession(ctx context.Context, user *models.User, userA
 		UserID:           user.ID,
 		RefreshTokenHash: hashToken(refreshToken),
 		UserAgent:        userAgent,
+		IP:               ip,
 		ExpiresAt:        time.Now().UTC().Add(s.cfg.JWTRefreshTTL),
 	}
 	if err := s.sessions.Create(ctx, session); err != nil {
@@ -147,7 +151,60 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (*AuthRe
 		return nil, ErrUserInactive
 	}
 	_ = s.sessions.Revoke(ctx, session.ID)
-	return s.issueSession(ctx, user, session.UserAgent)
+	return s.issueSession(ctx, user, session.UserAgent, session.IP)
+}
+
+// ---------------------------------------------------------------------------
+// Logged-in devices
+// ---------------------------------------------------------------------------
+
+// DeviceSession is the public shape of a session row for the devices UI.
+type DeviceSession struct {
+	ID        string    `json:"id"`
+	UserAgent string    `json:"userAgent"`
+	IP        string    `json:"ip"`
+	Current   bool      `json:"current"`
+	CreatedAt time.Time `json:"createdAt"`
+	ExpiresAt time.Time `json:"expiresAt"`
+}
+
+// ListSessions returns the active sessions for a user (newest first), marking
+// the one that issued the current request as the current device.
+func (s *AuthService) ListSessions(ctx context.Context, userID, currentSessionID string) ([]DeviceSession, error) {
+	sessions, err := s.sessions.ListForUser(ctx, userID, 20)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]DeviceSession, 0, len(sessions))
+	for _, ss := range sessions {
+		out = append(out, DeviceSession{
+			ID:        ss.ID,
+			UserAgent: ss.UserAgent,
+			IP:        ss.IP,
+			Current:   ss.ID == currentSessionID,
+			CreatedAt: ss.CreatedAt,
+			ExpiresAt: ss.ExpiresAt,
+		})
+	}
+	return out, nil
+}
+
+// RevokeSession revokes one of the user's sessions. Sessions belonging to a
+// different user are treated as not found so ids can't be probed.
+func (s *AuthService) RevokeSession(ctx context.Context, userID, sessionID string) error {
+	ss, err := s.sessions.GetByID(ctx, sessionID)
+	if err != nil {
+		return err
+	}
+	if ss.UserID != userID {
+		return repositories.ErrNotFound
+	}
+	return s.sessions.Revoke(ctx, sessionID)
+}
+
+// RevokeOtherSessions signs out every device except the current one.
+func (s *AuthService) RevokeOtherSessions(ctx context.Context, userID, currentSessionID string) error {
+	return s.sessions.RevokeAllForUserExcept(ctx, userID, currentSessionID)
 }
 
 // Logout revokes the session identified by an access token or refresh token.
