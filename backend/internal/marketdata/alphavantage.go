@@ -1,9 +1,11 @@
 package marketdata
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -21,7 +23,10 @@ import (
 // realtime feed anywhere in our provider set — is anchored to the latest AV
 // treasury reading.
 
-const avBase = "https://www.alphavantage.co/query"
+const (
+	avBase       = "https://www.alphavantage.co/query"
+	macroCacheKey = "tradfi:macro"
+)
 
 // avEndpoint describes one Alpha Vantage series fetch.
 type avEndpoint struct {
@@ -41,7 +46,9 @@ var avEndpoints = []avEndpoint{
 }
 
 // refreshAVMacro fetches the full macro block. Callers never hold the lock.
-func (p *TradFiProvider) refreshAVMacro() {
+// The result is persisted to the shared cache (Redis / memory) so later cold
+// starts reuse it instead of burning the Alpha Vantage daily quota again.
+func (p *TradFiProvider) refreshAVMacro(ctx context.Context) {
 	now := time.Now()
 	var latestUS02Y float64
 	okCount := 0
@@ -49,6 +56,7 @@ func (p *TradFiProvider) refreshAVMacro() {
 	for _, ep := range avEndpoints {
 		pts, err := p.avSeriesFetch(ep.function, ep.extra)
 		if err != nil || len(pts) == 0 {
+			log.Printf("alphavantage %s failed: %v", ep.function, err)
 			continue
 		}
 		p.mu.Lock()
@@ -80,11 +88,17 @@ func (p *TradFiProvider) refreshAVMacro() {
 	p.avAt = now
 	healthy := okCount >= len(avEndpoints)/2
 	p.states["alphavantage"] = ProviderState{Active: "alphavantage", Healthy: healthy, LastRefresh: now}
+	snapshot := p.macro
 	p.mu.Unlock()
 
 	// Anchor the US02Y quote (no realtime source) to the AV reading.
 	if latestUS02Y > 0 {
 		p.updateQuote(TradQuote{Symbol: "US02Y", Price: latestUS02Y, Source: "alphavantage"})
+	}
+
+	// Persist whatever succeeded so the next cold start reuses it.
+	if okCount > 0 {
+		_ = cacheSetJSON(ctx, p.cache, macroCacheKey, snapshot, 8*time.Hour)
 	}
 }
 

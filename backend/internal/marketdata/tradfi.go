@@ -164,6 +164,7 @@ type TradFiProvider struct {
 	tdBudget     *twelveBudget
 	macro        MacroSnapshot
 	avAt         time.Time
+	avLastTry    time.Time
 	avRefreshing int32
 	states       map[string]ProviderState
 }
@@ -197,6 +198,12 @@ func NewTradFiProvider(opts TradFiOptions) *TradFiProvider {
 		p.quotes[inst.Symbol] = p.seedQuote(inst)
 	}
 	p.tdBudget = &twelveBudget{}
+	// Restore a previously cached macro snapshot so cold starts never re-burn
+	// the Alpha Vantage 25/day quota (cache = Redis or the in-process TTL map).
+	if m, ok := cacheGetJSON[MacroSnapshot](context.Background(), opts.Cache, macroCacheKey); ok && len(m.Inflation) > 0 {
+		p.macro = m
+		p.avAt = time.Now()
+	}
 	return p
 }
 
@@ -237,7 +244,7 @@ func (p *TradFiProvider) Run(ctx context.Context) {
 	p.refreshTwelveQuotes()
 	p.refreshYahooQuotes()
 	go p.refreshTDSparks(ctx) // paced — takes ~90s on a cold cache
-	p.refreshAVMacro()
+	p.refreshAVMacro(ctx)
 
 	ticker := time.NewTicker(p.refreshEvery)
 	sparkTicker := time.NewTicker(5 * time.Minute)
@@ -258,7 +265,7 @@ func (p *TradFiProvider) Run(ctx context.Context) {
 			// (~90s total) and must never stall the quote-refresh loop.
 			go p.refreshTDSparks(ctx)
 		case <-avTicker.C:
-			p.refreshAVMacro()
+			p.refreshAVMacro(ctx)
 		}
 	}
 }
@@ -342,18 +349,24 @@ func (p *TradFiProvider) Historical(ctx context.Context, symbol, timeframe strin
 	return p.yahooHistorical(ctx, inst, timeframe, limit)
 }
 
-// ensureAVFresh kicks off a background macro refresh when stale (single-flight).
+// ensureAVFresh kicks off a background macro refresh when the snapshot is
+// stale (>12h) or was never fetched, throttled to one attempt per 10 minutes
+// (Alpha Vantage free is 25 requests/day — failed attempts still burn credits).
 func (p *TradFiProvider) ensureAVFresh() {
 	p.mu.RLock()
-	stale := time.Since(p.avAt) > 12*time.Hour
+	need := time.Since(p.avAt) > 12*time.Hour
+	last := p.avLastTry
 	p.mu.RUnlock()
-	if !stale || p.avRefreshing != 0 {
+	if !need || time.Since(last) < 10*time.Minute || p.avRefreshing != 0 {
 		return
 	}
 	if swapIfZero(&p.avRefreshing) {
+		p.mu.Lock()
+		p.avLastTry = time.Now()
+		p.mu.Unlock()
 		go func() {
 			defer storeZero(&p.avRefreshing)
-			p.refreshAVMacro()
+			p.refreshAVMacro(context.Background())
 		}()
 	}
 }
