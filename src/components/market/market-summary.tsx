@@ -1,8 +1,15 @@
-import { useId, useRef, useState, type ReactNode } from "react";
+import { useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { fmtPct } from "@/lib/market-data";
-import { marketSummaryData, type MarketInstrument, type SeriesPoint } from "@/lib/market-summary";
+import { fmtCompact, fmtPct, type Asset } from "@/lib/market-data";
+import {
+  liveAnchoredSeries,
+  marketSummaryData,
+  type MarketInstrument,
+  type SeriesPoint,
+} from "@/lib/market-summary";
+import { useLiveAssets, useLiveGlobal } from "@/lib/realtime";
+import { AssetLogo } from "@/components/market/asset-logo";
 import { TerminalLink } from "@/components/layout/terminal-link";
 
 /* ------------------------------------------------------------------------- */
@@ -429,17 +436,17 @@ export function MajorIndices({ items }: { items: MarketInstrument[] }) {
   );
 }
 
-export function CryptoAssets({ items }: { items: MarketInstrument[] }) {
+export function CryptoAssets({ assets }: { assets: Asset[] }) {
   return (
     <div className="border-t border-[#171C26] pt-1">
-      {items.map((a) => (
+      {assets.map((a) => (
         <MarketRow
           key={a.symbol}
-          icon={<CircleBadge color={a.color} label={a.badge} />}
+          icon={<AssetLogo asset={a} className="size-6 rounded-full" />}
           name={a.name}
-          ticker={a.ticker}
+          ticker={`${a.pair} · Binance`}
           value={a.price}
-          changePercent={a.changePercent}
+          changePercent={a.change24h}
           formatValue={fmtUsd}
         />
       ))}
@@ -447,31 +454,33 @@ export function CryptoAssets({ items }: { items: MarketInstrument[] }) {
   );
 }
 
-export function CryptoMarketCap({
-  cap,
-  assets,
-}: {
-  cap: typeof marketSummaryData.cryptoMarketCap;
-  assets: MarketInstrument[];
-}) {
-  const { btc, eth, others } = cap.dominance;
+export function CryptoMarketCap({ assets }: { assets: Asset[] }) {
+  // Live backend data (Binance feed via the Go gateway) — falls back to the
+  // store's static snapshot until the first poll lands.
+  const global = useLiveGlobal();
+  const cap = global.marketCap;
+  const changePct = global.marketCapChange;
+  // Intraday path anchored to the live cap: real endpoint + real daily change.
+  const series = useMemo(() => liveAnchoredSeries(23, cap, changePct, 44), [cap, changePct]);
+  // Real implied daily dollar change: first vs last point of the live-anchored series.
+  const change = (series[series.length - 1]?.value ?? cap) - (series[0]?.value ?? cap);
+  const { btcDominance: btc, ethDominance: eth, otherDominance: others } = global;
+
   return (
     <MarketCard
       title="Crypto market cap"
-      action={<Pct value={cap.changePercent} className="text-[11px]" />}
+      action={<Pct value={changePct} className="text-[11px]" />}
     >
       <div className="flex items-baseline justify-between gap-2">
-        <p className="num text-lg font-semibold tracking-tight">
-          ${(cap.value / 1e12).toFixed(2)}T
-        </p>
+        <p className="num text-lg font-semibold tracking-tight">${(cap / 1e12).toFixed(2)}T</p>
         <span className="text-[9px] uppercase tracking-wider text-muted-foreground">
-          24h · {fmtUsd(cap.change)}
+          24h · {fmtCompact(change)}
         </span>
       </div>
 
       <div className="mt-3">
         <MarketAreaChart
-          data={cap.series}
+          data={series}
           color={RED}
           height={90}
           formatValue={(v) => `$${(v / 1e12).toFixed(2)}T`}
@@ -488,13 +497,13 @@ export function CryptoMarketCap({
           <div style={{ width: `${others}%`, background: "#3A4152" }} />
         </div>
         <div className="mt-1.5 flex justify-between text-[9px] text-muted-foreground">
-          <span>BTC {btc}%</span>
-          <span>ETH {eth}%</span>
-          <span>Others {others}%</span>
+          <span>BTC {btc.toFixed(1)}%</span>
+          <span>ETH {eth.toFixed(1)}%</span>
+          <span>Others {others.toFixed(1)}%</span>
         </div>
       </div>
 
-      <CryptoAssets items={assets} />
+      <CryptoAssets assets={assets} />
 
       <div className="mt-2">
         <CardLink to="/assets">See all crypto assets</CardLink>
@@ -634,6 +643,10 @@ export function TreasuryYield({
 
 export function MarketSummary({ className }: { className?: string }) {
   const d = marketSummaryData;
+  // Live backend assets — BTC & ETH rows get real prices, changes and logos.
+  const liveAssets = useLiveAssets();
+  const cryptoAssets = liveAssets.filter((a) => a.symbol === "BTC" || a.symbol === "ETH");
+
   return (
     <section
       className={cn("rounded-lg border border-[#1C2230] bg-[#07090D] p-2.5 sm:p-3", className)}
@@ -652,7 +665,7 @@ export function MarketSummary({ className }: { className?: string }) {
         <MajorIndices items={d.indices} />
 
         <div className="lg:col-span-2">
-          <CryptoMarketCap cap={d.cryptoMarketCap} assets={d.cryptoAssets} />
+          <CryptoMarketCap assets={cryptoAssets} />
         </div>
         <TreasuryYield t={d.treasury10y} inflation={d.inflation} />
 

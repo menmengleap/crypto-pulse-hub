@@ -39,14 +39,6 @@ export interface SeriesInstrument {
 export interface MarketSummaryData {
   sp500: SeriesInstrument;
   indices: MarketInstrument[];
-  cryptoMarketCap: {
-    value: number;
-    change: number;
-    changePercent: number;
-    series: SeriesPoint[];
-    dominance: { btc: number; eth: number; others: number };
-  };
-  cryptoAssets: MarketInstrument[];
   dollarIndex: SeriesInstrument;
   futures: MarketInstrument[];
   treasury10y: SeriesInstrument;
@@ -111,6 +103,28 @@ function intradaySeries(seed: number, start: number, driftPct: number, points = 
 
 function round(v: number): number {
   return Math.round(v * 100) / 100;
+}
+
+/**
+ * Build a deterministic intraday series anchored to a live value: it starts at
+ * yesterday's implied close (derived from `current` and `changePct`) and drifts
+ * to exactly `current`, so the chart's endpoint and daily change are real while
+ * the intraday noise stays SSR-stable.
+ */
+export function liveAnchoredSeries(
+  seed: number,
+  current: number,
+  changePct: number,
+  points = 44,
+): SeriesPoint[] {
+  const divisor = 1 + changePct / 100;
+  // Defensive: an extreme (or non-finite) change would divide by zero — fall
+  // back to a flat series anchored at the live value instead of NaN.
+  if (!Number.isFinite(divisor) || divisor <= 0) {
+    return intradaySeries(seed, current, 0, points);
+  }
+  const start = current / divisor;
+  return intradaySeries(seed, start, changePct / 100, points);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -188,37 +202,6 @@ export const marketSummaryData: MarketSummaryData = {
       changePercent: 1.32,
       color: "#EC4899",
       badge: "NK",
-    },
-  ],
-
-  cryptoMarketCap: {
-    value: 3.98e12,
-    change: -5.04e10,
-    changePercent: -1.24,
-    series: intradaySeries(23, 4.03e12, -0.0124, 44),
-    dominance: { btc: 58.6, eth: 12.8, others: 28.6 },
-  },
-
-  cryptoAssets: [
-    {
-      symbol: "BTC",
-      name: "Bitcoin",
-      ticker: "BTC/USDT · Binance",
-      price: 118420.33,
-      change: 2479.12,
-      changePercent: 2.14,
-      color: "#F7931A",
-      badge: "₿",
-    },
-    {
-      symbol: "ETH",
-      name: "Ethereum",
-      ticker: "ETH/USDT · Binance",
-      price: 4218.71,
-      change: 59.08,
-      changePercent: 1.42,
-      color: "#7B8CF7",
-      badge: "Ξ",
     },
   ],
 
