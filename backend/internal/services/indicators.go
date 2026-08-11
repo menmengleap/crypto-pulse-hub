@@ -17,8 +17,8 @@ import (
 type IndicatorCalculateRequest struct {
 	Symbol     string              `json:"symbol" validate:"required,uppercase"`
 	Timeframe  string              `json:"timeframe" validate:"required"`
-	Candles    []indicators.Candle `json:"candles" validate:"required,min=5,max=2000,dive"`
-	Indicators []indicators.Spec   `json:"indicators" validate:"required,min=1,max=10,dive"`
+	Candles    []indicators.Candle `json:"candles" validate:"required,min=5,max=5000,dive"`
+	Indicators []indicators.Spec   `json:"indicators" validate:"required,min=1,max=12,dive"`
 }
 
 // ErrInvalidRequest is returned for payloads that pass decoding but fail the

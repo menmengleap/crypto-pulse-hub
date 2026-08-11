@@ -1,9 +1,10 @@
 # Render Blueprint — Cryptolytic
 #
-# This blueprint manages ONLY the Python technical-indicator microservice.
-# The Go API (cryptolytic-api) and the React frontend (cryptolytic-frontend)
-# are already deployed on Render and are intentionally NOT listed here, so
-# applying this blueprint never touches them.
+# This blueprint manages the Python technical-indicator microservice and the
+# developer-portal frontend (signal-forge-main → cryptolytic-developer).
+# The Go API (cryptolytic-api) and the main React frontend
+# (cryptolytic-frontend) are already deployed on Render and are intentionally
+# NOT listed here, so applying this blueprint never touches them.
 #
 # After deploying, set INDICATOR_SERVICE_URL on the Go API service to this
 # service's URL (https://python-indicators.onrender.com by default), then
@@ -18,3 +19,28 @@ services:
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     autoDeploy: true
+
+  # Developer portal (cryptolytic-developer.onrender.com).
+  # The Nitro build targets node-server and proxies /api/** to the already-
+  # deployed Go backend (NITRO_API_PROXY), so the browser never calls the
+  # backend directly and no CORS changes are needed. The VITE_* values are
+  # baked in at build time; if Render assigns a different subdomain, update
+  # them to the service's real URL before deploying.
+  - type: web
+    name: cryptolytic-developer
+    runtime: node
+    rootDir: cryptolytic-api-developer/signal-forge-main
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: node .output/server/index.mjs
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: NITRO_PRESET
+        value: node-server
+      - key: NITRO_API_PROXY
+        value: https://cryptolytic-api.onrender.com
+      - key: VITE_API_BASE_URL
+        value: https://cryptolytic-developer.onrender.com
+      - key: VITE_AUTH_API_BASE_URL
+        value: https://cryptolytic-developer.onrender.com

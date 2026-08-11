@@ -19,10 +19,17 @@ export interface IndicatorMeta {
   category: "Trend" | "Momentum" | "Volatility";
   params: ParamSpec[];
   lines: string[];
+  formula?: string;
+  warmup?: string;
   interpretation: string;
 }
 
-/** Only indicators the calculation engine supports are exposed anywhere in the UI. */
+/**
+ * The indicator catalog — kept in lockstep with the Python engine
+ * (python-indicators/app/indicators.py) and the Go gateway catalog
+ * (backend/internal/indicators/catalog.go). Every type, param key, default
+ * and bound below matches what the calculation service actually validates.
+ */
 export const INDICATORS: IndicatorMeta[] = [
   {
     type: "sma",
@@ -32,10 +39,12 @@ export const INDICATORS: IndicatorMeta[] = [
     category: "Trend",
     description:
       "Arithmetic mean of closing prices over a fixed lookback period. Smooths price noise into a single trend line.",
-    params: [{ key: "period", label: "Period", default: 20, min: 1, max: 1000 }],
+    params: [{ key: "period", label: "Period", default: 20, min: 2, max: 500 }],
     lines: ["sma"],
+    formula: "sma(t) = mean(close[t − period + 1 … t])",
+    warmup: "The first period − 1 values are undefined and omitted from the response.",
     interpretation:
-      "Returns one line. Values are undefined for the first period - 1 candles, so the series is shorter than the candle input.",
+      "Returns one line. Price above the average leans bullish, below leans bearish — interpretation is left to your application.",
   },
   {
     type: "ema",
@@ -44,9 +53,11 @@ export const INDICATORS: IndicatorMeta[] = [
     short: "EMA",
     category: "Trend",
     description:
-      "Weighted moving average that reacts faster to recent price action than a simple moving average.",
-    params: [{ key: "period", label: "Period", default: 21, min: 1, max: 1000 }],
+      "Weighted moving average (alpha = 2/(period+1)) that reacts faster to recent price action than a simple moving average.",
+    params: [{ key: "period", label: "Period", default: 20, min: 2, max: 500 }],
     lines: ["ema"],
+    formula: "ema(t) = α·close(t) + (1 − α)·ema(t−1),  α = 2/(period+1)",
+    warmup: "Seeded from the first close; earlier values converge as the series warms up.",
     interpretation: "Returns one line with the same timestamps as the trailing candles.",
   },
   {
@@ -56,11 +67,13 @@ export const INDICATORS: IndicatorMeta[] = [
     short: "RSI",
     category: "Momentum",
     description:
-      "Momentum oscillator bounded between 0 and 100 comparing average gains to average losses over the period.",
-    params: [{ key: "period", label: "Period", default: 14, min: 2, max: 1000 }],
+      "Momentum oscillator bounded between 0 and 100 comparing average gains to average losses over the period (Wilder smoothing).",
+    params: [{ key: "period", label: "Period", default: 14, min: 2, max: 250 }],
     lines: ["rsi"],
+    formula: "rsi = 100 − 100/(1 + RS),  RS = avg_gain / avg_loss (Wilder alpha = 1/period)",
+    warmup: "The first period values are unreliable warm-up and are dropped.",
     interpretation:
-      "Returns one bounded line. Conventional readings treat 70 as overbought and 30 as oversold — interpretation is left to your application.",
+      "Returns one bounded line. Conventional readings treat 70 as overbought and 30 as oversold; a flat market reads 50.",
   },
   {
     type: "macd",
@@ -71,27 +84,33 @@ export const INDICATORS: IndicatorMeta[] = [
     description:
       "Difference between a fast and slow EMA, plus a signal EMA of that difference and the resulting histogram.",
     params: [
-      { key: "fast", label: "Fast", default: 12, min: 1, max: 1000 },
-      { key: "slow", label: "Slow", default: 26, min: 1, max: 1000 },
-      { key: "signal", label: "Signal", default: 9, min: 1, max: 1000 },
+      { key: "fast", label: "Fast", default: 12, min: 2, max: 200 },
+      { key: "slow", label: "Slow", default: 26, min: 3, max: 300 },
+      { key: "signal", label: "Signal", default: 9, min: 2, max: 100 },
     ],
     lines: ["macd", "signal", "histogram"],
-    interpretation: "Returns three lines: macd, signal and histogram.",
+    formula: "macd = ema(fast) − ema(slow); signal = ema(macd, signal); histogram = macd − signal",
+    warmup: "Both EMAs seed from the first close, so the first slow bars are masked as warm-up.",
+    interpretation:
+      "Returns three lines: macd, signal and histogram. Crossovers of macd and signal are the classic trade signal.",
   },
   {
-    type: "bbands",
-    slug: "bbands",
+    type: "bollinger",
+    slug: "bollinger",
     name: "Bollinger Bands",
-    short: "Bollinger Bands",
+    short: "Bollinger",
     category: "Volatility",
     description:
-      "A moving average with upper and lower bands offset by a multiple of the standard deviation of price.",
+      "A moving average with upper and lower bands offset by a multiple of the population standard deviation of price.",
     params: [
-      { key: "period", label: "Period", default: 20, min: 2, max: 1000 },
-      { key: "stddev", label: "Std Dev", default: 2, min: 1, max: 10, step: 0.1 },
+      { key: "period", label: "Period", default: 20, min: 2, max: 500 },
+      { key: "stdDev", label: "Std Dev", default: 2, min: 0.1, max: 10, step: 0.1 },
     ],
     lines: ["upper", "middle", "lower"],
-    interpretation: "Returns three lines: upper, middle and lower.",
+    formula: "middle = sma(period); bands = middle ± stdDev · population_std(period)",
+    warmup: "Values are undefined for the first period − 1 candles.",
+    interpretation:
+      "Returns three lines: upper, middle and lower. Band width reflects volatility; squeezes and expansions signal consolidation and breakouts.",
   },
   {
     type: "atr",
@@ -100,22 +119,48 @@ export const INDICATORS: IndicatorMeta[] = [
     short: "ATR",
     category: "Volatility",
     description:
-      "Average of true ranges over the period, measuring absolute volatility in the instrument's own units.",
-    params: [{ key: "period", label: "Period", default: 14, min: 1, max: 1000 }],
+      "Wilder-smoothed mean of the true range, measuring absolute volatility in the instrument's own units.",
+    params: [{ key: "period", label: "Period", default: 14, min: 2, max: 250 }],
     lines: ["atr"],
-    interpretation: "Returns one line expressed in price units, never normalised.",
+    formula:
+      "tr = max(high−low, |high−prev_close|, |low−prev_close|); atr = ewm(tr, alpha=1/period)",
+    warmup: "The first period values converge as the Wilder smoothing warms up.",
+    interpretation:
+      "Returns one line expressed in price units, never normalised — useful for position sizing and stop distances.",
   },
   {
-    type: "adx",
-    slug: "adx",
-    name: "Average Directional Index",
-    short: "ADX",
-    category: "Trend",
+    type: "stochastic",
+    slug: "stochastic",
+    name: "Stochastic Oscillator",
+    short: "Stoch",
+    category: "Momentum",
     description:
-      "Quantifies trend strength independent of direction, derived from smoothed directional movement.",
-    params: [{ key: "period", label: "Period", default: 14, min: 2, max: 1000 }],
-    lines: ["adx"],
-    interpretation: "Returns one line bounded between 0 and 100 describing trend strength only.",
+      "Oscillator comparing the close to the rolling high/low range, with %K and %D smoothing. Bounded between 0 and 100.",
+    params: [
+      { key: "period", label: "Period", default: 14, min: 2, max: 250 },
+      { key: "smoothK", label: "%K Smooth", default: 3, min: 1, max: 50 },
+      { key: "smoothD", label: "%D Smooth", default: 3, min: 1, max: 50 },
+    ],
+    lines: ["k", "d"],
+    formula: "%K = 100·(close − lowest_low)/(highest_high − lowest_low), smoothed; %D = mean(%K)",
+    warmup: "Windows with zero range are NaN and omitted from the response.",
+    interpretation:
+      "Returns two lines: %K and %D. Conventional readings treat 80 as overbought and 20 as oversold.",
+  },
+  {
+    type: "obv",
+    slug: "obv",
+    name: "On-Balance Volume",
+    short: "OBV",
+    category: "Momentum",
+    description:
+      "Cumulative volume signed by the close-to-close direction — a running tally that pairs price movement with volume flow.",
+    params: [],
+    lines: ["obv"],
+    formula: "obv(t) = obv(t−1) + sign(close(t) − close(t−1)) · volume(t)",
+    warmup: "No warm-up: the series starts at the first candle.",
+    interpretation:
+      "Returns one cumulative line with no parameters. Divergence between price and OBV can hint at weakening volume behind a move.",
   },
 ];
 
@@ -169,11 +214,19 @@ export function validateRequest(request: IndicatorRequest): ValidationIssue[] {
     ];
     for (const [field, value] of numbers) {
       if (!Number.isFinite(value)) {
-        issues.push({ scope: "candles", row: index, message: `Row ${index + 1}: ${field} must be a finite number.` });
+        issues.push({
+          scope: "candles",
+          row: index,
+          message: `Row ${index + 1}: ${field} must be a finite number.`,
+        });
       }
     }
     if (seen.has(candle.time)) {
-      issues.push({ scope: "candles", row: index, message: `Row ${index + 1}: duplicate timestamp ${candle.time}.` });
+      issues.push({
+        scope: "candles",
+        row: index,
+        message: `Row ${index + 1}: duplicate timestamp ${candle.time}.`,
+      });
     }
     seen.add(candle.time);
     const prev = candles[index - 1];
@@ -198,7 +251,11 @@ export function validateRequest(request: IndicatorRequest): ValidationIssue[] {
   indicators.forEach((indicator, index) => {
     const meta = INDICATOR_MAP[indicator.type];
     if (!meta) {
-      issues.push({ scope: "indicators", row: index, message: `Unsupported indicator "${indicator.type}".` });
+      issues.push({
+        scope: "indicators",
+        row: index,
+        message: `Unsupported indicator "${indicator.type}".`,
+      });
       return;
     }
     for (const spec of meta.params) {
@@ -245,14 +302,21 @@ export function parseCandles(input: string): { candles: Candle[]; error?: string
   }
   const list = Array.isArray(parsed)
     ? parsed
-    : typeof parsed === "object" && parsed !== null && Array.isArray((parsed as { candles?: unknown }).candles)
+    : typeof parsed === "object" &&
+        parsed !== null &&
+        Array.isArray((parsed as { candles?: unknown }).candles)
       ? ((parsed as { candles: unknown[] }).candles as unknown[])
       : null;
-  if (!list) return { candles: [], error: "Expected an array of candles or an object with a candles array." };
+  if (!list)
+    return {
+      candles: [],
+      error: "Expected an array of candles or an object with a candles array.",
+    };
 
   const candles: Candle[] = [];
   for (const raw of list) {
-    if (typeof raw !== "object" || raw === null) return { candles: [], error: "Each candle must be an object." };
+    if (typeof raw !== "object" || raw === null)
+      return { candles: [], error: "Each candle must be an object." };
     const item = raw as Record<string, unknown>;
     const candle: Candle = {
       time: Number(item["time"]),

@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as DocsRouteImport } from './routes/docs'
+import { Route as IndicatorsRouteImport } from './routes/indicators'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AppApiKeysRouteImport } from './routes/_app.api-keys'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
@@ -33,9 +35,19 @@ const DocsRoute = DocsRouteImport.update({
   path: '/docs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IndicatorsRoute = IndicatorsRouteImport.update({
+  id: '/indicators',
+  path: '/indicators',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -67,7 +79,9 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/docs': typeof DocsRoute
+  '/indicators': typeof IndicatorsRoute
   '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
   '/api-keys': typeof AppApiKeysRoute
   '/dashboard': typeof AppDashboardRoute
@@ -77,7 +91,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/docs': typeof DocsRoute
+  '/indicators': typeof IndicatorsRoute
   '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
   '/api-keys': typeof AppApiKeysRoute
   '/dashboard': typeof AppDashboardRoute
@@ -89,7 +105,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/docs': typeof DocsRoute
+  '/indicators': typeof IndicatorsRoute
   '/login': typeof LoginRoute
+  '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
   '/_app/api-keys': typeof AppApiKeysRoute
   '/_app/dashboard': typeof AppDashboardRoute
@@ -101,7 +119,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/docs'
+    | '/indicators'
     | '/login'
+    | '/pricing'
     | '/register'
     | '/api-keys'
     | '/dashboard'
@@ -111,7 +131,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/docs'
+    | '/indicators'
     | '/login'
+    | '/pricing'
     | '/register'
     | '/api-keys'
     | '/dashboard'
@@ -122,7 +144,9 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/docs'
+    | '/indicators'
     | '/login'
+    | '/pricing'
     | '/register'
     | '/_app/api-keys'
     | '/_app/dashboard'
@@ -134,7 +158,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   DocsRoute: typeof DocsRoute
+  IndicatorsRoute: typeof IndicatorsRoute
   LoginRoute: typeof LoginRoute
+  PricingRoute: typeof PricingRoute
   RegisterRoute: typeof RegisterRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
 }
@@ -162,11 +188,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/indicators': {
+      id: '/indicators'
+      path: '/indicators'
+      fullPath: '/indicators'
+      preLoaderRoute: typeof IndicatorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -225,7 +265,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   DocsRoute: DocsRoute,
+  IndicatorsRoute: IndicatorsRoute,
   LoginRoute: LoginRoute,
+  PricingRoute: PricingRoute,
   RegisterRoute: RegisterRoute,
   AuthCallbackRoute: AuthCallbackRoute,
 }

@@ -90,6 +90,22 @@ func writeServiceError(w http.ResponseWriter, err error) {
 	WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "something went wrong")
 }
 
+// writeDeveloperError emits a flat error object { code, message } — the shape
+// the console API client reads (body.message). The v1 developer surface uses
+// this instead of the envelope so the UI surfaces real messages.
+func writeDeveloperError(w http.ResponseWriter, status int, code, message string) {
+	WriteJSON(w, status, map[string]string{"code": code, "message": message})
+}
+
+// writeDeveloperServiceError maps repository/service errors to flat v1 errors.
+func writeDeveloperServiceError(w http.ResponseWriter, err error) {
+	if errors.Is(err, repositories.ErrNotFound) {
+		writeDeveloperError(w, http.StatusNotFound, "NOT_FOUND", "resource not found")
+		return
+	}
+	writeDeveloperError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "something went wrong")
+}
+
 // bearerToken extracts the raw bearer token from the Authorization header.
 func bearerToken(r *http.Request) string {
 	h := r.Header.Get("Authorization")

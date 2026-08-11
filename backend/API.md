@@ -227,8 +227,8 @@ specs; the gateway forwards the payload verbatim and returns the series.
 }
 ```
 
-- `candles`: 5–2000 bars, ascending unique `time` (epoch seconds).
-- `indicators`: 1–10 specs. Types: `sma ema rsi macd bollinger atr stochastic obv`.
+- `candles`: 5–5000 bars, ascending unique `time` (epoch seconds).
+- `indicators`: 1–12 specs. Types: `sma ema rsi macd bollinger atr stochastic obv`.
 - `200` → `{ symbol, timeframe, computedAt, results[] }` where `results[i]`
   matches the request order: `{ type, params, lines: { <label>: [{ time, value }] } }`
   (warm-up values dropped).
@@ -248,6 +248,83 @@ specs; the gateway forwards the payload verbatim and returns the series.
   }
 }
 ```
+
+---
+
+## Developer API keys & usage (v1)
+
+The **User Developer** product surface. Users create API keys from the console
+(`/api-keys`), then call the v1 calculate endpoint with the key as a Bearer
+token from their own systems. Only the SHA-256 hash of a key is stored; the
+full secret is returned exactly once, at creation.
+
+### GET /api/v1/indicators (public)
+
+The machine-readable indicator catalog — the same 8 indicators the Python
+microservice implements, with params, lines, formulas and warm-up notes:
+
+```json
+{
+  "indicators": [
+    { "type": "sma", "name": "Simple Moving Average", "short": "SMA",
+      "category": "Trend", "description": "...",
+      "params": [ { "key": "period", "label": "Period", "default": 20, "min": 2, "max": 500 } ],
+      "lines": ["sma"], "formula": "...", "warmup": "...", "interpretation": "..." }
+  ],
+  "timeframes": ["1m","5m","15m","30m","1h","4h","1d","1w"],
+  "limits": { "minCandles": 5, "maxCandles": 5000, "minIndicators": 1, "maxIndicators": 12 }
+}
+```
+
+### GET /api/v1/status (public)
+
+`{ "status": "ok", "service": "cryptolytic-indicator-api", "version": "1.0.0", "timeframes": [...], "time": "..." }`
+
+### POST /api/v1/indicators/calculate
+
+Identical request/response contract to the legacy public route, but requires a
+credential — either a platform access token (`Authorization: Bearer <JWT>`, as
+the signed-in console sends) or a dashboard **API key**
+(`Authorization: Bearer cl_live_…`). Every call is logged to `api_key_usage`
+(per key) for the usage dashboard. Errors are flat `{ "code", "message" }`
+objects (no envelope).
+
+### GET /api/v1/api-keys (JWT)
+
+```json
+{ "success": true, "data": { "keys": [
+  { "id": "...", "name": "production-bot", "maskedKey": "cl_live_Ab12Cd…f9zA",
+    "status": "active", "lastUsedAt": "2026-08-11T09:00:00Z", "createdAt": "..." }
+] } }
+```
+
+### POST /api/v1/api-keys (JWT)
+
+```json
+{ "name": "production-bot" }
+```
+
+`201` → `{ success, data: { id, name, maskedKey, status, createdAt, secret } }` —
+`secret` is shown only once.
+
+### DELETE /api/v1/api-keys/:id (JWT)
+
+Revokes the key. `200 { "revoked": true }`. Keys belonging to other users
+return `404`.
+
+### GET /api/v1/usage (JWT)
+
+Aggregate request stats for the authenticated user (raw object, no envelope):
+
+```json
+{
+  "totalRequests": 1420, "successfulRequests": 1411, "failedRequests": 9,
+  "avgLatencyMs": 38.2, "activeKeys": 2,
+  "series": [ { "time": "2026-08-11", "requests": 412, "errors": 1 } ]
+}
+```
+
+`?range=` accepts `24h` (default), `7d`, `30d`, `90d` or any Go duration.
 
 ---
 

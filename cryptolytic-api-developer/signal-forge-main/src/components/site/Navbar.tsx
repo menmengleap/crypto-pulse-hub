@@ -8,7 +8,6 @@ import logoImage from "@/Img/image.png";
 
 const NAV = [
   { label: "Indicators", to: "/indicators" },
-  { label: "Developers", to: "/docs" },
   { label: "Pricing", to: "/pricing" },
   { label: "Documentation", to: "/docs" },
 ];

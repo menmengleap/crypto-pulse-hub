@@ -268,6 +268,54 @@ type News struct {
 }
 
 // ---------------------------------------------------------------------------
+// Developer API keys & usage
+// ---------------------------------------------------------------------------
+
+// APIKey is a credential a developer uses to call the indicator API. Only the
+// SHA-256 hash of the secret is persisted; the raw secret is returned exactly
+// once, at creation time.
+type APIKey struct {
+	ID         string     `json:"id"`
+	UserID     string     `json:"userId" db:"user_id"`
+	Name       string     `json:"name"`
+	KeyHash    string     `json:"-" db:"key_hash"`
+	MaskedKey  string     `json:"maskedKey" db:"masked_key"`
+	Status     string     `json:"status"` // active | revoked
+	LastUsedAt *time.Time `json:"lastUsedAt" db:"last_used_at"`
+	Timestamps
+}
+
+// APIKeyUsage is one logged call to the indicator API. api_key_id is set when
+// the call was authenticated with a developer key (null for JWT-authenticated
+// playground calls).
+type APIKeyUsage struct {
+	ID            int64     `json:"id"`
+	APIKeyID      *string   `json:"apiKeyId,omitempty" db:"api_key_id"`
+	UserID        string    `json:"userId" db:"user_id"`
+	IndicatorType string    `json:"indicatorType" db:"indicator_type"`
+	Status        string    `json:"status"` // ok | error
+	StatusCode    int       `json:"statusCode" db:"status_code"`
+	LatencyMs     int       `json:"latencyMs" db:"latency_ms"`
+	CreatedAt     time.Time `json:"createdAt" db:"created_at"`
+}
+
+// UsageStats is the aggregate the dashboard renders (GET /api/v1/usage).
+type UsageStats struct {
+	TotalRequests     int          `json:"totalRequests"`
+	SuccessfulRequests int         `json:"successfulRequests"`
+	FailedRequests    int          `json:"failedRequests"`
+	AvgLatencyMs      float64      `json:"avgLatencyMs"`
+	ActiveKeys        int          `json:"activeKeys"`
+	Series            []UsagePoint `json:"series"`
+}
+
+type UsagePoint struct {
+	Time     string `json:"time"`
+	Requests int    `json:"requests"`
+	Errors   int    `json:"errors"`
+}
+
+// ---------------------------------------------------------------------------
 // AI
 // ---------------------------------------------------------------------------
 

@@ -27,10 +27,12 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.Marke
 	alertRepo := repositories.NewAlertRepo(pool)
 	newsRepo := repositories.NewNewsRepo(pool)
 	marketRepo := repositories.NewMarketRepo(pool)
+	apiKeyRepo := repositories.NewAPIKeyRepo(pool)
 
 	// Services
 	authSvc := services.NewAuthService(userRepo, sessionRepo, cfg)
 	aiSvc := services.NewAIService(pool, provider, marketRepo)
+	apiKeySvc := services.NewAPIKeyService(apiKeyRepo)
 
 	// Handlers
 	authH := handlers.NewAuthHandler(authSvc, cfg)
@@ -44,7 +46,9 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.Marke
 	aiH := handlers.NewAIHandler(aiSvc)
 	healthH := handlers.NewHealthHandler(pool)
 	liveH := handlers.NewLiveHandler(live, global, tradfi)
-	indicatorH := handlers.NewIndicatorHandler(services.NewIndicatorService(cfg.IndicatorServiceURL))
+	indicatorH := handlers.NewIndicatorHandler(services.NewIndicatorService(cfg.IndicatorServiceURL), apiKeySvc)
+	apiKeyH := handlers.NewAPIKeyHandler(apiKeySvc)
+	usageH := handlers.NewUsageHandler(apiKeySvc)
 	finnhubH := handlers.NewFinnhubHandler(finnhub)
 
 	rateLimit := middleware.NewRateLimit(cfg.RateLimitRPS, cfg.RateLimitBurst)
@@ -83,6 +87,26 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool, provider marketdata.Marke
 
 	// --- Technical indicators (forwarded to the Python microservice) ---
 	r.Post("/api/indicators/calculate", indicatorH.Calculate)
+
+	// --- Developer API (v1) — the "User Developer" product surface. ---
+	// Catalog + status are public so docs and marketing pages render without
+	// credentials; calculate accepts either a platform JWT or a dashboard API
+	// key; key/usage management is JWT-only.
+	r.Get("/api/v1/indicators", indicatorH.List)
+	r.Get("/api/v1/status", indicatorH.Status)
+
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.RequireDeveloperAuth(authSvc, apiKeySvc))
+		r.Post("/api/v1/indicators/calculate", indicatorH.CalculateV1)
+	})
+
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.RequireAuth(authSvc))
+		r.Get("/api/v1/api-keys", apiKeyH.List)
+		r.Post("/api/v1/api-keys", apiKeyH.Create)
+		r.Delete("/api/v1/api-keys/{id}", apiKeyH.Revoke)
+		r.Get("/api/v1/usage", usageH.Get)
+	})
 
 	r.Get("/api/market-cap", marketH.MarketCap)
 	r.Get("/api/market-volume", marketH.MarketVolume)

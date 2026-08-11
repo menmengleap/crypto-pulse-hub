@@ -14,7 +14,8 @@ export interface Candle {
 
 export type IndicatorParams = Record<string, number>;
 
-export type IndicatorType = "sma" | "ema" | "rsi" | "macd" | "bbands" | "atr" | "adx";
+export type IndicatorType =
+  "sma" | "ema" | "rsi" | "macd" | "bollinger" | "atr" | "stochastic" | "obv";
 
 export interface IndicatorConfig {
   type: IndicatorType;
