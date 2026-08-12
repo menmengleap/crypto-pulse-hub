@@ -42,6 +42,20 @@ type Post = {
 
 const posts: Post[] = [
   {
+    id: "pro-trading-terminal",
+    tag: "Feature",
+    date: "Aug 12, 2026",
+    title: "Cryptolytic Professional AI Trading Terminal",
+    excerpt:
+      "The console is now a full-screen, TradingView-style trading terminal — a dominant live chart with drawing tools, indicators, an AI analysis sidebar, a resizable screener workspace and a market ticker.",
+    body: [
+      "The console has been rebuilt as a professional trading terminal. The chart is now the primary workspace and claims the full viewport — every surrounding panel (left drawing rail, right AI analysis sidebar, bottom workspace) can be toggled independently, and when you close them all the chart expands to fill the screen.",
+      "The chart toolbar carries the live symbol and price, every timeframe from 1m to 1W, indicators computed by the Python microservice (SMA, EMA, Bollinger, RSI, MACD, ATR, Stochastic, OBV), drawing tools, compare, alerts, replay/pause and chart style settings. A narrow left rail gives one-click access to the drawing tools — trend, horizontal, vertical, ray, rectangle and Fibonacci.",
+      "The right sidebar runs an AI market analysis on the active asset: bias, trend, momentum, market structure, key levels and an AI confidence gauge, plus the latest headlines. The bottom workspace holds six tools — Screener, Performance, Technicals, Indicators, Strategy and Trading — in a band you can drag to resize.",
+      "Your workspace preferences persist across reloads (panel toggles, sizes and the active tab), focus mode hides the chrome for a pure chart, and the AI research chat is one click away as an overlay when you want to ask the market anything.",
+    ],
+  },
+  {
     id: "console-ai-chat",
     tag: "Feature",
     date: "Aug 12, 2026",

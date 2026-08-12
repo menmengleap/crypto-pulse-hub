@@ -136,6 +136,62 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+ * Trading terminal — scoped professional palette (TradingView-style).
+ * The console workspace applies these tokens to its own subtree so the rest
+ * of the site keeps the global brand palette.
+ * --------------------------------------------------------------------------- */
+.terminal-scope {
+  --background: #070b12;
+  --foreground: #e8edf3;
+  --surface: #0d131b;
+  --surface-2: #111a26;
+  --card: #0d131b;
+  --card-foreground: #e8edf3;
+  --popover: #0d131b;
+  --popover-foreground: #e8edf3;
+  --primary: #7c8cff;
+  --primary-foreground: #0b0f18;
+  --secondary: #131c29;
+  --secondary-foreground: #e8edf3;
+  --muted: #101827;
+  --muted-foreground: #7d8998;
+  --accent: #131c29;
+  --accent-foreground: #e8edf3;
+  --destructive: #ea3943;
+  --destructive-foreground: #fff;
+  --border: #202936;
+  --input: #202936;
+  --ring: #7c8cff;
+  --up: #16c784;
+  --down: #ea3943;
+  --btc: #f7931a;
+  --radius: 0.5rem;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 2px);
+  --radius-2xl: calc(var(--radius) + 4px);
+  --radius-3xl: calc(var(--radius) + 6px);
+
+  /* Flatter panels — no gradient, hairline border, tight radius. */
+  --gradient-surface: var(--surface);
+  --shadow-glow: 0 0 0 1px color-mix(in oklab, var(--primary) 18%, transparent);
+}
+
+/* Thin scrollbars inside the terminal (screener, AI panel, bottom tabs). */
+.terminal-scope ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.terminal-scope ::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--muted-foreground) 30%, transparent);
+  border-radius: 999px;
+}
+.terminal-scope ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 @utility panel {
   background: var(--gradient-surface);
   border: 1px solid var(--color-border);

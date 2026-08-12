@@ -1,18 +1,18 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { AdvancedChat } from "@/components/chat/advanced-chat";
+import { TerminalWorkspace } from "@/components/terminal/terminal-workspace";
 import { useSessionGate } from "@/lib/api";
 
 export const Route = createFileRoute("/ai-analysis")({
   head: () => ({
     meta: [
-      { title: "Advanced Chat — Cryptolytic" },
+      { title: "Trading Terminal — Cryptolytic" },
       {
         name: "description",
         content:
-          "The console's Advanced Chat — ask about live prices, movers, fear & greed, dominance, the market cycle, news or a server-side desk note on any asset.",
+          "Cryptolytic Professional AI Trading Terminal — full-screen chart with live klines, drawing tools, technical indicators, AI market analysis, screener and market data.",
       },
-      { property: "og:title", content: "Advanced Chat — Cryptolytic" },
+      { property: "og:title", content: "Trading Terminal — Cryptolytic" },
     ],
   }),
   component: AiAnalysisPage,
@@ -24,7 +24,7 @@ function AiAnalysisPage() {
 
   // Gate the render behind mount so the server and first client paint agree
   // (both show the loader) — the guard then runs client-side without an SSR
-  // hydration mismatch. Same pattern as AppShell's console gate.
+  // hydration mismatch.
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
@@ -43,11 +43,11 @@ function AiAnalysisPage() {
 
   if (!mounted || authLoading || !authed) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <span className="size-5 animate-spin rounded-full border-2 border-border border-t-primary" />
+      <div className="flex min-h-screen items-center justify-center bg-[#070B12]">
+        <span className="size-5 animate-spin rounded-full border-2 border-[#202936] border-t-[#7C8CFF]" />
       </div>
     );
   }
 
-  return <AdvancedChat />;
+  return <TerminalWorkspace />;
 }

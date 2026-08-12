@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { IChartApi, ISeriesApi } from "lightweight-charts";
+import { cn } from "@/lib/utils";
 import { fetchKlines, normalizeInterval, subscribeKline, type Candle } from "@/lib/realtime";
 import {
   INDICATOR_PRESETS,
@@ -96,6 +97,8 @@ export function PriceChart({
   symbol = "BTC",
   tf = "4H",
   height = 460,
+  fill = false,
+  streaming = true,
   showVolume = true,
   chartType = "candles",
   upColor = "#2ED3A0",
@@ -108,6 +111,10 @@ export function PriceChart({
   symbol?: string;
   tf?: string;
   height?: number;
+  /** Fill the parent container (100% × 100%) instead of a fixed height. */
+  fill?: boolean;
+  /** When false, live ticks are ignored (chart freezes for replay/pause). */
+  streaming?: boolean;
   showVolume?: boolean;
   chartType?: ChartStyle;
   upColor?: string;
@@ -124,6 +131,10 @@ export function PriceChart({
   const [ready, setReady] = useState(false);
   const [live, setLive] = useState(false);
   const [error, setError] = useState(false);
+  const streamingRef = useRef(streaming);
+  useEffect(() => {
+    streamingRef.current = streaming;
+  }, [streaming]);
 
   // Last kline window fetched for the current symbol/timeframe. Live updates
   // mutate the last row in place (same-bar ticks) or append (new bar) so the
@@ -152,8 +163,8 @@ export function PriceChart({
   const heightRef = useRef(height);
   useEffect(() => {
     heightRef.current = height;
-    chartRef.current?.applyOptions({ height });
-  }, [height]);
+    if (!fill) chartRef.current?.applyOptions({ height });
+  }, [height, fill]);
 
   // Live style + color updates without recreating the chart.
   useEffect(() => {
@@ -290,6 +301,7 @@ export function PriceChart({
       setCandlesState({ symbol, tf, rows: candles });
 
       const unsub = subscribeKline(symbol, tf, (c) => {
+        if (!streamingRef.current) return;
         if (chartType === "candles") {
           (series as ISeriesApi<"Candlestick">).update({
             time: c.time as never,
@@ -331,9 +343,17 @@ export function PriceChart({
         });
       });
 
-      const ro = new ResizeObserver(() => chart.applyOptions({ width: el.clientWidth }));
+      const ro = new ResizeObserver(() => {
+        if (fill) {
+          chart.applyOptions({ width: el.clientWidth, height: el.clientHeight });
+        } else {
+          chart.applyOptions({ width: el.clientWidth });
+        }
+      });
       ro.observe(el);
-      chart.applyOptions({ width: el.clientWidth });
+      chart.applyOptions(
+        fill ? { width: el.clientWidth, height: el.clientHeight } : { width: el.clientWidth },
+      );
 
       cleanup = () => {
         ro.disconnect();
@@ -350,7 +370,7 @@ export function PriceChart({
       disposed = true;
       cleanup();
     };
-  }, [symbol, tf, showVolume, chartType]);
+  }, [symbol, tf, showVolume, chartType, fill]);
 
   // ---------------------------------------------------------------------------
   // Indicators — computed by the Python microservice via the Go gateway.
@@ -480,17 +500,23 @@ export function PriceChart({
   }, [ready, indicatorQuery.response, indicators, showVolume, symbol, tf]);
 
   return (
-    <div className="relative w-full">
-      {!ready && !error && <Skeleton className="absolute inset-0 rounded-lg" style={{ height }} />}
+    <div className={cn("relative w-full", fill && "h-full min-h-0")}>
+      {!ready && !error && (
+        <Skeleton className="absolute inset-0 rounded-lg" style={fill ? undefined : { height }} />
+      )}
       {error && (
         <div
           className="flex items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground"
-          style={{ height }}
+          style={fill ? { position: "absolute", inset: 0 } : { height }}
         >
           Unable to load live chart data for {symbol} — check your connection.
         </div>
       )}
-      <div ref={containerRef} className="w-full" style={{ height }} />
+      <div
+        ref={containerRef}
+        className={cn("w-full", fill && "h-full")}
+        style={fill ? undefined : { height }}
+      />
       {ready && (
         <DrawingOverlay
           key={`${symbol}-${tf}-${chartType}`}
