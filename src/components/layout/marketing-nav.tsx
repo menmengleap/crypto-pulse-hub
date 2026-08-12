@@ -180,7 +180,7 @@ export function MarketingNav() {
             />
           ) : (
             <TerminalLink
-              to="/market"
+              to="/ai-analysis"
               className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-[0_8px_24px_-12px_var(--primary)] transition-opacity hover:opacity-90"
             >
               {signedIn ? "Open terminal" : "Sign up"}
@@ -235,7 +235,7 @@ export function MarketingNav() {
                 </Link>
                 {hydrated && (
                   <TerminalLink
-                    to="/market"
+                    to="/ai-analysis"
                     onClick={() => setMobileOpen(false)}
                     className="mt-2 block rounded-lg bg-primary px-3 py-2.5 text-center text-sm font-medium text-primary-foreground"
                   >
