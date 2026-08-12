@@ -42,6 +42,19 @@ type Post = {
 
 const posts: Post[] = [
   {
+    id: "homepage-market-hub",
+    tag: "Feature",
+    date: "Aug 12, 2026",
+    title: "A Market hub on the homepage — the terminal's tools, without the sign-in",
+    excerpt:
+      "The homepage navbar's Market item now opens a dropdown of ten market tools, each rendered with the exact same UI and live data as its console page — right on the homepage.",
+    body: [
+      "The homepage navbar's Market item is now a dropdown with ten market tools: Market Overview, Spot Market, Derivatives Market, Crypto Assets, Fear & Greed, Market Sentiment, Market Cycle, Bitcoin Dominance, Market Heatmap and Compare.",
+      "Every tool renders the exact same components and live data as its console page — the homepage and the terminal share one data source, as two destinations. Clicking Market on the homepage keeps you on the homepage; opening the same tools from the console sidebar keeps you in the console.",
+      "Visitors can explore the full market suite without an account. Each page carries an 'Open in terminal' button that sends signed-in users straight to the same page inside the terminal.",
+    ],
+  },
+  {
     id: "v0.6.12",
     tag: "Release",
     version: "v0.6.12",
@@ -221,6 +234,7 @@ const changes: {
       "Overlay & sub-pane indicator rendering on the Advanced Chart",
       "Real profile data (name, avatar, member since) from the database",
       "Console 'News' section — the homepage's New feed, inside the terminal",
+      "Homepage Market hub — ten terminal market tools on the public site",
     ],
   },
   {

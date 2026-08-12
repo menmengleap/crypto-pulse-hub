@@ -40,6 +40,17 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
 import { Route as WhatsNewRouteImport } from './routes/whats-new'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as MarketsIndexRouteImport } from './routes/markets/index'
+import { Route as MarketsAssetsRouteImport } from './routes/markets/assets'
+import { Route as MarketsCompareRouteImport } from './routes/markets/compare'
+import { Route as MarketsCycleRouteImport } from './routes/markets/cycle'
+import { Route as MarketsDerivativesRouteImport } from './routes/markets/derivatives'
+import { Route as MarketsDominanceRouteImport } from './routes/markets/dominance'
+import { Route as MarketsFearGreedRouteImport } from './routes/markets/fear-greed'
+import { Route as MarketsHeatmapRouteImport } from './routes/markets/heatmap'
+import { Route as MarketsOverviewRouteImport } from './routes/markets/overview'
+import { Route as MarketsSentimentRouteImport } from './routes/markets/sentiment'
+import { Route as MarketsSpotRouteImport } from './routes/markets/spot'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
 import { Route as NewsNewsIdRouteImport } from './routes/news.$newsId'
 
@@ -198,6 +209,61 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketsIndexRoute = MarketsIndexRouteImport.update({
+  id: '/markets/',
+  path: '/markets/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketsAssetsRoute = MarketsAssetsRouteImport.update({
+  id: '/markets/assets',
+  path: '/markets/assets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketsCompareRoute = MarketsCompareRouteImport.update({
+  id: '/markets/compare',
+  path: '/markets/compare',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketsCycleRoute = MarketsCycleRouteImport.update({
+  id: '/markets/cycle',
+  path: '/markets/cycle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketsDerivativesRoute = MarketsDerivativesRouteImport.update({
+  id: '/markets/derivatives',
+  path: '/markets/derivatives',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketsDominanceRoute = MarketsDominanceRouteImport.update({
+  id: '/markets/dominance',
+  path: '/markets/dominance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketsFearGreedRoute = MarketsFearGreedRouteImport.update({
+  id: '/markets/fear-greed',
+  path: '/markets/fear-greed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketsHeatmapRoute = MarketsHeatmapRouteImport.update({
+  id: '/markets/heatmap',
+  path: '/markets/heatmap',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketsOverviewRoute = MarketsOverviewRouteImport.update({
+  id: '/markets/overview',
+  path: '/markets/overview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketsSentimentRoute = MarketsSentimentRouteImport.update({
+  id: '/markets/sentiment',
+  path: '/markets/sentiment',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketsSpotRoute = MarketsSpotRouteImport.update({
+  id: '/markets/spot',
+  path: '/markets/spot',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NewsIndexRoute = NewsIndexRouteImport.update({
   id: '/news/',
   path: '/news/',
@@ -241,7 +307,18 @@ export interface FileRoutesByFullPath {
   '/watchlist': typeof WatchlistRoute
   '/whats-new': typeof WhatsNewRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/markets/assets': typeof MarketsAssetsRoute
+  '/markets/compare': typeof MarketsCompareRoute
+  '/markets/cycle': typeof MarketsCycleRoute
+  '/markets/derivatives': typeof MarketsDerivativesRoute
+  '/markets/dominance': typeof MarketsDominanceRoute
+  '/markets/fear-greed': typeof MarketsFearGreedRoute
+  '/markets/heatmap': typeof MarketsHeatmapRoute
+  '/markets/overview': typeof MarketsOverviewRoute
+  '/markets/sentiment': typeof MarketsSentimentRoute
+  '/markets/spot': typeof MarketsSpotRoute
   '/news/$newsId': typeof NewsNewsIdRoute
+  '/markets/': typeof MarketsIndexRoute
   '/news/': typeof NewsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -276,7 +353,18 @@ export interface FileRoutesByTo {
   '/watchlist': typeof WatchlistRoute
   '/whats-new': typeof WhatsNewRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/markets/assets': typeof MarketsAssetsRoute
+  '/markets/compare': typeof MarketsCompareRoute
+  '/markets/cycle': typeof MarketsCycleRoute
+  '/markets/derivatives': typeof MarketsDerivativesRoute
+  '/markets/dominance': typeof MarketsDominanceRoute
+  '/markets/fear-greed': typeof MarketsFearGreedRoute
+  '/markets/heatmap': typeof MarketsHeatmapRoute
+  '/markets/overview': typeof MarketsOverviewRoute
+  '/markets/sentiment': typeof MarketsSentimentRoute
+  '/markets/spot': typeof MarketsSpotRoute
   '/news/$newsId': typeof NewsNewsIdRoute
+  '/markets': typeof MarketsIndexRoute
   '/news': typeof NewsIndexRoute
 }
 export interface FileRoutesById {
@@ -312,7 +400,18 @@ export interface FileRoutesById {
   '/watchlist': typeof WatchlistRoute
   '/whats-new': typeof WhatsNewRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/markets/assets': typeof MarketsAssetsRoute
+  '/markets/compare': typeof MarketsCompareRoute
+  '/markets/cycle': typeof MarketsCycleRoute
+  '/markets/derivatives': typeof MarketsDerivativesRoute
+  '/markets/dominance': typeof MarketsDominanceRoute
+  '/markets/fear-greed': typeof MarketsFearGreedRoute
+  '/markets/heatmap': typeof MarketsHeatmapRoute
+  '/markets/overview': typeof MarketsOverviewRoute
+  '/markets/sentiment': typeof MarketsSentimentRoute
+  '/markets/spot': typeof MarketsSpotRoute
   '/news/$newsId': typeof NewsNewsIdRoute
+  '/markets/': typeof MarketsIndexRoute
   '/news/': typeof NewsIndexRoute
 }
 export interface FileRouteTypes {
@@ -349,7 +448,18 @@ export interface FileRouteTypes {
     | '/watchlist'
     | '/whats-new'
     | '/auth/callback'
+    | '/markets/assets'
+    | '/markets/compare'
+    | '/markets/cycle'
+    | '/markets/derivatives'
+    | '/markets/dominance'
+    | '/markets/fear-greed'
+    | '/markets/heatmap'
+    | '/markets/overview'
+    | '/markets/sentiment'
+    | '/markets/spot'
     | '/news/$newsId'
+    | '/markets/'
     | '/news/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -384,7 +494,18 @@ export interface FileRouteTypes {
     | '/watchlist'
     | '/whats-new'
     | '/auth/callback'
+    | '/markets/assets'
+    | '/markets/compare'
+    | '/markets/cycle'
+    | '/markets/derivatives'
+    | '/markets/dominance'
+    | '/markets/fear-greed'
+    | '/markets/heatmap'
+    | '/markets/overview'
+    | '/markets/sentiment'
+    | '/markets/spot'
     | '/news/$newsId'
+    | '/markets'
     | '/news'
   id:
     | '__root__'
@@ -419,7 +540,18 @@ export interface FileRouteTypes {
     | '/watchlist'
     | '/whats-new'
     | '/auth/callback'
+    | '/markets/assets'
+    | '/markets/compare'
+    | '/markets/cycle'
+    | '/markets/derivatives'
+    | '/markets/dominance'
+    | '/markets/fear-greed'
+    | '/markets/heatmap'
+    | '/markets/overview'
+    | '/markets/sentiment'
+    | '/markets/spot'
     | '/news/$newsId'
+    | '/markets/'
     | '/news/'
   fileRoutesById: FileRoutesById
 }
@@ -455,7 +587,18 @@ export interface RootRouteChildren {
   WatchlistRoute: typeof WatchlistRoute
   WhatsNewRoute: typeof WhatsNewRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
+  MarketsAssetsRoute: typeof MarketsAssetsRoute
+  MarketsCompareRoute: typeof MarketsCompareRoute
+  MarketsCycleRoute: typeof MarketsCycleRoute
+  MarketsDerivativesRoute: typeof MarketsDerivativesRoute
+  MarketsDominanceRoute: typeof MarketsDominanceRoute
+  MarketsFearGreedRoute: typeof MarketsFearGreedRoute
+  MarketsHeatmapRoute: typeof MarketsHeatmapRoute
+  MarketsOverviewRoute: typeof MarketsOverviewRoute
+  MarketsSentimentRoute: typeof MarketsSentimentRoute
+  MarketsSpotRoute: typeof MarketsSpotRoute
   NewsNewsIdRoute: typeof NewsNewsIdRoute
+  MarketsIndexRoute: typeof MarketsIndexRoute
   NewsIndexRoute: typeof NewsIndexRoute
 }
 
@@ -678,6 +821,83 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/markets/': {
+      id: '/markets/'
+      path: '/markets'
+      fullPath: '/markets/'
+      preLoaderRoute: typeof MarketsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/markets/assets': {
+      id: '/markets/assets'
+      path: '/markets/assets'
+      fullPath: '/markets/assets'
+      preLoaderRoute: typeof MarketsAssetsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/markets/compare': {
+      id: '/markets/compare'
+      path: '/markets/compare'
+      fullPath: '/markets/compare'
+      preLoaderRoute: typeof MarketsCompareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/markets/cycle': {
+      id: '/markets/cycle'
+      path: '/markets/cycle'
+      fullPath: '/markets/cycle'
+      preLoaderRoute: typeof MarketsCycleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/markets/derivatives': {
+      id: '/markets/derivatives'
+      path: '/markets/derivatives'
+      fullPath: '/markets/derivatives'
+      preLoaderRoute: typeof MarketsDerivativesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/markets/dominance': {
+      id: '/markets/dominance'
+      path: '/markets/dominance'
+      fullPath: '/markets/dominance'
+      preLoaderRoute: typeof MarketsDominanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/markets/fear-greed': {
+      id: '/markets/fear-greed'
+      path: '/markets/fear-greed'
+      fullPath: '/markets/fear-greed'
+      preLoaderRoute: typeof MarketsFearGreedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/markets/heatmap': {
+      id: '/markets/heatmap'
+      path: '/markets/heatmap'
+      fullPath: '/markets/heatmap'
+      preLoaderRoute: typeof MarketsHeatmapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/markets/overview': {
+      id: '/markets/overview'
+      path: '/markets/overview'
+      fullPath: '/markets/overview'
+      preLoaderRoute: typeof MarketsOverviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/markets/sentiment': {
+      id: '/markets/sentiment'
+      path: '/markets/sentiment'
+      fullPath: '/markets/sentiment'
+      preLoaderRoute: typeof MarketsSentimentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/markets/spot': {
+      id: '/markets/spot'
+      path: '/markets/spot'
+      fullPath: '/markets/spot'
+      preLoaderRoute: typeof MarketsSpotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/news/': {
       id: '/news/'
       path: '/news'
@@ -727,7 +947,18 @@ const rootRouteChildren: RootRouteChildren = {
   WatchlistRoute: WatchlistRoute,
   WhatsNewRoute: WhatsNewRoute,
   AuthCallbackRoute: AuthCallbackRoute,
+  MarketsAssetsRoute: MarketsAssetsRoute,
+  MarketsCompareRoute: MarketsCompareRoute,
+  MarketsCycleRoute: MarketsCycleRoute,
+  MarketsDerivativesRoute: MarketsDerivativesRoute,
+  MarketsDominanceRoute: MarketsDominanceRoute,
+  MarketsFearGreedRoute: MarketsFearGreedRoute,
+  MarketsHeatmapRoute: MarketsHeatmapRoute,
+  MarketsOverviewRoute: MarketsOverviewRoute,
+  MarketsSentimentRoute: MarketsSentimentRoute,
+  MarketsSpotRoute: MarketsSpotRoute,
   NewsNewsIdRoute: NewsNewsIdRoute,
+  MarketsIndexRoute: MarketsIndexRoute,
   NewsIndexRoute: NewsIndexRoute,
 }
 export const routeTree = rootRouteImport
