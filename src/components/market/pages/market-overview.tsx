@@ -32,6 +32,7 @@ export function MarketOverviewContent({ variant = "console" }: { variant?: "cons
   const globalStats = useLiveGlobal();
   const trending = [...assets].sort((a, b) => b.change24h - a.change24h).slice(0, 6);
   const heat = assets.slice(0, 12);
+  const isPublic = variant === "public";
   const to = (consolePath: string) => marketPublicPath(consolePath, variant);
 
   return (
@@ -165,16 +166,15 @@ export function MarketOverviewContent({ variant = "console" }: { variant?: "cons
             {heat.map((a) => {
               const up = a.change24h >= 0;
               const intensity = Math.min(Math.abs(a.change24h) / 8, 1) * 0.32 + 0.1;
-              return (
-                <Link
-                  key={a.id}
-                  to={to("/chart")}
-                  search={{ symbol: a.symbol }}
-                  className="group rounded-xl border border-border p-3 transition-all hover:-translate-y-0.5 hover:border-primary/40"
-                  style={{
-                    background: `color-mix(in oklab, var(--${up ? "up" : "down"}) ${intensity * 100}%, transparent)`,
-                  }}
-                >
+              const cls =
+                "group rounded-xl border border-border p-3 transition-all hover:-translate-y-0.5 hover:border-primary/40";
+              const style = {
+                background: `color-mix(in oklab, var(--${up ? "up" : "down"}) ${intensity * 100}%, transparent)`,
+              } as const;
+              // On the homepage these tiles are informational — never a link
+              // into the auth-gated console chart.
+              const inner = (
+                <>
                   <p className="truncate text-xs font-semibold tracking-wide">{a.symbol}</p>
                   <p
                     className={cn(
@@ -187,6 +187,21 @@ export function MarketOverviewContent({ variant = "console" }: { variant?: "cons
                   <p className="truncate text-[11px] text-muted-foreground">
                     {fmtCompact(a.marketCap)}
                   </p>
+                </>
+              );
+              return isPublic ? (
+                <div key={a.id} className={cls} style={style}>
+                  {inner}
+                </div>
+              ) : (
+                <Link
+                  key={a.id}
+                  to={to("/chart")}
+                  search={{ symbol: a.symbol }}
+                  className={cls}
+                  style={style}
+                >
+                  {inner}
                 </Link>
               );
             })}
@@ -195,13 +210,11 @@ export function MarketOverviewContent({ variant = "console" }: { variant?: "cons
 
         <Panel title="Trending Assets" description="Biggest 24h movers" bodyClassName="p-0">
           <ul className="divide-y divide-border">
-            {trending.map((a) => (
-              <li key={a.id}>
-                <Link
-                  to={to("/chart")}
-                  search={{ symbol: a.symbol }}
-                  className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5 transition-colors hover:bg-accent/40 sm:px-5"
-                >
+            {trending.map((a) => {
+              const cls =
+                "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5 transition-colors hover:bg-accent/40 sm:px-5";
+              const inner = (
+                <>
                   <AssetRowCell asset={a} />
                   <div className="flex items-center gap-4">
                     <Sparkline
@@ -216,9 +229,20 @@ export function MarketOverviewContent({ variant = "console" }: { variant?: "cons
                       <ChangeBadge value={a.change24h} className="mt-1" />
                     </div>
                   </div>
-                </Link>
-              </li>
-            ))}
+                </>
+              );
+              return (
+                <li key={a.id}>
+                  {isPublic ? (
+                    <div className={cls}>{inner}</div>
+                  ) : (
+                    <Link to={to("/chart")} search={{ symbol: a.symbol }} className={cls}>
+                      {inner}
+                    </Link>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </Panel>
       </div>

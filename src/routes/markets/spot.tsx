@@ -28,7 +28,7 @@ function MarketsSpotPage() {
         icon={BarChart3}
         consoleTo="/spot"
       />
-      <SpotMarketContent />
+      <SpotMarketContent variant="public" />
     </MarketingLayout>
   );
 }

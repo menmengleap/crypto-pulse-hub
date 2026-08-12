@@ -21,8 +21,13 @@ const sectors = [
   "Stablecoin",
 ];
 
-/** Crypto Assets content — shared by the console page (/assets) and the public homepage page (/markets/assets). */
-export function CryptoAssetsContent() {
+/**
+ * Crypto Assets content — shared by the console page (/assets) and the public
+ * homepage page (/markets/assets). In public mode, cards are informational (no
+ * links into the auth-gated console chart).
+ */
+export function CryptoAssetsContent({ variant = "console" }: { variant?: "console" | "public" }) {
+  const isPublic = variant === "public";
   const [q, setQ] = useState("");
   const [sector, setSector] = useState("All");
   const assets = useLiveAssets();
@@ -61,46 +66,52 @@ export function CryptoAssetsContent() {
             className="h-9 w-40 pl-8 text-xs sm:w-56"
           />
         </div>
-      </div>
-
+      </div>{" "}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {rows.map((a) => (
-          <Link
-            key={a.id}
-            to="/chart"
-            className="panel p-4 transition-colors hover:border-primary/35"
-          >
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
-              <AssetRowCell asset={a} />
-              <ChangeBadge value={a.change24h} />
+        {rows.map((a) => {
+          const cls = "panel p-4 transition-colors hover:border-primary/35";
+          const inner = (
+            <>
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
+                <AssetRowCell asset={a} />
+                <ChangeBadge value={a.change24h} />
+              </div>
+              <p className="num mt-3 text-lg font-semibold tracking-tight">{fmtPrice(a.price)}</p>
+              <Sparkline data={a.spark} positive={a.change24h >= 0} className="mt-2 h-10" />
+              <dl className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
+                <div>
+                  <dt>Market cap</dt>
+                  <dd className="num text-foreground">{fmtCompact(a.marketCap)}</dd>
+                </div>
+                <div>
+                  <dt>Volume 24h</dt>
+                  <dd className="num text-foreground">{fmtCompact(a.volume24h)}</dd>
+                </div>
+                <div>
+                  <dt>RSI</dt>
+                  <dd className="num text-foreground">{a.rsi.toFixed(1)}</dd>
+                </div>
+                <div>
+                  <dt>Sector</dt>
+                  <dd className="text-foreground">{a.sector}</dd>
+                </div>
+              </dl>
+              <div className="mt-3">
+                <TrendBadge trend={a.trend} />
+              </div>
+            </>
+          );
+          return isPublic ? (
+            <div key={a.id} className={cls}>
+              {inner}
             </div>
-            <p className="num mt-3 text-lg font-semibold tracking-tight">{fmtPrice(a.price)}</p>
-            <Sparkline data={a.spark} positive={a.change24h >= 0} className="mt-2 h-10" />
-            <dl className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
-              <div>
-                <dt>Market cap</dt>
-                <dd className="num text-foreground">{fmtCompact(a.marketCap)}</dd>
-              </div>
-              <div>
-                <dt>Volume 24h</dt>
-                <dd className="num text-foreground">{fmtCompact(a.volume24h)}</dd>
-              </div>
-              <div>
-                <dt>RSI</dt>
-                <dd className="num text-foreground">{a.rsi.toFixed(1)}</dd>
-              </div>
-              <div>
-                <dt>Sector</dt>
-                <dd className="text-foreground">{a.sector}</dd>
-              </div>
-            </dl>
-            <div className="mt-3">
-              <TrendBadge trend={a.trend} />
-            </div>
-          </Link>
-        ))}
+          ) : (
+            <Link key={a.id} to="/chart" className={cls}>
+              {inner}
+            </Link>
+          );
+        })}
       </div>
-
       {rows.length === 0 && (
         <Panel>
           <p className="py-10 text-center text-sm text-muted-foreground">

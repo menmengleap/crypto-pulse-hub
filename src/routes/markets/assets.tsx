@@ -28,7 +28,7 @@ function MarketsAssetsPage() {
         icon={Coins}
         consoleTo="/assets"
       />
-      <CryptoAssetsContent />
+      <CryptoAssetsContent variant="public" />
     </MarketingLayout>
   );
 }

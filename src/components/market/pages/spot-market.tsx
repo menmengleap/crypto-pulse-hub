@@ -8,8 +8,13 @@ import { useLiveAssets } from "@/lib/realtime";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-/** Spot Market content — shared by the console page (/spot) and the public homepage page (/markets/spot). */
-export function SpotMarketContent() {
+/**
+ * Spot Market content — shared by the console page (/spot) and the public
+ * homepage page (/markets/spot). In public mode, rows are informational (no
+ * links into the auth-gated console chart).
+ */
+export function SpotMarketContent({ variant = "console" }: { variant?: "console" | "public" }) {
+  const isPublic = variant === "public";
   const [q, setQ] = useState("");
   const [tab, setTab] = useState("all");
   const assets = useLiveAssets();
@@ -72,15 +77,20 @@ export function SpotMarketContent() {
             </tr>
           </thead>
           <tbody>
+            {" "}
             {rows.map((a) => (
               <tr
                 key={a.id}
                 className="border-b border-border/60 transition-colors last:border-0 hover:bg-accent/40"
               >
                 <td className="px-4 py-3">
-                  <Link to="/chart">
+                  {isPublic ? (
                     <AssetRowCell asset={a} />
-                  </Link>
+                  ) : (
+                    <Link to="/chart">
+                      <AssetRowCell asset={a} />
+                    </Link>
+                  )}
                 </td>
                 <td className="num px-4 py-3 text-right">{fmtPrice(a.price)}</td>
                 <td className="px-4 py-3 text-right">
