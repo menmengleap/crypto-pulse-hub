@@ -1,27 +1,15 @@
-import { useState } from "react";
-import { alerts } from "@/lib/market-data";
-import { Link } from "@tanstack/react-router";
 import {
-  Bell,
   Check,
-  ChevronDown,
   Eraser,
-  Expand,
-  GitCompareArrows,
   Maximize2,
   Minimize2,
   PanelLeft,
-  Pause,
-  PenLine,
-  Play,
   Settings2,
   SlidersHorizontal,
-  X,
-  type LucideIcon,
 } from "lucide-react";
 import { ChangeBadge } from "@/components/market/ui";
-import { fmtCompact, fmtPrice, timeframes, type Asset } from "@/lib/market-data";
-import { INDICATOR_PRESETS, presetByKey } from "@/lib/indicators";
+import { fmtPrice, timeframes, type Asset } from "@/lib/market-data";
+import { INDICATOR_PRESETS } from "@/lib/indicators";
 import { useLiveAssets, useMarketStatus } from "@/lib/realtime";
 import { useWorkspace } from "@/lib/workspace";
 import { cn } from "@/lib/utils";
@@ -40,12 +28,10 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { ChartStyle } from "@/components/chart/price-chart";
-import type { DrawingToolId } from "@/lib/chart-drawings";
 
 const toolBtn =
   "inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground";
@@ -117,12 +103,6 @@ export function ChartToolbar({
   activeIndicators,
   onToggleIndicator,
   onClearIndicators,
-  activeTool,
-  onActiveTool,
-  drawings,
-  onClearDrawings,
-  paused,
-  onTogglePaused,
 }: {
   asset: Asset;
   symbol: string;
@@ -138,17 +118,10 @@ export function ChartToolbar({
   activeIndicators: string[];
   onToggleIndicator: (k: string) => void;
   onClearIndicators: () => void;
-  activeTool: DrawingToolId | null;
-  onActiveTool: (t: DrawingToolId | null) => void;
-  drawings: unknown[];
-  onClearDrawings: () => void;
-  paused: boolean;
-  onTogglePaused: () => void;
 }) {
   const assets = useLiveAssets();
   const status = useMarketStatus();
   const workspace = useWorkspace();
-  const drawingActive = activeTool !== null && activeTool !== "pointer";
 
   return (
     <div className="shrink-0 border-b border-border bg-surface/40">
@@ -282,116 +255,6 @@ export function ChartToolbar({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Compare — homepage public page */}
-        <Tip label="Compare assets (homepage)">
-          <Link to="/markets/compare" className={cn(toolBtn, "gap-1")}>
-            <GitCompareArrows className="size-3.5" />
-            <span className="hidden xl:inline">Compare</span>
-          </Link>
-        </Tip>
-
-        {/* Drawing tools */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className={cn(toolBtn, drawingActive && toolBtnActive, drawingActive && "relative")}
-            >
-              <PenLine className="size-3.5" />
-              <span className="hidden xl:inline">Drawing</span>
-              {drawingActive && (
-                <span className="absolute -right-0.5 -top-0.5 size-1.5 rounded-full bg-primary" />
-              )}
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-52 p-1">
-            <DropdownMenuLabel className="px-2 pt-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-              Drawings
-            </DropdownMenuLabel>
-            {DRAW_TOOLS.map((t) => (
-              <DropdownMenuItem
-                key={t.id}
-                onClick={() => onActiveTool(t.id)}
-                className={cn(activeTool === t.id && "bg-primary/12 text-primary")}
-              >
-                <t.icon />
-                <span>{t.label}</span>
-                <DropdownMenuShortcut>{t.hint}</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            ))}
-            {drawings.length > 0 && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={onClearDrawings}>
-                  <Eraser />
-                  Clear all drawings
-                </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        {/* Alerts */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button type="button" className={toolBtn}>
-              <Bell className="size-3.5" />
-              <span className="hidden xl:inline">Alert</span>
-              {alerts.filter((a) => a.status === "Active").length > 0 && (
-                <span className="rounded-full bg-primary/20 px-1.5 text-[9px] font-semibold text-primary">
-                  {alerts.filter((a) => a.status === "Active").length}
-                </span>
-              )}
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-72">
-            <DropdownMenuLabel className="px-3 pt-3 text-[10px] uppercase tracking-wider text-muted-foreground">
-              Price alerts
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <div className="max-h-72 overflow-y-auto px-1 py-1">
-              {alerts.map((a) => (
-                <DropdownMenuItem
-                  key={a.id}
-                  className="flex items-center justify-between gap-2 px-2 py-2"
-                  onSelect={(e) => e.preventDefault()}
-                >
-                  <span className="min-w-0">
-                    <span className="block text-[11px] font-semibold text-foreground">
-                      {a.asset} · {a.condition} {a.target}
-                    </span>
-                    <span className="block text-[10px] text-muted-foreground">{a.created}</span>
-                  </span>
-                  <span
-                    className={cn(
-                      "shrink-0 rounded-md border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider",
-                      a.status === "Active"
-                        ? "border-up/25 bg-up/10 text-up"
-                        : a.status === "Paused"
-                          ? "border-border bg-muted/40 text-muted-foreground"
-                          : "border-down/25 bg-down/10 text-down",
-                    )}
-                  >
-                    {a.status}
-                  </span>
-                </DropdownMenuItem>
-              ))}
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        {/* Replay / pause live */}
-        <Tip label={paused ? "Resume live" : "Pause live"}>
-          <button
-            type="button"
-            onClick={onTogglePaused}
-            className={cn(toolBtn, paused && toolBtnActive)}
-          >
-            {paused ? <Play className="size-3.5" /> : <Pause className="size-3.5" />}
-            <span className="hidden xl:inline">{paused ? "Resume" : "Replay"}</span>
-          </button>
-        </Tip>
-
         {/* Settings */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -457,45 +320,7 @@ export function ChartToolbar({
             )}
           </button>
         </Tip>
-
-        {/* Right panel toggle */}
-        <Tip label={workspace.rightPanel ? "Close AI panel" : "Open AI panel"}>
-          <button
-            type="button"
-            onClick={() => workspace.setRightPanel(!workspace.rightPanel)}
-            className={cn(toolBtn, workspace.rightPanel && toolBtnActive)}
-          >
-            <Expand className="size-3.5" />
-            <span className="hidden xl:inline">AI</span>
-          </button>
-        </Tip>
-
-        {/* Bottom panel toggle */}
-        <Tip label={workspace.bottomPanel ? "Close bottom panel" : "Open bottom panel"}>
-          <button
-            type="button"
-            onClick={() => workspace.setBottomPanel(!workspace.bottomPanel)}
-            className={cn(toolBtn, workspace.bottomPanel && toolBtnActive)}
-          >
-            {workspace.bottomPanel ? (
-              <ChevronDown className="size-3.5" />
-            ) : (
-              <Expand className="size-3.5" />
-            )}
-            <span className="hidden xl:inline">Panel</span>
-          </button>
-        </Tip>
       </div>
     </div>
   );
 }
-
-const DRAW_TOOLS: { id: DrawingToolId; label: string; icon: LucideIcon; hint: string }[] = [
-  { id: "pointer", label: "Pointer", icon: Expand, hint: "Esc" },
-  { id: "trend", label: "Trend line", icon: PenLine, hint: "T" },
-  { id: "horizontal", label: "Horizontal line", icon: SlidersHorizontal, hint: "H" },
-  { id: "vertical", label: "Vertical line", icon: X, hint: "V" },
-  { id: "ray", label: "Ray", icon: GitCompareArrows, hint: "R" },
-  { id: "rectangle", label: "Rectangle", icon: Settings2, hint: "B" },
-  { id: "fib", label: "Fibonacci", icon: GitCompareArrows, hint: "F" },
-];

@@ -9,7 +9,6 @@ import { initRealtime } from "@/lib/realtime";
 import { useWorkspace } from "@/lib/workspace";
 import { cn } from "@/lib/utils";
 import { AIPanel } from "@/components/terminal/ai-panel";
-import { AlertsPopover } from "@/components/terminal/alerts-popover";
 import { BottomWorkspace } from "@/components/terminal/bottom-workspace";
 import { ChartToolbar } from "@/components/terminal/chart-toolbar";
 import { DrawingToolbar } from "@/components/terminal/drawing-toolbar";
@@ -43,7 +42,6 @@ export function TerminalWorkspace() {
   const [activeIndicators, setActiveIndicators] = useState<string[]>(["sma20", "rsi14"]);
   const [activeTool, setActiveTool] = useState<DrawingToolId | null>(null);
   const [drawings, setDrawings] = useState<ChartDrawing[]>([]);
-  const [paused, setPaused] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
 
   const asset = bySymbol(symbol)!;
@@ -138,19 +136,12 @@ export function TerminalWorkspace() {
             activeIndicators={activeIndicators}
             onToggleIndicator={toggleIndicator}
             onClearIndicators={() => setActiveIndicators([])}
-            activeTool={activeTool}
-            onActiveTool={setActiveTool}
-            drawings={drawings}
-            onClearDrawings={() => setDrawings([])}
-            paused={paused}
-            onTogglePaused={() => setPaused((p) => !p)}
           />
           <div className="relative min-h-0 min-w-0 flex-1">
             <PriceChart
               symbol={symbol}
               tf={tf}
               fill
-              streaming={!paused}
               chartType={chartType}
               upColor={upColor}
               downColor={downColor}
