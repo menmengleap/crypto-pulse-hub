@@ -574,30 +574,6 @@ export const news: NewsItem[] = [
   },
 ];
 
-export const newsCategories = [
-  "All",
-  "Crypto",
-  "Bitcoin",
-  "Ethereum",
-  "Altcoins",
-  "DeFi",
-  "ETF",
-  "Regulation",
-  "Macro",
-  "Markets",
-  "Technology",
-];
-
-export const trendingTopics = [
-  "ETF inflows",
-  "Bitcoin dominance",
-  "Rollup fees",
-  "Rate cuts",
-  "AI tokens",
-  "Liquid staking",
-  "Market structure bill",
-];
-
 export const indicators = [
   {
     name: "RSI (14)",

@@ -18,7 +18,6 @@ import {
   PieChart,
   Search,
   Settings,
-  Sparkles,
   Star,
   Layers,
   Coins,
@@ -46,10 +45,6 @@ type NavItem = { label: string; to: string; icon: LucideIcon };
 type NavGroup = { label: string; items: NavItem[] };
 
 export const navGroups: NavGroup[] = [
-  {
-    label: "What's New",
-    items: [{ label: "New", to: "/whats-new", icon: Sparkles }],
-  },
   {
     label: "Markets",
     items: [

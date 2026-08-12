@@ -85,7 +85,7 @@ function NewPricingMarketPage() {
 
 // ---------------------------------------------------------------------------
 // New — shared content (video showcase, live markets & Finnhub research).
-// The same components render inside the console's /whats-new page.
+// The same components render inside the console's /news page.
 // ---------------------------------------------------------------------------
 
 function NewTabContent() {

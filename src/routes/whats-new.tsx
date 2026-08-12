@@ -1,46 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AppShell } from "@/components/layout/app-shell";
-import {
-  VideoShowcase,
-  LiveMarketsStrip,
-  FinnhubRealtimeSection,
-} from "@/components/market/new-content";
-import { useLiveAssets, useLiveGlobal } from "@/lib/realtime";
-
-export const Route = createFileRoute("/whats-new")({
-  head: () => ({
-    meta: [
-      { title: "New — Cryptolytic" },
-      {
-        name: "description",
-        content:
-          "Live markets and the latest research panels inside the terminal — the same data as the homepage.",
-      },
-      { property: "og:title", content: "New — Cryptolytic" },
-    ],
-  }),
-  component: WhatsNewPage,
-});
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 /**
- * The console's own "New" page — the New Homepage content brought inside the
- * terminal. It renders the exact same components (and therefore the same Data
- * API) as the marketing /new page, but stays inside the console: the hero CTA
- * jumps to the console market overview instead of the homepage tabs.
+ * The console's standalone "New" page was consolidated into the console's
+ * "News" page (/news), which now renders the homepage's New feed inside the
+ * terminal. Old links and bookmarks to /whats-new are redirected there so
+ * nothing breaks — the console stays in the console, never on the homepage.
  */
-function WhatsNewPage() {
-  const assets = useLiveAssets();
-  const globalStats = useLiveGlobal();
-  const top = assets.slice(0, 6);
-  const movers = [...assets].sort((a, b) => b.change24h - a.change24h).slice(0, 6);
-
-  return (
-    <AppShell title="New" subtitle="What's live in the market right now — from the terminal">
-      <div className="space-y-8">
-        <VideoShowcase consoleMode />
-        <LiveMarketsStrip top={top} stats={globalStats} movers={movers} />
-        <FinnhubRealtimeSection />
-      </div>
-    </AppShell>
-  );
-}
+export const Route = createFileRoute("/whats-new")({
+  beforeLoad: () => {
+    throw redirect({ to: "/news", replace: true });
+  },
+});
