@@ -1,30 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AppShell } from "@/components/layout/app-shell";
-import { MarketSentimentContent } from "@/components/market/pages/market-sentiment";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+/**
+ * The console is now a single full-screen Advanced Chat with live prices.
+ * The former console pages (sentiment, chart, news, …) were consolidated into
+ * the chat — old links and bookmarks redirect there.
+ */
 export const Route = createFileRoute("/sentiment")({
-  head: () => ({
-    meta: [
-      { title: "Market Sentiment — Cryptolytic" },
-      {
-        name: "description",
-        content:
-          "Composite crypto market sentiment from spot flows, funding, social activity and on-chain accumulation.",
-      },
-      { property: "og:title", content: "Market Sentiment — Cryptolytic" },
-      {
-        property: "og:description",
-        content: "Understand positioning and crowd behaviour across crypto markets.",
-      },
-    ],
-  }),
-  component: SentimentPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/ai-analysis", replace: true });
+  },
 });
-
-function SentimentPage() {
-  return (
-    <AppShell title="Market Sentiment" subtitle="Composite positioning signal">
-      <MarketSentimentContent />
-    </AppShell>
-  );
-}

@@ -8,7 +8,10 @@ export const Route = createFileRoute("/forgot-password")({
   head: () => ({
     meta: [
       { title: "Reset password — Cryptolytic" },
-      { name: "description", content: "Reset the password for your Cryptolytic market analytics account." },
+      {
+        name: "description",
+        content: "Reset the password for your Cryptolytic market analytics account.",
+      },
       { property: "og:title", content: "Reset password — Cryptolytic" },
       { property: "og:description", content: "Send yourself a secure password reset link." },
     ],

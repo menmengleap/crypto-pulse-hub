@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { ChangeBadge, Panel } from "@/components/market/ui";
 import { LiveBadge } from "@/components/market/live-badge";
@@ -34,8 +34,6 @@ type Row = {
   volume: number;
   marketCap: number | undefined;
   spark: number[];
-  /** Link target for clickable rows (crypto → chart). */
-  to?: "/chart";
 };
 
 function AssetCell({ row }: { row: Row }) {
@@ -57,7 +55,6 @@ function AssetCell({ row }: { row: Row }) {
 }
 
 function TickerRows({ rows }: { rows: Row[] }) {
-  const navigate = useNavigate();
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[680px] border-separate border-spacing-0">
@@ -82,28 +79,7 @@ function TickerRows({ rows }: { rows: Row[] }) {
         </thead>
         <tbody className="[&>tr:last-child>td]:border-0">
           {rows.map((row) => (
-            <tr
-              key={row.id}
-              onClick={
-                row.to
-                  ? () => void navigate({ to: "/chart", search: { symbol: row.symbol } })
-                  : undefined
-              }
-              onKeyDown={
-                row.to
-                  ? (e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        void navigate({ to: "/chart", search: { symbol: row.symbol } });
-                      }
-                    }
-                  : undefined
-              }
-              tabIndex={row.to ? 0 : undefined}
-              role={row.to ? "link" : undefined}
-              aria-label={row.to ? `Open ${row.symbol} chart` : undefined}
-              className={cn("transition-colors", row.to && "cursor-pointer hover:bg-accent/40")}
-            >
+            <tr key={row.id}>
               <td className="border-b border-border/60 py-2.5 pl-4 pr-2 sm:pl-5">
                 <AssetCell row={row} />
               </td>
@@ -153,7 +129,6 @@ export function TickerBoard() {
     volume: a.volume24h,
     marketCap: a.marketCap,
     spark: a.spark,
-    to: "/chart",
   }));
 
   const toRows = (list: GlobalTicker[]): Row[] =>
@@ -208,10 +183,10 @@ export function TickerBoard() {
       <p className="px-4 pb-4 pt-3 text-[11px] text-muted-foreground sm:px-5">
         All prices stream live from the Cryptolytic API — Binance (crypto), Yahoo Finance ⇄ Finnhub
         (stocks) and exchangerate-api ⇄ Frankfurter (forex), with automatic provider failover.{" "}
-        <Link to="/chart" className="text-primary hover:underline">
-          Open a chart
+        <Link to="/ai-analysis" className="text-primary hover:underline">
+          Ask the AI chat
         </Link>{" "}
-        for any asset.
+        about any asset.
       </p>
     </Panel>
   );

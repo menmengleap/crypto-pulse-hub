@@ -1,30 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AppShell } from "@/components/layout/app-shell";
-import { CompareAssetsContent } from "@/components/market/pages/compare-assets";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+/**
+ * The console is now a single full-screen Advanced Chat with live prices.
+ * The former console pages (compare, chart, news, …) were consolidated into
+ * the chat — old links and bookmarks redirect there.
+ */
 export const Route = createFileRoute("/compare")({
-  head: () => ({
-    meta: [
-      { title: "Compare Assets — Cryptolytic" },
-      {
-        name: "description",
-        content:
-          "Compare two crypto assets side by side across price, performance, volume and technicals.",
-      },
-      { property: "og:title", content: "Compare Assets — Cryptolytic" },
-      {
-        property: "og:description",
-        content: "Side-by-side crypto asset comparison for relative strength analysis.",
-      },
-    ],
-  }),
-  component: ComparePage,
+  beforeLoad: () => {
+    throw redirect({ to: "/ai-analysis", replace: true });
+  },
 });
-
-function ComparePage() {
-  return (
-    <AppShell title="Compare" subtitle="Relative strength between two assets">
-      <CompareAssetsContent />
-    </AppShell>
-  );
-}

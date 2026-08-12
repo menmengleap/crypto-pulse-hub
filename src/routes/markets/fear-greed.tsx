@@ -26,7 +26,7 @@ function MarketsFearGreedPage() {
         title="Fear & Greed"
         subtitle="Market emotion index — from extreme fear to extreme greed, updated hourly"
         icon={Gauge}
-        consoleTo="/fear-greed"
+        consoleTo="/ai-analysis"
       />
       <FearGreedContent />
     </MarketingLayout>

@@ -26,7 +26,7 @@ function MarketsDerivativesPage() {
         title="Derivatives Market"
         subtitle="Perpetual futures positioning and flow — open interest, funding and liquidations"
         icon={Layers}
-        consoleTo="/derivatives"
+        consoleTo="/ai-analysis"
       />
       <DerivativesMarketContent />
     </MarketingLayout>

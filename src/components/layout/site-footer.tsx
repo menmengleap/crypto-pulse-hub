@@ -79,7 +79,7 @@ export function SiteFooter() {
                   </Link>
                 </li>
                 <li>
-                  <TerminalLink to="/market" className={linkCls}>
+                  <TerminalLink to="/ai-analysis" className={linkCls}>
                     Open terminal
                   </TerminalLink>
                 </li>

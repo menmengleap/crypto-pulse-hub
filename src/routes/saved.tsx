@@ -1,26 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Bookmark } from "lucide-react";
-import { AppShell } from "@/components/layout/app-shell";
-import { ComingSoon } from "@/components/layout/coming-soon";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+/**
+ * The console is now a single full-screen Advanced Chat with live prices.
+ * The former console pages (saved analysis, chart, news, …) were consolidated
+ * into the chat — old links and bookmarks redirect there.
+ */
 export const Route = createFileRoute("/saved")({
-  head: () => ({
-    meta: [
-      { title: "Saved Analysis — Cryptolytic" },
-      { name: "description", content: "Saved Analysis is coming soon to Cryptolytic." },
-    ],
-  }),
-  component: SavedPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/ai-analysis", replace: true });
+  },
 });
-
-function SavedPage() {
-  return (
-    <AppShell title="Saved Analysis" subtitle="Your research notes, in one place">
-      <ComingSoon
-        icon={Bookmark}
-        title="Saved Analysis is coming soon"
-        description="Keep every dated analysis, chart note and watchlist insight in one tidy workspace. This workspace ships in an upcoming release."
-      />
-    </AppShell>
-  );
-}

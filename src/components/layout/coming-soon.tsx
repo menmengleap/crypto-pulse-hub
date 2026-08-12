@@ -31,7 +31,7 @@ export function ComingSoon({
           Follow releases on the blog
         </Link>
         <TerminalLink
-          to="/market"
+          to="/ai-analysis"
           className="rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
         >
           Back to the terminal

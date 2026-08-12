@@ -1,4 +1,5 @@
 import { useId, useMemo, useRef, useState, type ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fmtCompact, fmtPct, type Asset } from "@/lib/market-data";
@@ -12,7 +13,6 @@ import {
 import { useLiveAssets, useLiveGlobal } from "@/lib/realtime";
 import { useTradFiMacro, useTradFiQuotes, type TradMacro, type TradQuote } from "@/lib/tradfi";
 import { AssetLogo } from "@/components/market/asset-logo";
-import { TerminalLink } from "@/components/layout/terminal-link";
 
 /* ------------------------------------------------------------------------- */
 /* Theme tokens                                                              */
@@ -285,13 +285,13 @@ export function MarketRow({
 
 function CardLink({ to, children }: { to: string; children: ReactNode }) {
   return (
-    <TerminalLink
+    <Link
       to={to}
       className="inline-flex items-center gap-0.5 text-[10px] font-medium text-[#4C8DF6] transition-colors hover:text-[#6EA8FF]"
     >
       {children}
       <ChevronRight className="size-3" />
-    </TerminalLink>
+    </Link>
   );
 }
 
@@ -619,7 +619,7 @@ export function CryptoMarketCap({ assets }: { assets: Asset[] }) {
       <CryptoAssets assets={assets} />
 
       <div className="mt-2">
-        <CardLink to="/assets">See all crypto assets</CardLink>
+        <CardLink to="/markets/assets">See all crypto assets</CardLink>
       </div>
     </MarketCard>
   );
@@ -677,7 +677,7 @@ export function DollarIndex({
         <div className="p-3">
           <FuturesList items={commodities} />
           <div className="mt-2">
-            <CardLink to="/derivatives">See all futures</CardLink>
+            <CardLink to="/markets/derivatives">See all futures</CardLink>
           </div>
         </div>
       </div>
@@ -769,7 +769,7 @@ export function EconomicIndicators({ data }: { data: typeof marketSummaryData.in
       </div>
 
       <div className="mt-2">
-        <CardLink to="/fear-greed">See all economic indicators</CardLink>
+        <CardLink to="/markets/fear-greed">See all economic indicators</CardLink>
       </div>
     </div>
   );

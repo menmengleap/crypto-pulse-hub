@@ -1,29 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AppShell } from "@/components/layout/app-shell";
-import { CryptoAssetsContent } from "@/components/market/pages/crypto-assets";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+/**
+ * The console is now a single full-screen Advanced Chat with live prices.
+ * The former console pages (assets, chart, news, …) were consolidated into
+ * the chat — old links and bookmarks redirect there.
+ */
 export const Route = createFileRoute("/assets")({
-  head: () => ({
-    meta: [
-      { title: "Crypto Assets — Cryptolytic" },
-      {
-        name: "description",
-        content: "Browse crypto assets by sector with price, market cap, volume, RSI and trend.",
-      },
-      { property: "og:title", content: "Crypto Assets — Cryptolytic" },
-      {
-        property: "og:description",
-        content: "Explore the crypto asset universe by sector and technical state.",
-      },
-    ],
-  }),
-  component: AssetsPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/ai-analysis", replace: true });
+  },
 });
-
-function AssetsPage() {
-  return (
-    <AppShell title="Crypto Assets" subtitle="The full asset universe by sector">
-      <CryptoAssetsContent />
-    </AppShell>
-  );
-}

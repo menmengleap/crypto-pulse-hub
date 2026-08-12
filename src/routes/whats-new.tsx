@@ -1,13 +1,12 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 /**
- * The console's standalone "New" page was consolidated into the console's
- * "News" page (/news), which now renders the homepage's New feed inside the
- * terminal. Old links and bookmarks to /whats-new are redirected there so
- * nothing breaks — the console stays in the console, never on the homepage.
+ * The console is now a single full-screen Advanced Chat with live prices.
+ * The former console "New" page was consolidated into the chat along with
+ * every other console page — old links and bookmarks redirect there.
  */
 export const Route = createFileRoute("/whats-new")({
   beforeLoad: () => {
-    throw redirect({ to: "/news", replace: true });
+    throw redirect({ to: "/ai-analysis", replace: true });
   },
 });

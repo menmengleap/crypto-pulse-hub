@@ -1,30 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AppShell } from "@/components/layout/app-shell";
-import { BitcoinDominanceContent } from "@/components/market/pages/bitcoin-dominance";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+/**
+ * The console is now a single full-screen Advanced Chat with live prices.
+ * The former console pages (dominance, chart, news, …) were consolidated into
+ * the chat — old links and bookmarks redirect there.
+ */
 export const Route = createFileRoute("/dominance")({
-  head: () => ({
-    meta: [
-      { title: "Bitcoin Dominance — Cryptolytic" },
-      {
-        name: "description",
-        content:
-          "Bitcoin and Ethereum dominance trends with historical context and market interpretation.",
-      },
-      { property: "og:title", content: "Bitcoin Dominance — Cryptolytic" },
-      {
-        property: "og:description",
-        content: "Track capital rotation between Bitcoin, Ethereum and altcoins.",
-      },
-    ],
-  }),
-  component: DominancePage,
+  beforeLoad: () => {
+    throw redirect({ to: "/ai-analysis", replace: true });
+  },
 });
-
-function DominancePage() {
-  return (
-    <AppShell title="Bitcoin Dominance" subtitle="Capital distribution across the market">
-      <BitcoinDominanceContent />
-    </AppShell>
-  );
-}

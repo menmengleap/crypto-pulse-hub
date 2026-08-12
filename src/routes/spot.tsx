@@ -1,29 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AppShell } from "@/components/layout/app-shell";
-import { SpotMarketContent } from "@/components/market/pages/spot-market";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+/**
+ * The console is now a single full-screen Advanced Chat with live prices.
+ * The former console pages (spot, chart, news, …) were consolidated into the
+ * chat — old links and bookmarks redirect there. The same spot market UI is
+ * still available on the homepage at /markets/spot.
+ */
 export const Route = createFileRoute("/spot")({
-  head: () => ({
-    meta: [
-      { title: "Spot Market — Cryptolytic" },
-      {
-        name: "description",
-        content: "Spot market pairs with live prices, 24h change, volume and trend classification.",
-      },
-      { property: "og:title", content: "Spot Market — Cryptolytic" },
-      {
-        property: "og:description",
-        content: "Track spot pairs, volume and trend across the crypto market.",
-      },
-    ],
-  }),
-  component: SpotPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/ai-analysis", replace: true });
+  },
 });
-
-function SpotPage() {
-  return (
-    <AppShell title="Spot Market" subtitle="USDT-quoted spot pairs">
-      <SpotMarketContent />
-    </AppShell>
-  );
-}

@@ -76,12 +76,12 @@ export function VideoShowcase({ consoleMode = false }: { consoleMode?: boolean }
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             {consoleMode ? (
-              // Console mode stays inside the terminal: explore the market overview.
+              // Console mode stays inside the terminal: ask the AI chat.
               <Link
-                to="/market"
+                to="/ai-analysis"
                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
               >
-                Explore the market <ArrowRight className="size-4" />
+                Ask the AI chat <ArrowRight className="size-4" />
               </Link>
             ) : (
               // Marketing mode keeps users on the homepage: tab between New / Pricing / Market.

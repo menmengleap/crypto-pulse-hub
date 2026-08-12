@@ -12,7 +12,13 @@ import { useLiveAssets } from "@/lib/realtime";
 import { AssetLogo } from "@/components/market/asset-logo";
 import { cn } from "@/lib/utils";
 
-export function GlobalSearch({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+export function GlobalSearch({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
   const navigate = useNavigate();
   const assets = useLiveAssets();
 
@@ -33,7 +39,9 @@ export function GlobalSearch({ open, onOpenChange }: { open: boolean; onOpenChan
               <span className="font-medium">{a.symbol}</span>
               <span className="text-muted-foreground">{a.name}</span>
               <span className="ml-auto num text-xs text-muted-foreground">{fmtPrice(a.price)}</span>
-              <span className={cn("num text-xs", a.change24h >= 0 ? "text-up" : "text-down")}>{fmtPct(a.change24h)}</span>
+              <span className={cn("num text-xs", a.change24h >= 0 ? "text-up" : "text-down")}>
+                {fmtPct(a.change24h)}
+              </span>
             </CommandItem>
           ))}
         </CommandGroup>

@@ -42,6 +42,19 @@ type Post = {
 
 const posts: Post[] = [
   {
+    id: "console-ai-chat",
+    tag: "Feature",
+    date: "Aug 12, 2026",
+    title: "The terminal is now one screen — the Advanced Chat, with live prices",
+    excerpt:
+      "Every console page was consolidated into a single full-screen chat: a live price ticker runs across the top, and the assistant answers on prices, movers, fear & greed, dominance, the cycle, news and desk notes.",
+    body: [
+      "The console is now one screen: the Advanced Chat, full-screen, with a live price ticker running along the top. All the former console pages — market overview, spot, derivatives, assets, fear & greed, sentiment, cycle, dominance, heatmap, compare, chart, news, watchlist, screener, alerts, saved, profile and settings — were consolidated into the chat itself.",
+      "The ticker streams the top crypto prices in a seamless marquee; clicking any asset asks the assistant about it. The assistant still answers on live prices, biggest movers, the fear & greed gauge, BTC/ETH dominance, the market cycle, live headlines and server-side desk notes saved to your analysis library.",
+      "Old console links and bookmarks now redirect into the chat, and the homepage's market tools stay exactly where they are — the full market suite lives on the homepage at /markets/*, one deliberate click from the terminal.",
+    ],
+  },
+  {
     id: "homepage-market-hub",
     tag: "Feature",
     date: "Aug 12, 2026",

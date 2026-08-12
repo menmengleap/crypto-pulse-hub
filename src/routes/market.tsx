@@ -1,31 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AppShell } from "@/components/layout/app-shell";
-import { MarketOverviewContent } from "@/components/market/pages/market-overview";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+/**
+ * The console is now a single full-screen Advanced Chat with live prices.
+ * The former console pages (market overview, chart, news, …) were consolidated
+ * into the chat — old links and bookmarks redirect there. The same market
+ * overview UI is still available on the homepage at /markets/overview.
+ */
 export const Route = createFileRoute("/market")({
-  head: () => ({
-    meta: [
-      { title: "Market Overview — Cryptolytic" },
-      {
-        name: "description",
-        content:
-          "Live markets across crypto, stocks and forex: prices, market cap, dominance, sentiment, open interest and trending assets.",
-      },
-      { property: "og:title", content: "Market Overview — Cryptolytic" },
-      {
-        property: "og:description",
-        content:
-          "A dense dashboard of crypto, stock and forex market structure, sentiment and flows.",
-      },
-    ],
-  }),
-  component: MarketOverview,
+  beforeLoad: () => {
+    throw redirect({ to: "/ai-analysis", replace: true });
+  },
 });
-
-function MarketOverview() {
-  return (
-    <AppShell title="Market Overview" subtitle="Crypto, stocks & forex — real-time market flows">
-      <MarketOverviewContent />
-    </AppShell>
-  );
-}

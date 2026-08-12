@@ -26,7 +26,7 @@ function MarketsSentimentPage() {
         title="Market Sentiment"
         subtitle="Composite positioning signal — spot flows, funding, social and on-chain"
         icon={Activity}
-        consoleTo="/sentiment"
+        consoleTo="/ai-analysis"
       />
       <MarketSentimentContent />
     </MarketingLayout>

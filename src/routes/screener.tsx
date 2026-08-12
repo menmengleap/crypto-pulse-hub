@@ -1,26 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Filter } from "lucide-react";
-import { AppShell } from "@/components/layout/app-shell";
-import { ComingSoon } from "@/components/layout/coming-soon";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+/**
+ * The console is now a single full-screen Advanced Chat with live prices.
+ * The former console pages (screener, chart, news, …) were consolidated into
+ * the chat — old links and bookmarks redirect there.
+ */
 export const Route = createFileRoute("/screener")({
-  head: () => ({
-    meta: [
-      { title: "Screener — Cryptolytic" },
-      { name: "description", content: "Screener is coming soon to Cryptolytic." },
-    ],
-  }),
-  component: ScreenerPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/ai-analysis", replace: true });
+  },
 });
-
-function ScreenerPage() {
-  return (
-    <AppShell title="Screener" subtitle="Multi-condition market scans">
-      <ComingSoon
-        icon={Filter}
-        title="Screener is coming soon"
-        description="Build multi-condition scans across price, volume, momentum and fundamentals — then save the results to your watchlist. This workspace ships in an upcoming release."
-      />
-    </AppShell>
-  );
-}

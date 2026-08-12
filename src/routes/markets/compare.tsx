@@ -26,7 +26,7 @@ function MarketsComparePage() {
         title="Compare"
         subtitle="Relative strength between two assets — side by side"
         icon={GitCompareArrows}
-        consoleTo="/compare"
+        consoleTo="/ai-analysis"
       />
       <CompareAssetsContent />
     </MarketingLayout>

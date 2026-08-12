@@ -26,7 +26,7 @@ function MarketsDominancePage() {
         title="Bitcoin Dominance"
         subtitle="Capital distribution across the market — BTC, ETH and the rest"
         icon={PieChart}
-        consoleTo="/dominance"
+        consoleTo="/ai-analysis"
       />
       <BitcoinDominanceContent />
     </MarketingLayout>

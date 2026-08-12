@@ -474,10 +474,10 @@ function MarketTabContent() {
       <p className="text-xs text-muted-foreground">
         Crypto prices stream live from Binance. Stocks & forex update from live providers with
         automatic failover (Yahoo Finance ⇄ Finnhub, exchangerate-api ⇄ Frankfurter).{" "}
-        <TerminalLink to="/market" className="text-primary hover:underline">
-          Open the terminal's market page
+        <TerminalLink to="/ai-analysis" className="text-primary hover:underline">
+          Open the terminal's AI chat
         </TerminalLink>{" "}
-        for the full analyst dashboard.
+        for the full analyst experience.
       </p>
     </div>
   );

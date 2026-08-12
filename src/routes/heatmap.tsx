@@ -1,30 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AppShell } from "@/components/layout/app-shell";
-import { MarketHeatmapContent } from "@/components/market/pages/market-heatmap";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+/**
+ * The console is now a single full-screen Advanced Chat with live prices.
+ * The former console pages (heatmap, chart, news, …) were consolidated into
+ * the chat — old links and bookmarks redirect there.
+ */
 export const Route = createFileRoute("/heatmap")({
-  head: () => ({
-    meta: [
-      { title: "Market Heatmap — Cryptolytic" },
-      {
-        name: "description",
-        content:
-          "Interactive crypto market heatmap grouped by sector with 24h performance and market cap.",
-      },
-      { property: "og:title", content: "Market Heatmap — Cryptolytic" },
-      {
-        property: "og:description",
-        content: "See where money is moving across crypto sectors at a glance.",
-      },
-    ],
-  }),
-  component: HeatmapPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/ai-analysis", replace: true });
+  },
 });
-
-function HeatmapPage() {
-  return (
-    <AppShell title="Market Heatmap" subtitle="24h performance by sector">
-      <MarketHeatmapContent />
-    </AppShell>
-  );
-}

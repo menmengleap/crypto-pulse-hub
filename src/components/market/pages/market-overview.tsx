@@ -1,5 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { Activity, BarChart3, Coins, Gauge, PieChart, TrendingUp } from "lucide-react";
+import {
+  Activity,
+  BarChart3,
+  Gauge,
+  GitCompareArrows,
+  Grid2x2,
+  PieChart,
+  TrendingUp,
+} from "lucide-react";
 import {
   Panel,
   StatCard,
@@ -189,18 +197,15 @@ export function MarketOverviewContent({ variant = "console" }: { variant?: "cons
                   </p>
                 </>
               );
+              // On the homepage these tiles are informational — never a link
+              // into the terminal. The console chart is gone; the shared link
+              // branch is kept for parity but no longer passes a symbol search.
               return isPublic ? (
                 <div key={a.id} className={cls} style={style}>
                   {inner}
                 </div>
               ) : (
-                <Link
-                  key={a.id}
-                  to={to("/chart")}
-                  search={{ symbol: a.symbol }}
-                  className={cls}
-                  style={style}
-                >
+                <Link key={a.id} to={to("/chart")} className={cls} style={style}>
                   {inner}
                 </Link>
               );
@@ -236,7 +241,7 @@ export function MarketOverviewContent({ variant = "console" }: { variant?: "cons
                   {isPublic ? (
                     <div className={cls}>{inner}</div>
                   ) : (
-                    <Link to={to("/chart")} search={{ symbol: a.symbol }} className={cls}>
+                    <Link to={to("/chart")} className={cls}>
                       {inner}
                     </Link>
                   )}
@@ -312,10 +317,10 @@ export function MarketOverviewContent({ variant = "console" }: { variant?: "cons
       <Panel title="Quick access" description="Jump into research">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { to: "/chart", label: "Advanced Chart", icon: BarChart3 },
-            { to: "/screener", label: "Screener", icon: Coins },
-            { to: "/ai-analysis", label: "AI Analysis", icon: Activity },
+            { to: "/ai-analysis", label: "AI Chat", icon: Activity },
             { to: "/fear-greed", label: "Fear & Greed", icon: Gauge },
+            { to: "/heatmap", label: "Market Heatmap", icon: Grid2x2 },
+            { to: "/compare", label: "Compare", icon: GitCompareArrows },
           ].map((q) => (
             <Link
               key={q.to}

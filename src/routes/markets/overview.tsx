@@ -26,7 +26,7 @@ function MarketsOverviewPage() {
         title="Market Overview"
         subtitle="Crypto, stocks & forex — real-time market flows, right on the homepage"
         icon={LayoutDashboard}
-        consoleTo="/market"
+        consoleTo="/ai-analysis"
       />
       <MarketOverviewContent variant="public" />
     </MarketingLayout>

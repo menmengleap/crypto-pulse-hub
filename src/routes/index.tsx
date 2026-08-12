@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, BarChart3, Bell, Brain, Gauge, LineChart, Newspaper } from "lucide-react";
 import { fmtCompact, fmtDominance, fmtPrice } from "@/lib/market-data";
 import { useLiveAssets, useLiveGlobal } from "@/lib/realtime";
@@ -161,17 +161,17 @@ function Landing() {
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <TerminalLink
-                  to="/market"
+                  to="/ai-analysis"
                   className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
                 >
-                  Launch market overview <ArrowRight className="size-4" />
+                  Launch AI chat <ArrowRight className="size-4" />
                 </TerminalLink>
-                <TerminalLink
-                  to="/chart"
+                <Link
+                  to="/markets/overview"
                   className="inline-flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-medium transition-colors hover:border-primary/40"
                 >
-                  Explore charts
-                </TerminalLink>
+                  Explore market hub
+                </Link>
               </div>
 
               <dl className="mt-12 grid max-w-2xl grid-cols-2 gap-6 sm:grid-cols-4">

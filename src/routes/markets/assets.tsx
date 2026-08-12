@@ -26,7 +26,7 @@ function MarketsAssetsPage() {
         title="Crypto Assets"
         subtitle="The full asset universe by sector — price, market cap, volume and technicals"
         icon={Coins}
-        consoleTo="/assets"
+        consoleTo="/ai-analysis"
       />
       <CryptoAssetsContent variant="public" />
     </MarketingLayout>

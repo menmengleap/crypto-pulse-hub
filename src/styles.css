@@ -199,6 +199,23 @@
   animation: showcase-shine 7s ease-in-out infinite;
 }
 
+/* Advanced Chat — live price ticker, seamless horizontal scroll. */
+@keyframes ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.ticker-track {
+  animation: ticker-scroll 55s linear infinite;
+  will-change: transform;
+}
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+
 /* Market summary charts — thin line draws in on load. */
 @keyframes chart-draw {
   to {
@@ -219,7 +236,8 @@
   }
   .showcase-float,
   .showcase-glow,
-  .showcase-shine {
+  .showcase-shine,
+  .ticker-track {
     animation: none;
   }
 }

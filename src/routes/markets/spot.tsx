@@ -26,7 +26,7 @@ function MarketsSpotPage() {
         title="Spot Market"
         subtitle="USDT-quoted spot pairs with live prices, 24h change, volume and trend"
         icon={BarChart3}
-        consoleTo="/spot"
+        consoleTo="/ai-analysis"
       />
       <SpotMarketContent variant="public" />
     </MarketingLayout>

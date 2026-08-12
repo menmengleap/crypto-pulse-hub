@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
 import {
   ArrowUp,
   Brain,
@@ -12,10 +11,10 @@ import {
   Sparkles,
   TrendingUp,
   Waves,
-  Wrench,
   type LucideIcon,
 } from "lucide-react";
 import { AccountMenu, Brand } from "@/components/layout/app-shell";
+import { PriceTicker } from "@/components/chat/price-ticker";
 import { AssetLogo } from "@/components/market/asset-logo";
 import { ChangeBadge, SentimentGauge, TrendBadge } from "@/components/market/ui";
 import { Sparkline } from "@/components/market/sparkline";
@@ -30,17 +29,8 @@ import {
 } from "@/lib/market-data";
 import { respondTo, timeAgo, type ChatMessage } from "@/lib/chat-ai";
 import type { FinnhubNewsHeadline } from "@/lib/api";
-import { marketPages } from "@/lib/market-routes";
 import { useLiveAssets, useLiveGlobal } from "@/lib/realtime";
 import { cn } from "@/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 const STORAGE_KEY = "cryptolytic.chat.v1";
 
@@ -462,10 +452,8 @@ function DeskNoteCard({ payload }: { payload?: unknown }) {
       {disclaimer && (
         <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground/80">{disclaimer}</p>
       )}
-      <p className="mt-2 text-[11px] text-primary">
-        <Link to="/saved" className="hover:underline">
-          Saved to your analysis library →
-        </Link>
+      <p className="mt-2 text-[11px] text-muted-foreground/70">
+        Desk notes are saved to your analysis library.
       </p>
     </div>
   );
@@ -630,42 +618,13 @@ export function AdvancedChat() {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground">
-                <Wrench className="size-3.5" />
-                <span className="hidden sm:inline">Tools</span>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-60">
-                <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
-                  Market tools
-                </DropdownMenuLabel>
-                {marketPages.map((p) => (
-                  <DropdownMenuItem key={p.publicTo} asChild>
-                    <Link to={p.consoleTo} className="gap-2.5">
-                      <p.icon className="size-3.5 text-muted-foreground" />
-                      {p.label}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/chart" className="gap-2.5">
-                    <LineChart className="size-3.5 text-muted-foreground" />
-                    Advanced Chart
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/news" className="gap-2.5">
-                    <Newspaper className="size-3.5 text-muted-foreground" />
-                    News
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
             <AccountMenu />
           </div>
         </div>
       </header>
+
+      {/* Live prices */}
+      <PriceTicker onPick={(symbol) => void send(`How is ${symbol} doing?`)} />
 
       {/* Thread */}
       <div className="flex-1 overflow-y-auto">

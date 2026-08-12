@@ -26,7 +26,7 @@ function MarketsCyclePage() {
         title="Market Cycle"
         subtitle="Cycle phase and structural context — where the market sits in its broader cycle"
         icon={Waves}
-        consoleTo="/cycle"
+        consoleTo="/ai-analysis"
       />
       <MarketCycleContent />
     </MarketingLayout>

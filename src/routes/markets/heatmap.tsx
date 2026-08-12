@@ -26,7 +26,7 @@ function MarketsHeatmapPage() {
         title="Market Heatmap"
         subtitle="24h performance by sector — see where money is moving at a glance"
         icon={Grid2x2}
-        consoleTo="/heatmap"
+        consoleTo="/ai-analysis"
       />
       <MarketHeatmapContent />
     </MarketingLayout>
