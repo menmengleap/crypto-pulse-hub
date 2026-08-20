@@ -10,7 +10,7 @@ import {
 import { ChangeBadge } from "@/components/market/ui";
 import { fmtPrice, timeframes, type Asset } from "@/lib/market-data";
 import { INDICATOR_PRESETS } from "@/lib/indicators";
-import { useLiveAssets, useMarketStatus } from "@/lib/realtime";
+import { useLiveAssets } from "@/lib/realtime";
 import { useWorkspace } from "@/lib/workspace";
 import { cn } from "@/lib/utils";
 import {
@@ -120,7 +120,6 @@ export function ChartToolbar({
   onClearIndicators: () => void;
 }) {
   const assets = useLiveAssets();
-  const status = useMarketStatus();
   const workspace = useWorkspace();
 
   return (
@@ -146,24 +145,6 @@ export function ChartToolbar({
             </p>
             <ChangeBadge value={asset.change24h} />
           </div>
-          <span
-            className={cn(
-              "hidden items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider lg:inline-flex",
-              status === "live"
-                ? "border-up/25 bg-up/10 text-up"
-                : "border-border bg-muted/40 text-muted-foreground",
-            )}
-          >
-            <span className={cn("relative flex size-1", status !== "live" && "opacity-40")}>
-              <span
-                className={cn(
-                  "relative inline-flex size-1 rounded-full",
-                  status === "live" ? "bg-up" : "bg-muted-foreground",
-                )}
-              />
-            </span>
-            {status === "live" ? "Live" : "Connecting"}
-          </span>
         </div>
 
         <div className="ml-auto flex items-center gap-0.5">

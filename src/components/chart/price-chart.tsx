@@ -11,7 +11,6 @@ import {
   type IndicatorResult,
 } from "@/lib/indicators";
 import { Skeleton } from "@/components/ui/skeleton";
-import { LiveBadge } from "@/components/market/live-badge";
 import { DrawingOverlay } from "@/components/chart/drawing-overlay";
 import type { ChartDrawing, DrawingToolId } from "@/lib/chart-drawings";
 
@@ -129,7 +128,6 @@ export function PriceChart({
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<AnySeries | null>(null);
   const [ready, setReady] = useState(false);
-  const [live, setLive] = useState(false);
   const [error, setError] = useState(false);
   const streamingRef = useRef(streaming);
   useEffect(() => {
@@ -326,9 +324,6 @@ export function PriceChart({
                 : withAlpha(downColorRef.current, 0.35),
           });
         }
-        setLive(true);
-        // Mirror the live bar into the indicator window (replace in place or
-        // append a new bar — both change the window key only when it matters).
         setCandlesState((prev) => {
           if (!prev || prev.symbol !== symbol || prev.tf !== tf) return prev;
           const rows = [...prev.rows];
@@ -527,7 +522,6 @@ export function PriceChart({
           onDrawingsChange={onDrawingsChange ?? (() => {})}
         />
       )}
-      {ready && live && <LiveBadge className="pointer-events-none absolute right-3 top-2.5" />}
       {ready && indicators.length > 0 && (
         <div className="pointer-events-none absolute left-3 top-2.5 z-10">
           {indicatorQuery.error ? (

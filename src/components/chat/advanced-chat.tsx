@@ -8,16 +8,15 @@ import {
   LineChart,
   Newspaper,
   PieChart,
-  Sparkles,
   TrendingUp,
   Waves,
   type LucideIcon,
 } from "lucide-react";
 import { AccountMenu, Brand } from "@/components/layout/app-shell";
 import { PriceTicker } from "@/components/chat/price-ticker";
+import { MiniChart } from "@/components/chart/mini-chart";
 import { AssetLogo } from "@/components/market/asset-logo";
-import { ChangeBadge, SentimentGauge, TrendBadge } from "@/components/market/ui";
-import { Sparkline } from "@/components/market/sparkline";
+import { ChangeBadge, TrendBadge } from "@/components/market/ui";
 import {
   dominanceHistory,
   fearGreedHistory7,
@@ -143,7 +142,7 @@ function AssetCard({ asset }: { asset: Asset }) {
         </div>
         <TrendBadge trend={asset.trend} />
       </div>
-      <Sparkline data={asset.spark} positive={up} className="mt-3 h-12" />
+      <MiniChart data={asset.spark} positive={up} height={48} className="mt-3" />
       <dl className="mt-3 grid grid-cols-2 gap-3 border-t border-border pt-3 sm:grid-cols-4">
         <Stat label="Market cap" value={fmtCompact(asset.marketCap)} />
         <Stat label="Volume 24h" value={fmtCompact(asset.volume24h)} />
@@ -194,19 +193,22 @@ function GlobalCard({ global }: { global: GlobalStats }) {
 function FearCard({ global }: { global: GlobalStats }) {
   return (
     <div className="mt-3 panel p-4">
-      <div className="grid gap-4 sm:grid-cols-[auto_1fr]">
-        <SentimentGauge score={global.fearGreed} label={global.fearGreedLabel} />
-        <div className="min-w-0">
-          <p className="text-xs text-muted-foreground">7-day history</p>
-          <Sparkline data={fearGreedHistory7} positive className="mt-2 h-24" strokeWidth={2} />
-          <div className="mt-2 grid grid-cols-7 gap-1 text-center text-[10px] text-muted-foreground">
-            {fearGreedHistory7.map((v, i) => (
-              <span key={i} className="num">
-                {v}
-              </span>
-            ))}
-          </div>
-        </div>
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">7-day Fear & Greed</p>
+        <p className="num text-sm font-semibold">
+          {global.fearGreed}
+          <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+            {global.fearGreedLabel}
+          </span>
+        </p>
+      </div>
+      <MiniChart data={fearGreedHistory7} positive height={96} className="mt-3" />
+      <div className="mt-2 grid grid-cols-7 gap-1 text-center text-[10px] text-muted-foreground">
+        {fearGreedHistory7.map((v, i) => (
+          <span key={i} className="num">
+            {v}
+          </span>
+        ))}
       </div>
     </div>
   );
@@ -228,11 +230,11 @@ function DominanceCard({ global }: { global: GlobalStats }) {
       </div>
       <div className="panel p-4">
         <p className="text-xs text-muted-foreground">8-month BTC dominance</p>
-        <Sparkline
+        <MiniChart
           data={dominanceHistory.map((d) => d.btc)}
           positive
-          className="mt-2 h-24"
-          strokeWidth={2}
+          height={96}
+          className="mt-3"
         />
       </div>
     </div>
@@ -612,10 +614,6 @@ export function AdvancedChat() {
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <Brand subtitle="Advanced Chat" />
-            <span className="hidden items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary sm:inline-flex">
-              <Sparkles className="size-3" />
-              AI assistant
-            </span>
           </div>
           <div className="flex items-center gap-2">
             <AccountMenu />

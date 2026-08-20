@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { MessageSquare, Search, Sparkles } from "lucide-react";
+import { MessageSquare, Search } from "lucide-react";
 import { AlertsPopover } from "@/components/terminal/alerts-popover";
 import { Brand, AccountMenu } from "@/components/layout/app-shell";
 import { AssetLogo } from "@/components/market/asset-logo";
 import { ChangeBadge } from "@/components/market/ui";
 import { fmtPrice, type Asset } from "@/lib/market-data";
-import { useLiveAssets, useMarketStatus } from "@/lib/realtime";
-import { cn } from "@/lib/utils";
+import { useLiveAssets } from "@/lib/realtime";
 
 /**
  * Compact terminal top nav — brand, market search, live status and the
@@ -22,7 +21,6 @@ export function TopNav({
   onOpenChat: () => void;
 }) {
   const assets = useLiveAssets();
-  const status = useMarketStatus();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const boxRef = useRef<HTMLDivElement | null>(null);
@@ -94,33 +92,6 @@ export function TopNav({
       </div>
 
       <div className="ml-auto flex items-center gap-1.5">
-        <span
-          className={cn(
-            "hidden items-center gap-1.5 rounded-md border px-2 py-1 text-[10px] font-semibold uppercase tracking-wider md:inline-flex",
-            status === "live"
-              ? "border-up/25 bg-up/10 text-up"
-              : "border-border bg-muted/40 text-muted-foreground",
-          )}
-        >
-          <span className={cn("relative flex size-1.5", status !== "live" && "opacity-40")}>
-            {status === "live" && (
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-up opacity-60" />
-            )}
-            <span
-              className={cn(
-                "relative inline-flex size-1.5 rounded-full",
-                status === "live" ? "bg-up" : "bg-muted-foreground",
-              )}
-            />
-          </span>
-          {status === "live" ? "Live" : status === "offline" ? "Reconnecting" : "Connecting"}
-        </span>
-
-        <span className="hidden items-center gap-1 rounded-md border border-primary/25 bg-primary/10 px-2 py-1 text-[10px] font-semibold text-primary lg:inline-flex">
-          <Sparkles className="size-3" />
-          AI
-        </span>
-
         <button
           type="button"
           onClick={onOpenChat}
